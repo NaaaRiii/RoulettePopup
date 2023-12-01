@@ -1,0 +1,63 @@
+/*@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}*/
+
+
+.roulette-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+}
+
+.roulette-wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 5px solid red;
+  position: relative;
+  transition: transform 10s ease-out;
+  /*transition: transform 10s cubic-bezier(0.22, 0.61, 0.36, 1);*/
+}
+
+.roulette-pointer {
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 20px solid black;
+  position: absolute;
+  top: -10px; /* 逆三角形の高さと同じだけ上にずらす */
+  left: 46%;
+  transform: scaleY(-1);
+  z-index: 10;
+}
+
+.segment {
+  position: absolute;
+  width: 50%;
+  height: 2%;
+  top: 48%;
+  transform-origin: 100% 100%;
+  transform: rotate(calc(var(--segment-angle) * var(--index)));
+}
+
+.segment::after {
+  content: attr(data-number);
+  position: absolute;
+  top: -500%;
+  left: 0;
+  transform: translateY(-50%) translateX(-50%) rotate(-var(--segment-angle) * var(--index));
+  background-color: white;
+  width: 50px;
+  height: 0px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
