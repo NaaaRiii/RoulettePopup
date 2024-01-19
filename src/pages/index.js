@@ -101,4 +101,4 @@ export default HomePage;
 //  );
 //};
 
-//export default UserProfile;
+//export { UserProfile };

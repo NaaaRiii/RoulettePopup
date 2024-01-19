@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import '../components/RoulettePopup.css';
 import Modal from './Modal';
+import { fetchRouletteText } from './utils';
 
 const RoulettePopup = () => {
   const [rotation, setRotation] = useState(90);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [rouletteText, setRouletteText] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  //const [result, setResult] = useState('');
   //const [selectedSegment, setSelectedSegment] = useState(null);
 
   // ルーレットのセグメントを定義（例: 12セグメント）
@@ -25,9 +29,6 @@ const RoulettePopup = () => {
     );
   });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [result, setResult] = useState('');
-
   const startSpinning = () => {
     // ルーレットを5回転プラスランダムな角度で回転させます
     const newRotation = 90 + Math.floor(Math.random() * 360) + 360 * 5;
@@ -35,22 +36,23 @@ const RoulettePopup = () => {
     setRotation(newRotation);
     setIsSpinning(true);
   
-    setTimeout(() => {
+    setTimeout( async () => {
       setIsSpinning(false);
       const effectiveAngle = (newRotation - 90) % 360;
       const matchNumber = Math.ceil((360 - effectiveAngle) / segmentAngles);
       
-      // モーダルで結果を表示
-      setResult(`Matched number is: ${matchNumber}`);
+      // APIからデータを取得し、状態に保存
+      const data = await fetchRouletteText(matchNumber);
+      setRouletteText(data.text);
       setIsModalOpen(true);
     }, 6000);
   };
 
-  const resetRoulette = () => {
-    setRotation(90); // 初期回転角度に戻す
-    setIsSpinning(false); // 回転状態をリセット
-    setIsModalOpen(false); // モーダルを閉じる
-  };
+  //const resetRoulette = () => {
+  //  setRotation(90); // 初期回転角度に戻す
+  //  setIsSpinning(false); // 回転状態をリセット
+  //  setIsModalOpen(false); // モーダルを閉じる
+  //};
 
   // 回転が完全に止まるまで待ちます
   //  setTimeout(() => {
@@ -80,8 +82,8 @@ const RoulettePopup = () => {
       <button onClick={startSpinning} disabled={isSpinning}>Start</button>
       {/*{!isSpinning && selectedSegment && <div>Selected Segment: {selectedSegment}</div>}*/}
       {/*<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>*/}
-      <Modal isOpen={isModalOpen} onClose={resetRoulette}>
-      <div>{result}</div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div>Matched text is: {rouletteText}</div>
       </Modal>
     </div>
   );
