@@ -11,3 +11,4 @@ export const fetchRouletteText = async (number) => {
     return null;
   }
 };
+

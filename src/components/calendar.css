@@ -1,0 +1,59 @@
+/* 土日のテキスト色を黒に変更 */
+.react-calendar__month-view__days__day--weekend {
+  color: #000 !important;
+}
+
+/* クリックした日のスタイルを上書き */
+.react-calendar__tile--active,
+.react-calendar__tile--hasActive {
+  background: none !important;
+  color: #000 !important; /* または元のテキストカラーに合わせます */
+}
+
+/* マウスカーソルが日付にフーバーしても反応しないようにする */
+.react-calendar__tile:hover {
+  background: none !important;
+  cursor: default !important; /* カーソルをデフォルト状態に保持 */
+}
+
+/* 今日の日付のスタイルを上書きして、特別な表示を無効にする */
+.react-calendar__tile--now {
+  background: none !important;
+  color: #000 !important; /* 通常のテキストカラーに合わせます */
+  font-weight: normal !important; /* もし変更されていたら、通常のフォントウェイトに */
+}
+
+/* 今月の日付に下線を引く */
+.react-calendar__month-view__days__day {
+  text-decoration: underline;
+}
+
+/* 前月と次月の日付の下線を取り除く */
+.react-calendar__month-view__days__day--neighboringMonth {
+  text-decoration: none !important;
+}
+
+/* 今月の全ての日付を太字にし、先月と来月の日は除外 */
+.react-calendar__month-view__days__day:not(.react-calendar__month-view__days__day--neighboringMonth) {
+  font-weight: bold !important; /* 太字にする */
+}
+
+/* 先月と来月の土日のテキスト色を#757575に変更 */
+.react-calendar__month-view__days__day--neighboringMonth.react-calendar__month-view__days__day--weekend {
+  color: #757575 !important;
+}
+
+/* ナビゲーションバーの下に線を引く */
+.react-calendar__navigation {
+  border-bottom: 1px solid #000; /* 黒色の1px実線 */
+}
+
+.exp-high {
+  background-color: #ff0000; /* 濃い赤 */
+}
+.exp-medium {
+  background-color: #ff9999; /* 中程度の赤 */
+}
+.exp-low {
+  background-color: #ffcccc; /* 薄い赤 */
+}
