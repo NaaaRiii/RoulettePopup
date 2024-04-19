@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Router from 'next/router';
+import Layout from '../components/Layout';
+import '../components/styles.css';
 
 export default function NewGoal() {
   const [title, setTitle] = useState('');
@@ -8,52 +10,47 @@ export default function NewGoal() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // ここでAPIにデータを送信する処理を実装します
-    // 例: fetch('/api/goals', { method: 'POST', body: JSON.stringify({ title, content, deadline }), headers: { 'Content-Type': 'application/json' } })
-    // APIからのレスポンスに基づいて適切なアクションを取ります（例: リダイレクト）
-    Router.push('/goalList'); // 例としてリダイレクト
+    const token = localStorage.getItem('token');
+    const body = JSON.stringify({ title, content, deadline });
+
+    try {
+      const response = await fetch('http://localhost:3000/api/goals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`  // トークンをヘッダーに設定
+        },
+        body
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        Router.push(`/goals/${data.id}/new-small_goal`);
+      } else {
+        console.error("Error submitting form:", data);
+      }
+    } catch (error) {
+      console.error("Submission failed", error);
+    }
   };
 
   return (
-    <div id="goal_form">
-      <h1>Let's Set Goals</h1>
-      <form onSubmit={handleSubmit}>
-        <div id="error_explanation">
-          {/* エラーメッセージを表示する部分 */}
-        </div>
+    <Layout>
+      <div id="goal_form">
+        <h1>Let's Set Goals</h1>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="title">Goal's Title</label>
+          <input id="title" name="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-        <label htmlFor="title">Goal's Title</label>
-        <input
-          id="title"
-          name="title"
-          type="text"
-          className="goal-title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+          <label htmlFor="content">Content</label>
+          <input id="content" name="content" type="text" value={content} onChange={(e) => setContent(e.target.value)} />
 
-        <label htmlFor="content">Content</label>
-        <input
-          id="content"
-          name="content"
-          type="text"
-          className="goal-content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
+          <label htmlFor="deadline">Deadline</label>
+          <input id="deadline" name="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
 
-        <label htmlFor="deadline">Deadline</label>
-        <input
-          id="deadline"
-          name="deadline"
-          type="date"
-          className="goal-deadline"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
-        />
-
-        <button type="submit" className="btn btn-primary">設定</button>
-      </form>
-    </div>
+          <button type="submit" className="btn btn-primary">設定</button>
+        </form>
+      </div>
+    </Layout>
   );
 }
