@@ -8,16 +8,28 @@ import { useGoals } from '../../contexts/GoalsContext';
 
 function GoalPage() {
   const router = useRouter();
-  const { id } = router.query;
+  const { id } = router.query;// この `id` が `goalId`
   const [goal, setGoal] = useState({ small_goals: [] });
-  //const [smallGoal, setSmallGoal] = useState({ tasks: [] });
+  const [smallGoals, setSmallGoals] = useState({ tasks: [] });
   const [loading, setLoading] = useState(true);
   const { refreshGoals } = useGoals();
+  const token = localStorage.getItem('token');
+  const smallGoalId = 'your_value_here';
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return format(date, 'yyyy-MM-dd');
   };
+
+  useEffect(() => {
+    fetch(`http://localhost:3000/api/goals/${id}/small_goals`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+      setSmallGoals(data);
+    });
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -59,7 +71,7 @@ function GoalPage() {
 
   useEffect(() => {
     if (!id) return;
-  
+    
     const token = localStorage.getItem('token');
     fetch(`http://localhost:3000/api/goals/${id}/small_goals`, {
       headers: {
@@ -68,10 +80,21 @@ function GoalPage() {
     })
     .then(response => response.json())
     .then(data => {
-      console.log('Fetched small goals:', data); // データ構造をログ出力
+      console.log('Fetched small goals:', data);
+      const updatedSmallGoals = data.map(smallGoal => ({
+        ...smallGoal,
+        tasks: smallGoal.tasks.map(task => {
+          const taskStateKey = `taskState-${id}-${smallGoal.id}-${task.id}`;
+          const savedState = localStorage.getItem(taskStateKey);
+          return {
+            ...task,
+            completed: savedState !== null ? JSON.parse(savedState) : task.completed
+          };
+        })
+      }));
       setGoal(prevGoal => ({
         ...prevGoal,
-        small_goals: data
+        small_goals: updatedSmallGoals
       }));
       setLoading(false);
     })
@@ -82,61 +105,81 @@ function GoalPage() {
 
   function handleTaskToggle(taskId) {
     setGoal(prevGoal => {
-      const updatedGoal = {
-        ...prevGoal,
-        small_goals: prevGoal.small_goals.map(smallGoal => {
-          return {
-            ...smallGoal,
-            tasks: smallGoal.tasks.map(task => {
-              if (task.id === taskId) {
-                const updatedTask = { ...task, completed: !task.completed };
-                saveTaskState(prevGoal.id, smallGoal.id, updatedTask);
-                return updatedTask;
-              }
-              return task;
-            })
-          };
-        })
-      };
-      localStorage.setItem(`goalState-${prevGoal.id}`, JSON.stringify(updatedGoal));
-      return updatedGoal;
+      const updatedGoal = prevGoal.small_goals.map(smallGoal => {
+        return {
+          ...smallGoal,
+          tasks: smallGoal.tasks.map(task => {
+            if (task.id === taskId) {
+              const newCompleted = !task.completed;
+              console.log(`Task ${taskId} completed status changed to: ${newCompleted}`); // 状態変更をログ出力
+              saveTaskState(prevGoal.id, smallGoal.id, taskId, newCompleted);
+              return { ...task, completed: newCompleted };
+            }
+            return task;
+          })
+        };
+      });
+  
+      const newGoalState = { ...prevGoal, small_goals: updatedGoal };
+      localStorage.setItem(`goalState-${prevGoal.id}`, JSON.stringify(newGoalState));
+      console.log('New goal state saved to localStorage', newGoalState); // 保存状態をログ出力
+      return newGoalState;
     });
   }
   
-  function saveTaskState(goalId, smallGoalId, task) {
-    const key = `taskState-${goalId}-${smallGoalId}-${task.id}`;
-    localStorage.setItem(key, JSON.stringify(task.completed));
+  function saveTaskState(goalId, smallGoalId, taskId, completed) {
+    const key = `taskState-${goalId}-${smallGoalId}-${taskId}`;
+    localStorage.setItem(key, JSON.stringify(completed));
+    console.log(`Task state for ${taskId} saved: ${completed}`); // localStorageへの保存状態をログ出力
   }
-
+  
   useEffect(() => {
     const storedState = localStorage.getItem(`goalState-${id}`);
     if (storedState) {
-      setGoal(JSON.parse(storedState));
-    } else if (id) {
-      const token = localStorage.getItem('token');
-      fetch(`http://localhost:3000/api/goals/${id}/small_goals`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Fetched small goals:', data);
-        setGoal(prevGoal => ({
-          ...prevGoal,
-          small_goals: data
-        }));
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching small goals:', error);
-      });
+      const loadedGoal = JSON.parse(storedState);
+      setGoal(loadedGoal);
     }
-  }, [id]);
-  
-  const allTasksCompleted = goal.small_goals?.every(smallGoal =>
-    smallGoal.tasks?.every(task => task.completed)
-  );
+  }, [id]); 
+
+  function completeSmallGoal(smallGoalId) {
+    // APIを通じてサーバーにsmall goalの完了を通知
+    const token = localStorage.getItem('token');
+    fetch(`http://localhost:3000/api/goals/${id}/small_goals/${smallGoalId}/complete`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())  // レスポンスをJSON形式で受け取る
+    .then(data => {
+      if (data.status === 'success') {
+        // small_goalの状態を更新
+        const updatedGoals = goal.small_goals.map(sg => {
+          if (sg.id === smallGoalId) {
+            return { ...sg, completed: true };
+          }
+          return sg;
+        });
+        setGoal({ ...goal, small_goals: updatedGoals });
+
+        // dashboardページへリダイレクトし、成功メッセージを表示
+        router.push({
+          pathname: '/dashboard',
+          query: { message: encodeURIComponent(data.message) }  // エンコードされたメッセージをクエリパラメータに設定
+        });
+      } else {
+        alert('Failed to complete small goal.');
+      }
+    })
+    .catch(error => {
+      console.error('Error completing small goal:', error);
+    });
+  }
+
+    const allTasksCompleted = goal.small_goals?.every(smallGoal =>
+      smallGoal.tasks?.every(task => task.completed)
+    );
 
   if (loading) return <p>Loading...</p>;
   if (!goal) return <p>Goal not found</p>;
@@ -168,20 +211,26 @@ function GoalPage() {
             <h2>Small Goal Title:</h2>
             <h3>{smallGoal.title}</h3>
             {smallGoal.completed ? <span><strong>完了!</strong></span> : null}
-            {allTasksCompleted && (
-              <button className="btn btn-success">完了</button>
+
+            {/* smallGoalが未完了で、全てのタスクが完了していれば完了ボタンを表示 */}
+            {!smallGoal.completed && smallGoal.tasks?.every(task => task.completed) && (
+              <button className="btn btn-success" onClick={() => completeSmallGoal(smallGoal.id)}>完了</button>
             )}
+
             <p>Difficulty: {smallGoal.difficulty}</p>
             <p>Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
+
+            {/* 各smallGoalのタスクが全て完了しているか確認 */}
             {!smallGoal.completed && (
               <ul>
                 {smallGoal.tasks?.map((task) => (
                   <li key={task.id}>
-                    <label htmlFor={`task_${task.id}`}>
+                    <label>
                       <input
                         type="checkbox"
                         checked={task.completed}
-                        onChange={() => handleTaskToggle(task.id)} // 更新
+                        onChange={() => handleTaskToggle(task.id)}
+                        className="input-checkbox"
                       />
                       {task.content}
                     </label>

@@ -113,7 +113,7 @@ footer{
 label {
   display: block;
   margin-top: 10px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .btn {
@@ -194,4 +194,9 @@ button[disabled]:hover {
 
 .changed {
   color: red;
+}
+
+/* チェックボックスとtaskの間にスペースを追加 */
+.input-checkbox {
+  margin-right: 2px;
 }
