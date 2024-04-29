@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../components/RoulettePopup.css';
 import Modal from './Modal';
-import { fetchRouletteText } from './utils';
+import { fetchRouletteText } from './utils'; //src/components/utils.jsからルーレットのテキストを取得する
 
 const RoulettePopup = () => {
   const [rotation, setRotation] = useState(90);
@@ -29,43 +29,58 @@ const RoulettePopup = () => {
     );
   });
 
-  const startSpinning = () => {
-    // ルーレットを5回転プラスランダムな角度で回転させます
-    const newRotation = 90 + Math.floor(Math.random() * 360) + 360 * 5;
+  const isValidAngle = (angle) => {
+    const excludedRanges = [
+      { min: 0, max: 5 },
+      { min: 25, max: 35 },
+      { min: 55, max: 65 },
+      { min: 85, max: 95 },
+      { min: 115, max: 125 },
+      { min: 145, max: 155 },
+      { min: 175, max: 185 },
+      { min: 205, max: 215 },
+      { min: 235, max: 245 },
+      { min: 265, max: 275 },
+      { min: 295, max: 305 },
+      { min: 325, max: 335 },
+      { min: 355, max: 359 }
+    ];
   
+    // どの範囲にも含まれない場合にtrueを返す
+    return !excludedRanges.some(range => angle >= range.min && angle <= range.max);
+  }
+
+  const startSpinning = () => {
+    // ルーレットを最低5回転するように設定
+    let baseRotation = 360 * 5;
+    let randomAngle;
+    do {
+        // 0から359度の間でランダムな角度を生成
+        randomAngle = Math.floor(Math.random() * 360);
+    } while (!isValidAngle(randomAngle)); // 有効な角度が得られるまで繰り返す
+
+    // 最終的な回転角度にランダム角度を加算
+    const newRotation = 90 + randomAngle + baseRotation;
+
     setRotation(newRotation);
     setIsSpinning(true);
-  
-    setTimeout( async () => {
-      setIsSpinning(false);
-      const effectiveAngle = (newRotation - 90) % 360;
-      const matchNumber = Math.ceil((360 - effectiveAngle) / segmentAngles);
-      
-      // APIからデータを取得し、状態に保存
-      const data = await fetchRouletteText(matchNumber);
-      setRouletteText(data.text);
-      setIsModalOpen(true);
+
+    setTimeout(async () => {
+        setIsSpinning(false);
+        const effectiveAngle = (newRotation - 90) % 360;
+        const matchNumber = Math.ceil((360 - effectiveAngle) / segmentAngles);
+
+        // APIからデータを取得し、状態に保存
+        const data = await fetchRouletteText(matchNumber);
+        setRouletteText(data.text);
+        setIsModalOpen(true);
+
+        // コンソールに角度とテキストを出力
+        console.log(`Stopped at angle: ${effectiveAngle} degrees`);
+        console.log(`Matched number: ${matchNumber}`);
+        console.log(`Matched text: ${data.text}`);
     }, 6000);
   };
-
-  //const resetRoulette = () => {
-  //  setRotation(90); // 初期回転角度に戻す
-  //  setIsSpinning(false); // 回転状態をリセット
-  //  setIsModalOpen(false); // モーダルを閉じる
-  //};
-
-  // 回転が完全に止まるまで待ちます
-  //  setTimeout(() => {
-  //    setIsSpinning(false);
-  
-  //    // 実質的なルーレットの角度（360度未満）を計算
-  //    const effectiveAngle = (newRotation - 90) % 360;
-  //    // ルーレットの針が指すセグメントを計算
-  //    const matchNumber = Math.ceil((360 - effectiveAngle) / segmentAngles);
-  //    setSelectedSegment(matchNumber);
-  //    alert(`Matched number is: ${matchNumber}`);
-  //  }, 6000); // 回転の時間（ミリ秒）
-  //};
 
   return (
     <div className="roulette-container">

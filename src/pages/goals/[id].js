@@ -14,7 +14,7 @@ function GoalPage() {
   const [loading, setLoading] = useState(true);
   const { refreshGoals } = useGoals();
   const token = localStorage.getItem('token');
-  const smallGoalId = 'your_value_here';
+  //const smallGoalId = 'your_value_here';
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -48,7 +48,7 @@ function GoalPage() {
   }, [id]);
 
   const deleteGoal = () => {
-    if (window.confirm('本当にこのゴールを削除しますか？')) {
+    if (window.confirm('Are you sure ?')) {
       const token = localStorage.getItem('token');
       fetch(`http://localhost:3000/api/goals/${id}`, {
         method: 'DELETE',
@@ -62,10 +62,10 @@ function GoalPage() {
           refreshGoals();
           router.push('/index-goal');
         } else {
-          alert('ゴールの削除に失敗しました。');
+          alert('Failed to delete the goal.');
         }
       })
-      .catch(() => alert('通信に失敗しました。'));
+      .catch(() => alert('Communication has failed.'));
     }
   };
 
@@ -141,6 +141,26 @@ function GoalPage() {
     }
   }, [id]); 
 
+  const completeGoal = async () => {
+    const response = await fetch(`http://localhost:3000/api/goals/${id}/complete`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await response.json();
+    if (response.ok) {
+      // Redirect to dashboard with a success message
+      router.push({
+        pathname: '/dashboard',
+        query: { message: encodeURIComponent(data.message) }
+      });
+    } else {
+      alert(data.message);
+    }
+  };
+
   function completeSmallGoal(smallGoalId) {
     // APIを通じてサーバーにsmall goalの完了を通知
     const token = localStorage.getItem('token');
@@ -195,9 +215,9 @@ function GoalPage() {
           <>
             <p>このGoalを完了しますか?</p>
             {goal.small_goals?.some(sg => !sg.completed) ? (
-              <button disabled className="btn btn-success">Goalを達成する</button>
+              <button disabled className="btn btn-success">Completed Goal</button>
             ) : (
-              <button className="btn btn-success">Goalを達成する</button>
+              <button onClick={completeGoal} className="btn btn-success">Completed Goal</button>
             )}
           </>
         )}
