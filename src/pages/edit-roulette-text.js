@@ -1,4 +1,5 @@
 import Layout from '../components/Layout';
+import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import '../components/styles.css';
 
@@ -179,6 +180,11 @@ const EditRouletteText = () => {
             Number: {rouletteText.number}, Text: {rouletteText.text}
           </div>
         ))}
+      </div>
+      <div>
+      <Link href="/dashboard">
+          <div className={'btn btn-primary'}>Back</div>
+      </Link>
       </div>
     </Layout>
   );

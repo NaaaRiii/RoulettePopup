@@ -6,7 +6,7 @@ import '../../../components/styles.css';
 
 function NewSmallGoal() {
   const router = useRouter();
-  const { id } = router.query;
+  const { goalId } = router.query;
   const [title, setTitle] = useState('');
   const [tasks, setTasks] = useState([{ id: Date.now(), content: '' }]);
   const [difficulty, setDifficulty] = useState('');
@@ -49,17 +49,17 @@ function NewSmallGoal() {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(`http://localhost:3000/api/goals/${id}/small_goals`, {
+      const response = await fetch(`http://localhost:3000/api/goals/${goalId}/small_goals`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // トークンをヘッダーに追加
+          'Authorization': `Bearer ${token}`
         },
         body
       });
 
       if (response.ok) {
-        router.push(`/goals/${id}`);
+        router.push(`/goals/${goalId}`);
       } else {
         const errorData = await response.json();
         console.error("Error submitting small goal:", errorData);
@@ -106,11 +106,11 @@ function NewSmallGoal() {
             required
           >
             <option value="">Select Difficulty</option>
-            <option value="very_easy">Very Easy</option>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-            <option value="very_hard">Very Hard</option>
+            <option value="ものすごく簡単">ものすごく簡単</option>
+            <option value="簡単">簡単</option>
+            <option value="普通">普通</option>
+            <option value="難しい">難しい</option>
+            <option value="とても難しい">とても難しい</option>
           </select>
         </div>
         <div>
@@ -124,7 +124,7 @@ function NewSmallGoal() {
           />
         </div>
         <button type="submit" className="btn btn-primary">Submit</button>
-        <Link href={`/goals/${id}`}>
+        <Link href={`/goals/${goalId}`}>
           <div className={'btn btn-primary'}>Back</div>
         </Link>
       </form>

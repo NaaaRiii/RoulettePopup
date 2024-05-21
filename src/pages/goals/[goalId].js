@@ -8,13 +8,13 @@ import { useGoals } from '../../contexts/GoalsContext';
 
 function GoalPage() {
   const router = useRouter();
-  const { id } = router.query;// この `id` が `goalId`
+  const { goalId } = router.query;
+  const [token, setToken] = useState('');
   const [goal, setGoal] = useState({ small_goals: [] });
   const [smallGoals, setSmallGoals] = useState({ tasks: [] });
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
   const { refreshGoals } = useGoals();
-  const token = localStorage.getItem('token');
-  //const smallGoalId = 'your_value_here';
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -22,20 +22,42 @@ function GoalPage() {
   };
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/goals/${id}/small_goals`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    .then(res => res.json())
-    .then(data => {
-      setSmallGoals(data);
-    });
-  }, [id]);
+    const messageFromQuery = router.query.message;
+    if (messageFromQuery) {
+      setMessage(decodeURIComponent(messageFromQuery));
+    }
+  }, [router.query]);
 
   useEffect(() => {
-    if (!id) return;
+    if (typeof window !== 'undefined') { // クライアントサイドでの実行を確認
+      const token = localStorage.getItem('token');
+      setToken(token);
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token && goalId) {
+      fetch(`http://localhost:3000/api/goals/${goalId}/small_goals`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        setSmallGoals(data);
+      })
+      .catch(error => {
+        console.error('Failed to fetch small goals', error);
+      });
+    } else {
+      console.error("Token not found or goalId is missing");
+    }
+  }, [goalId]);
+
+  useEffect(() => {
+    if (!goalId) return;
 
     const token = localStorage.getItem('token');
-    fetch(`http://localhost:3000/api/goals/${id}`, {
+    fetch(`http://localhost:3000/api/goals/${goalId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -45,12 +67,12 @@ function GoalPage() {
         setGoal(data);
         setLoading(false);
       });
-  }, [id]);
+  }, [goalId]);
 
   const deleteGoal = () => {
     if (window.confirm('Are you sure ?')) {
       const token = localStorage.getItem('token');
-      fetch(`http://localhost:3000/api/goals/${id}`, {
+      fetch(`http://localhost:3000/api/goals/${goalId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -69,11 +91,36 @@ function GoalPage() {
     }
   };
 
+  const deleteSmallGoal = (smallGoalId) => {
+    if (window.confirm('Are you sure?')) {
+      const token = localStorage.getItem('token');
+      fetch(`http://localhost:3000/api/goals/${goalId}/small_goals/${smallGoalId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          setGoal(prevGoal => ({
+            ...prevGoal,
+            small_goals: prevGoal.small_goals.filter(sg => sg.id !== smallGoalId)
+          }));
+          alert('小目標が削除されました。');
+        } else {
+          alert('小目標の削除に失敗しました。');
+        }
+      })
+      .catch(() => alert('通信に失敗しました。'));
+    }
+  };
+
   useEffect(() => {
-    if (!id) return;
+    if (!goalId) return;
     
     const token = localStorage.getItem('token');
-    fetch(`http://localhost:3000/api/goals/${id}/small_goals`, {
+    fetch(`http://localhost:3000/api/goals/${goalId}/small_goals`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -84,7 +131,7 @@ function GoalPage() {
       const updatedSmallGoals = data.map(smallGoal => ({
         ...smallGoal,
         tasks: smallGoal.tasks.map(task => {
-          const taskStateKey = `taskState-${id}-${smallGoal.id}-${task.id}`;
+          const taskStateKey = `taskState-${goalId}-${smallGoal.id}-${task.id}`;
           const savedState = localStorage.getItem(taskStateKey);
           return {
             ...task,
@@ -101,7 +148,7 @@ function GoalPage() {
     .catch(error => {
       console.error('Error fetching small goals:', error);
     });
-  }, [id]);
+  }, [goalId]);
 
   function handleTaskToggle(taskId) {
     setGoal(prevGoal => {
@@ -121,7 +168,7 @@ function GoalPage() {
       });
   
       const newGoalState = { ...prevGoal, small_goals: updatedGoal };
-      localStorage.setItem(`goalState-${prevGoal.id}`, JSON.stringify(newGoalState));
+      localStorage.setItem(`goalState-${prevGoal.goalId}`, JSON.stringify(newGoalState));
       console.log('New goal state saved to localStorage', newGoalState); // 保存状態をログ出力
       return newGoalState;
     });
@@ -134,15 +181,15 @@ function GoalPage() {
   }
   
   useEffect(() => {
-    const storedState = localStorage.getItem(`goalState-${id}`);
+    const storedState = localStorage.getItem(`goalState-${goalId}`);
     if (storedState) {
       const loadedGoal = JSON.parse(storedState);
       setGoal(loadedGoal);
     }
-  }, [id]); 
+  }, [goalId]); 
 
   const completeGoal = async () => {
-    const response = await fetch(`http://localhost:3000/api/goals/${id}/complete`, {
+    const response = await fetch(`http://localhost:3000/api/goals/${goalId}/complete`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -151,7 +198,6 @@ function GoalPage() {
     });
     const data = await response.json();
     if (response.ok) {
-      // Redirect to dashboard with a success message
       router.push({
         pathname: '/dashboard',
         query: { message: encodeURIComponent(data.message) }
@@ -164,7 +210,7 @@ function GoalPage() {
   function completeSmallGoal(smallGoalId) {
     // APIを通じてサーバーにsmall goalの完了を通知
     const token = localStorage.getItem('token');
-    fetch(`http://localhost:3000/api/goals/${id}/small_goals/${smallGoalId}/complete`, {
+    fetch(`http://localhost:3000/api/goals/${goalId}/small_goals/${smallGoalId}/complete`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -197,16 +243,32 @@ function GoalPage() {
     });
   }
 
-    const allTasksCompleted = goal.small_goals?.every(smallGoal =>
-      smallGoal.tasks?.every(task => task.completed)
-    );
+    //const allTasksCompleted = goal.small_goals?.every(smallGoal =>
+    //  smallGoal.tasks?.every(task => task.completed)
+    //);
 
   if (loading) return <p>Loading...</p>;
   if (!goal) return <p>Goal not found</p>;
 
+  {/*一時的に追加*/}
+  function completeAllTasksForSmallGoal(smallGoalId) {
+    setGoal(prevGoal => {
+      const updatedGoals = prevGoal.small_goals.map(smallGoal => {
+        if (smallGoal.id === smallGoalId) {
+          const updatedTasks = smallGoal.tasks.map(task => ({ ...task, completed: true }));
+          return { ...smallGoal, tasks: updatedTasks };
+        }
+        return smallGoal;
+      });
+      return { ...prevGoal, small_goals: updatedGoals };
+    });
+  }
+  {/*一時的に追加*/}
+
   return (
     <Layout>
       <div>
+        {message && <p>{message}</p>}
         <h1>Goal Title:</h1>
         <h3>{goal.title}</h3>
         {goal.completed ? (
@@ -239,9 +301,23 @@ function GoalPage() {
 
             <p>Difficulty: {smallGoal.difficulty}</p>
             <p>Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
+            
+            {!smallGoal.completed && (
+              <>
+                <Link href={`/goals/${goalId}/small_goals/${smallGoal.id}/edit`}>
+                  <div>Edit Small Goal</div>
+                </Link>
+                <Link href={`/goals/${goalId}`} onClick={(e) => {
+                  e.preventDefault();
+                  deleteSmallGoal(smallGoal.id);
+                }}>
+                  <div>Delete Small Goal</div>
+                </Link>
+              </>
+            )}
 
             {/* 各smallGoalのタスクが全て完了しているか確認 */}
-            {!smallGoal.completed && (
+            {/*{!smallGoal.completed && (
               <ul>
                 {smallGoal.tasks?.map((task) => (
                   <li key={task.id}>
@@ -257,18 +333,42 @@ function GoalPage() {
                   </li>
                 ))}
               </ul>
+            )}*/}
+            {/*一時的に追加*/}
+            {!smallGoal.completed && (
+                <>
+                  <button className="btn btn-secondary" onClick={() => completeAllTasksForSmallGoal(smallGoal.id)}>
+                    Complete All Tasks
+                  </button>
+                  <ul>
+                    {smallGoal.tasks?.map((task) => (
+                      <li key={task.id}>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={task.completed}
+                            onChange={() => handleTaskToggle(task.id)}
+                            className="input-checkbox"
+                          />
+                          {task.content}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </>
             )}
+            {/*一時的に追加*/}
             <div>**************************************</div>
           </div>
         ))}
 
-        <Link href={`/goals/${goal.id}/edit`}>
+        <Link href={`/goals/${goalId}/edit`}>
           <div>Edit Goal</div>
         </Link>
         <Link href={`/index-goal`} onClick={deleteGoal}>
           <div>Delete Goal</div>
         </Link>
-        <Link href={`/goals/${goal.id}/new-small_goal`}>
+        <Link href={`/goals/${goalId}/new-small_goal`}>
           <div className={'btn btn-primary'}>Add New Small Goal</div>
         </Link>
         <Link href="/index-goal">

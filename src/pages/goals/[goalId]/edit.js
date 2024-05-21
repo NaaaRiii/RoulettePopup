@@ -6,16 +6,15 @@ import '../../../components/styles.css';
 
 function EditGoal() {
   const router = useRouter();
-  const { id } = router.query; // URLからgoalのIDを取得
+  const { goalId } = router.query;
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [message, setMessage] = useState('');
+  const [ message ] = useState('');
 
   useEffect(() => {
-    if (id) {
-      // APIからgoalデータを取得
-      fetch(`http://localhost:3000/api/goals/${id}`, {
+    if (goalId) {
+      fetch(`http://localhost:3000/api/goals/${goalId}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       })
       .then(response => response.json())
@@ -26,7 +25,7 @@ function EditGoal() {
       })
       .catch(error => console.error('Failed to load goal', error));
     }
-  }, [id]);
+  }, [goalId]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -37,7 +36,7 @@ function EditGoal() {
     };
 
     try {
-      const response = await fetch(`http://localhost:3000/api/goals/${id}`, {
+      const response = await fetch(`http://localhost:3000/api/goals/${goalId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -47,8 +46,7 @@ function EditGoal() {
       });
 
       if (response.ok) {
-        setMessage('Goal was successfully updated.');
-        //router.push(`/goals/${id}`);
+        router.push(`/goals/${goalId}?message=Goal was successfully updated`);
       } else {
         const errorData = await response.json();
         console.error("Error updating goal:", errorData);
@@ -94,7 +92,7 @@ function EditGoal() {
           />
         </div>
         <button type="submit" className="btn btn-primary">Update Goal</button>
-        <Link href={`/index-goal`}>
+        <Link href={`/goals/${goalId}`}>
           <div className={'btn btn-primary'}>Back</div>
         </Link>
       </form>

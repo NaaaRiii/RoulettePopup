@@ -35,7 +35,7 @@ const Header = () => {
           });
           if (response.ok) {
             const data = await response.json();
-            setUserRank(data.rank); // レスポンスからランクをセット
+            setUserRank(data.rank);
           } else {
             console.error('Failed to fetch user rank');
           }
@@ -61,7 +61,7 @@ const Header = () => {
               <span>You are Logged In</span>
               <Link href="/dashboard">Dashboard</Link>
               <a href="/logout" onClick={handleLogout}>Log out</a>
-              {userRank > 10 && <Link href={`/edit-roulette-text/`}>Roulette Text</Link>}
+              
             </div>
           ) : (
             <ul className="flex_list">
