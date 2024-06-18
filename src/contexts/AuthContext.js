@@ -1,29 +1,39 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const AuthProvider = ({ children }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRank, setUserRank] = useState(0);
 
-export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null);
-
-  const login = (token, userData) => {
-    localStorage.setItem('token', token);
-    setCurrentUser(userData);
+  const fetchUserRank = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/current_user', {
+        method: 'GET',
+        credentials: 'include'
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setIsLoggedIn(true);
+        setUserRank(data.rank);
+      } else {
+        console.error('Failed to fetch user rank');
+      }
+    } catch (error) {
+      console.error('Error fetching user rank:', error);
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setCurrentUser(null);
-  };
+  useEffect(() => {
+    fetchUserRank();
+  }, []);
 
-  const value = {
-    currentUser,
-    login,
-    logout,
-  };
+  return (
+    <AuthContext.Provider value={{ isLoggedIn, userRank, setIsLoggedIn, setUserRank }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+export const useAuth = () => useContext(AuthContext);

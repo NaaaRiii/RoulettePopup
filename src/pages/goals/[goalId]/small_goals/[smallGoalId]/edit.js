@@ -20,35 +20,31 @@ function EditSmallGoal() {
 
   useEffect(() => {
     if (smallGoalId && goalId) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        fetch(`http://localhost:3000/api/goals/${goalId}/small_goals/${smallGoalId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error('Failed to fetch');
-          }
-        })
-        .then(data => {
-          setTitle(data.title);
-          setTasks(data.tasks || []);
-          setDifficulty(data.difficulty);
-          if (data.deadline) {
-            const formattedDeadline = formatDate(data.deadline);
-            setDeadline(formattedDeadline);
-          } else {
-            setDeadline('');
-          }
-        })
-        .catch(error => {
-          console.error('Failed to load small goal', error);
-        });
-      } else {
-        console.error("Token not found");
-      }
+      fetch(`http://localhost:3000/api/goals/${goalId}/small_goals/${smallGoalId}`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Failed to fetch');
+        }
+      })
+      .then(data => {
+        setTitle(data.title);
+        setTasks(data.tasks || []);
+        setDifficulty(data.difficulty);
+        if (data.deadline) {
+          const formattedDeadline = formatDate(data.deadline);
+          setDeadline(formattedDeadline);
+        } else {
+          setDeadline('');
+        }
+      })
+      .catch(error => {
+        console.error('Failed to load small goal', error);
+      });
     }
   }, [smallGoalId, goalId]);
 
@@ -132,8 +128,8 @@ function EditSmallGoal() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
+        credentials: 'include',
         body: JSON.stringify(updatedSmallGoal)
       });
 

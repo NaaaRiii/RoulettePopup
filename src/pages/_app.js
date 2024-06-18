@@ -1,10 +1,14 @@
 import { GoalsProvider } from '../contexts/GoalsContext';
+import { AuthProvider } from '../contexts/AuthContext';
+import '../components/styles.css';
 
 function MyApp({ Component, pageProps }) {
   return (
-    <GoalsProvider>
-      <Component {...pageProps} />
-    </GoalsProvider>
+    <AuthProvider>
+      <GoalsProvider>
+        <Component {...pageProps} />
+      </GoalsProvider>
+    </AuthProvider>
   );
 }
 

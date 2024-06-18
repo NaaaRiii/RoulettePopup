@@ -15,7 +15,8 @@ function EditGoal() {
   useEffect(() => {
     if (goalId) {
       fetch(`http://localhost:3000/api/goals/${goalId}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        method: 'GET',
+        credentials: 'include'
       })
       .then(response => response.json())
       .then(data => {
@@ -40,8 +41,8 @@ function EditGoal() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
+        credentials: 'include',
         body: JSON.stringify(updatedGoal)
       });
 

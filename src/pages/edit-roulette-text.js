@@ -1,8 +1,7 @@
-import Layout from '../components/Layout';
-import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Layout from '../components/Layout';
 import '../components/styles.css';
-
 
 const EditRouletteText = () => {
   const [tickets, setTickets] = useState(0);
@@ -10,122 +9,80 @@ const EditRouletteText = () => {
   const [rouletteTexts, setRouletteTexts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editedText, setEditedText] = useState('');
-
   const [flashMessage, setFlashMessage] = useState('');
 
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
     fetch('http://localhost:3000/api/roulette_texts/tickets', {
-      //credentials: 'include'
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      method: 'GET',
+      credentials: 'include'
     })
       .then(response => response.json())
       .then(data => setTickets(data.tickets))
       .catch(error => console.error('Error:', error));
   }, []);
 
-  //useEffect(() => {
-  //  const token = localStorage.getItem('token');
-  //  fetch('http://localhost:3000/api/roulette_texts/tickets', {
-  //    method: 'GET',
-  //    headers: {
-  //      'Authorization': `Bearer ${token}`,
-  //      //'Content-Type': 'application/json',
-  //    },
-  //    //credentials: 'include', // クッキーを使用する場合
-  //    })
-  //    .then(response => response.json())
-  //    .then(data => setTickets(data.tickets))
-  //    .catch(error => console.error('Error:', error));
-  //}, []);
-
   useEffect(() => {
-    const token = localStorage.getItem('token');
     fetch('http://localhost:3000/api/roulette_texts', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      method: 'GET',
+      credentials: 'include'
     })
       .then(response => response.json())
       .then(data => {
-        setRouletteTexts(data);
-        setEditedText(data.find(text => text.number === rouletteNumber)?.text || '');
+        if (Array.isArray(data)) { // 配列であることを確認
+          setRouletteTexts(data);
+          const selectedText = data.find(text => text.number === parseInt(rouletteNumber));
+          setEditedText(selectedText ? selectedText.text : '');
+        } else {
+          console.error('Data is not an array:', data);
+        }
       })
       .catch(error => console.error('Error:', error));
   }, [rouletteNumber]);
 
-  //useEffect(() => {
-  //  fetch('http://localhost:3000/roulette_texts')
-  //    .then(response => response.json())
-  //    .then(data => setRouletteTexts(data))
-  //    .catch(error => console.error('Error:', error));
-  //}, []);
-
-  //useEffect(() => {
-  //  fetch('http://localhost:3000/roulette_texts')
-  //    .then(response => response.json())
-  //    .then(data => setRouletteNumber(data))
-  //    .catch(error => console.error('Error:', error));
-  //}, []);
-
-  //const selectedRouletteTextId = rouletteTexts.find(rt => rt.number === parseInt(setRouletteNumber))?.id;
   const selectedRouletteTextId = rouletteTexts.find(rt => rt.number === parseInt(rouletteNumber))?.id;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
 
     if (!selectedRouletteTextId) {
       console.error('Roulette Text ID is undefined.');
       return;
     }
+
     const apiUrl = `http://localhost:3000/api/roulette_texts/${selectedRouletteTextId}`;
 
     try {
       const response = await fetch(apiUrl, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
-        //body: JSON.stringify({
-        //  roulette_text: { 
-        //    number: rouletteNumber, 
-        //    text: editedText 
-        //  },
-        //}),
+        credentials: 'include',
         body: JSON.stringify({
           roulette_text: { text: editedText },
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        const errorText = await response.text();
+        console.error('Network response was not ok:', errorText);
+        setFlashMessage('更新に失敗しました。');
+        return;
       }
-  
-    //  const updatedRouletteText = await response.json();
 
-    //  // `rouletteTexts`状態を更新して、変更をUIに反映させる
-    //  setRouletteTexts(rouletteTexts.map(text => 
-    //    text.number === updatedRouletteText.number ? updatedRouletteText : text
-    //  ));
-  
-    //  alert("テキストが更新されました。");
-    //} catch (error) {
-    //  console.error('There has been a problem with your fetch operation:', error);
-    //}
+      const data = await response.json();
 
-    const updatedRouletteText = await response.json();
-      setRouletteTexts(rouletteTexts.map(text => text.number === updatedRouletteText.number ? updatedRouletteText : text));
-
-      setShowForm(false);
-      
-      // レスポンスに基づいてフラッシュメッセージを設定
-      setFlashMessage(`Number: ${updatedRouletteText.number} を ${updatedRouletteText.text} に変更しました。`);
-
+      if (data.roulette_text && typeof data.roulette_text === 'object' && 'number' in data.roulette_text) {
+        const { roulette_text: updatedRouletteText, tickets: updatedTickets } = data;
+        setRouletteTexts(rouletteTexts.map(text => text.number === updatedRouletteText.number ? updatedRouletteText : text));
+        setTickets(updatedTickets);
+        setShowForm(false);
+        setFlashMessage(`Number: ${updatedRouletteText.number} を ${updatedRouletteText.text} に変更しました。`);
+      } else {
+        console.error('Invalid response format:', data);
+        setFlashMessage('更新に失敗しました。');
+      }
     } catch (error) {
       console.error('There has been a problem with your fetch operation:', error);
       setFlashMessage('更新に失敗しました。');
@@ -191,5 +148,3 @@ const EditRouletteText = () => {
 };
 
 export default EditRouletteText;
-
-

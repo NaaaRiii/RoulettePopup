@@ -4,7 +4,6 @@ import { format } from 'date-fns';
 import Layout from '../components/Layout';
 import Link from 'next/link';
 import '../components/styles.css';
-//import RoulettePopup from '../components/RoulettePopup';
 
 export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,11 +33,16 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem('token');
+      //const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:3000/api/current_user', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        //headers: {
+        //  'Content-Type': 'application/json'
+        //},
+        //method: 'GET',
+        credentials: 'include',
+        //headers: {
+        //  'Authorization': `Bearer ${token}`
+        //}
       });
       if (response.ok) {
         const data = await response.json();
@@ -60,7 +64,7 @@ export default function Dashboard() {
     };
   
     fetchData();
-  }, []);  // Empty dependency array means this runs once on mount
+  }, []);
   
   useEffect(() => {
     console.log("Current rank:", userData.rank, "Last roulette rank:", userData.lastRouletteRank);
@@ -72,16 +76,20 @@ export default function Dashboard() {
   }, [userData.rank, userData.lastRouletteRank]);
 
   const updateLastRouletteRank = async (newRank) => {
-    const token = localStorage.getItem('token');
+    //const token = localStorage.getItem('token');
     const userId = userData.id;
     console.log("Attempting to update last roulette rank for user ID:", userId);
 
     const response = await fetch(`http://localhost:3000/api/current_users/${userId}/update_rank`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
+      credentials: 'include',
+      //headers: {
+      //  'Authorization': `Bearer ${token}`,
+      //  'Content-Type': 'application/json'
+      //},
       body: JSON.stringify({ lastRouletteRank: newRank })
     });
     if (response.ok) {
@@ -108,11 +116,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      {/*<button onClick={toggleModal}>Open Roulette</button>*/}
-
-      {/*{isModalOpen && (
-        <RoulettePopup closeFunction={toggleModal} />
-      )}*/}
 
       <div>
         {message && <p>{message}</p>}

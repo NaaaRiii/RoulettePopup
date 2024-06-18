@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import Router from 'next/router';
+import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import '../components/styles.css';
 
 export default function NewGoal() {
+  const router = useRouter();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [deadline, setDeadline] = useState('');
@@ -17,17 +18,21 @@ export default function NewGoal() {
       const response = await fetch('http://localhost:3000/api/goals', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`  // トークンをヘッダーに設定
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body
       });
-      const data = await response.json();
 
       if (response.ok) {
-        Router.push(`/goals/${data.id}/new-small_goal`);
+        const data = await response.json();
+        router.push({
+          pathname: `/goals/${data.id}/new-small_goal`,
+          query: { message: encodeURIComponent(data.message) },
+        });
       } else {
-        console.error("Error submitting form:", data);
+        const errorData = await response.json();
+        console.error("Error submitting form:", errorData);
       }
     } catch (error) {
       console.error("Submission failed", error);

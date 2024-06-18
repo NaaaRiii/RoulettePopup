@@ -1,15 +1,16 @@
+import { format } from 'date-fns';
 import { useRouter } from 'next/router';
+import { useGoals } from '../../contexts/GoalsContext';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
 import '../../components/styles.css';
-import { format } from 'date-fns';
-import { useGoals } from '../../contexts/GoalsContext';
+
 
 function GoalPage() {
   const router = useRouter();
   const { goalId } = router.query;
-  const [token, setToken] = useState('');
+  //const [token, setToken] = useState('');
   const [goal, setGoal] = useState({ small_goals: [] });
   const [smallGoals, setSmallGoals] = useState({ tasks: [] });
   const [loading, setLoading] = useState(true);
@@ -28,56 +29,114 @@ function GoalPage() {
     }
   }, [router.query]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') { // クライアントサイドでの実行を確認
-      const token = localStorage.getItem('token');
-      setToken(token);
-    }
-  }, []);
+  //useEffect(() => {
+  //  if (typeof window !== 'undefined') {
+  //    const token = localStorage.getItem('token');
+  //    setToken(token);
+  //  }
+  //}, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token && goalId) {
-      fetch(`http://localhost:3000/api/goals/${goalId}/small_goals`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      .then(res => res.json())
-      .then(data => {
-        setSmallGoals(data);
-      })
-      .catch(error => {
-        console.error('Failed to fetch small goals', error);
-      });
-    } else {
-      console.error("Token not found or goalId is missing");
+    if (goalId) {
+      fetchSmallGoals();
+      fetchGoalDetails();
     }
   }, [goalId]);
 
-  useEffect(() => {
-    if (!goalId) return;
+  //useEffect(() => {
+  //  if (token && goalId) {
+  //    fetchSmallGoals();
+  //    fetchGoalDetails();
+  //  }
+  //}, [goalId, token]);
 
-    const token = localStorage.getItem('token');
-    fetch(`http://localhost:3000/api/goals/${goalId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+  //const getAuthToken = () => {
+  //  const name = 'jwt=';
+  //  const decodedCookie = decodeURIComponent(document.cookie);
+  //  const ca = decodedCookie.split(';');
+  //  for (let i = 0; i < ca.length; i++) {
+  //    let c = ca[i];
+  //    while (c.charAt(0) === ' ') {
+  //      c = c.substring(1);
+  //    }
+  //    if (c.indexOf(name) === 0) {
+  //      return c.substring(name.length, c.length);
+  //    }
+  //  }
+  //  return '';
+  //};
+
+  const fetchSmallGoals = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/goals/${goalId}/small_goals`, {
+        //headers: { 'Authorization': `Bearer ${token}` }
+        //headers: { 'Authorization': `Bearer ${getAuthToken()}` }
+        method: 'GET',
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Unauthorized');
       }
-    })
-      .then(res => res.json())
-      .then(data => {
+      const data = await response.json();
+      const updatedSmallGoals = data.map(smallGoal => ({
+        ...smallGoal,
+        tasks: smallGoal.tasks.map(task => {
+          const taskStateKey = `taskState-${goalId}-${smallGoal.id}-${task.id}`;
+          const savedState = localStorage.getItem(taskStateKey);
+          return {
+            ...task,
+            completed: savedState !== null ? JSON.parse(savedState) : task.completed
+          };
+        })
+      }));
+      setGoal(prevGoal => ({
+        ...prevGoal,
+        small_goals: updatedSmallGoals
+      }));
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch small goals', error);
+    }
+  };
+  //    setGoal(prevGoal => ({
+  //      ...prevGoal,
+  //      small_goals: data
+  //    }));
+  //  } catch (error) {
+  //    console.error('Failed to fetch small goals', error);
+  //  }
+  //};
+
+  const fetchGoalDetails = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/goals/${goalId}`, {
+        //headers: { 'Authorization': `Bearer ${token}` }
+        method: 'GET',
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (response.ok) {
         setGoal(data);
         setLoading(false);
-      });
-  }, [goalId]);
+      } else {
+        console.error('Failed to fetch goal details', data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch goal details', error);
+    }
+  };
+
 
   const deleteGoal = () => {
     if (window.confirm('Are you sure ?')) {
-      const token = localStorage.getItem('token');
+      //const token = localStorage.getItem('token');
       fetch(`http://localhost:3000/api/goals/${goalId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          //'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       })
       .then(response => {
         if (response.ok) {
@@ -97,9 +156,10 @@ function GoalPage() {
       fetch(`http://localhost:3000/api/goals/${goalId}/small_goals/${smallGoalId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          //'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       })
       .then(response => {
         if (response.ok) {
@@ -116,39 +176,80 @@ function GoalPage() {
     }
   };
 
-  useEffect(() => {
-    if (!goalId) return;
+  //useEffect(() => {
+  //  if (!goalId) return;
     
-    const token = localStorage.getItem('token');
-    fetch(`http://localhost:3000/api/goals/${goalId}/small_goals`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Fetched small goals:', data);
-      const updatedSmallGoals = data.map(smallGoal => ({
-        ...smallGoal,
-        tasks: smallGoal.tasks.map(task => {
-          const taskStateKey = `taskState-${goalId}-${smallGoal.id}-${task.id}`;
-          const savedState = localStorage.getItem(taskStateKey);
-          return {
-            ...task,
-            completed: savedState !== null ? JSON.parse(savedState) : task.completed
-          };
-        })
-      }));
-      setGoal(prevGoal => ({
-        ...prevGoal,
-        small_goals: updatedSmallGoals
-      }));
-      setLoading(false);
-    })
-    .catch(error => {
-      console.error('Error fetching small goals:', error);
-    });
-  }, [goalId]);
+  //  //const token = localStorage.getItem('token');
+  //  fetch(`http://localhost:3000/api/goals/${goalId}/small_goals`, {
+  //    headers: {
+        //'Authorization': `Bearer ${token}`
+        //'Authorization': `Bearer ${getAuthToken()}`
+    //    method: 'GET',
+    //    credentials: 'include'
+    //  }
+    //})
+    //.then(response => response.json())
+    //.then(data => {
+    //  console.log('Fetched small goals:', data);
+    //  const updatedSmallGoals = data.map(smallGoal => ({
+    //    ...smallGoal,
+    //    tasks: smallGoal.tasks.map(task => {
+    //      const taskStateKey = `taskState-${goalId}-${smallGoal.id}-${task.id}`;
+    //      const savedState = localStorage.getItem(taskStateKey);
+    //      return {
+    //        ...task,
+    //        completed: savedState !== null ? JSON.parse(savedState) : task.completed
+    //      };
+    //    })
+    //  }));
+      //if (!Array.isArray(data)) {
+      //  throw new Error('Data is not an array');
+      //}
+      //const updatedSmallGoals = data.map(smallGoal => ({
+      //  ...smallGoal,
+      //  tasks: smallGoal.tasks.map(task => {
+      //    const taskStateKey = `taskState-${goalId}-${smallGoal.id}-${task.id}`;
+      //    const savedState = localStorage.getItem(taskStateKey);
+      //    return {
+      //      ...task,
+      //      completed: savedState !== null ? JSON.parse(savedState) : task.completed
+      //    };
+      //  })
+      //}));
+  //    setGoal(prevGoal => ({
+  //      ...prevGoal,
+  //      small_goals: updatedSmallGoals
+  //    }));
+  //    setLoading(false);
+  //  })
+  //  .catch(error => {
+  //    console.error('Error fetching small goals:', error);
+  //  });
+  //}, [goalId]);
+
+  //function handleTaskToggle(taskId) {
+  //  setGoal(prevGoal => {
+  //    const updatedGoal = prevGoal.small_goals.map(smallGoal => {
+  //      return {
+  //        ...smallGoal,
+  //        tasks: smallGoal.tasks.map(task => {
+  //          if (task.id === taskId) {
+  //            const newCompleted = !task.completed;
+  //            console.log(`Task ${taskId} completed status changed to: ${newCompleted}`);
+  //            saveTaskState(prevGoal.id, smallGoal.id, taskId, newCompleted);
+  //            return { ...task, completed: newCompleted };
+  //          }
+  //          return task;
+  //        })
+  //      };
+  //    });
+  
+  //    const newGoalState = { ...prevGoal, small_goals: updatedGoal };
+  //    localStorage.setItem(`goalState-${prevGoal.goalId}`, JSON.stringify(newGoalState));
+  //    console.log('New goal state saved to localStorage', newGoalState);
+  //    return newGoalState;
+  //  });
+  //}
 
   function handleTaskToggle(taskId) {
     setGoal(prevGoal => {
@@ -158,7 +259,6 @@ function GoalPage() {
           tasks: smallGoal.tasks.map(task => {
             if (task.id === taskId) {
               const newCompleted = !task.completed;
-              console.log(`Task ${taskId} completed status changed to: ${newCompleted}`); // 状態変更をログ出力
               saveTaskState(prevGoal.id, smallGoal.id, taskId, newCompleted);
               return { ...task, completed: newCompleted };
             }
@@ -169,16 +269,20 @@ function GoalPage() {
   
       const newGoalState = { ...prevGoal, small_goals: updatedGoal };
       localStorage.setItem(`goalState-${prevGoal.goalId}`, JSON.stringify(newGoalState));
-      console.log('New goal state saved to localStorage', newGoalState); // 保存状態をログ出力
       return newGoalState;
     });
-  }
-  
-  function saveTaskState(goalId, smallGoalId, taskId, completed) {
+  };
+
+  const saveTaskState = (goalId, smallGoalId, taskId, completed) => {
     const key = `taskState-${goalId}-${smallGoalId}-${taskId}`;
     localStorage.setItem(key, JSON.stringify(completed));
-    console.log(`Task state for ${taskId} saved: ${completed}`); // localStorageへの保存状態をログ出力
-  }
+  };
+  
+  //function saveTaskState(goalId, smallGoalId, taskId, completed) {
+  //  const key = `taskState-${goalId}-${smallGoalId}-${taskId}`;
+  //  localStorage.setItem(key, JSON.stringify(completed));
+  //  console.log(`Task state for ${taskId} saved: ${completed}`);
+  //}
   
   useEffect(() => {
     const storedState = localStorage.getItem(`goalState-${goalId}`);
@@ -192,9 +296,10 @@ function GoalPage() {
     const response = await fetch(`http://localhost:3000/api/goals/${goalId}/complete`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        //'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include' 
     });
     const data = await response.json();
     if (response.ok) {
@@ -208,19 +313,18 @@ function GoalPage() {
   };
 
   function completeSmallGoal(smallGoalId) {
-    // APIを通じてサーバーにsmall goalの完了を通知
-    const token = localStorage.getItem('token');
+    //const token = localStorage.getItem('token');
     fetch(`http://localhost:3000/api/goals/${goalId}/small_goals/${smallGoalId}/complete`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        //'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include' 
     })
-    .then(response => response.json())  // レスポンスをJSON形式で受け取る
+    .then(response => response.json())
     .then(data => {
       if (data.status === 'success') {
-        // small_goalの状態を更新
         const updatedGoals = goal.small_goals.map(sg => {
           if (sg.id === smallGoalId) {
             return { ...sg, completed: true };
@@ -229,10 +333,9 @@ function GoalPage() {
         });
         setGoal({ ...goal, small_goals: updatedGoals });
 
-        // dashboardページへリダイレクトし、成功メッセージを表示
         router.push({
           pathname: '/dashboard',
-          query: { message: encodeURIComponent(data.message) }  // エンコードされたメッセージをクエリパラメータに設定
+          query: { message: encodeURIComponent(data.message) }
         });
       } else {
         alert('Failed to complete small goal.');
@@ -243,26 +346,22 @@ function GoalPage() {
     });
   }
 
-    //const allTasksCompleted = goal.small_goals?.every(smallGoal =>
-    //  smallGoal.tasks?.every(task => task.completed)
-    //);
-
   if (loading) return <p>Loading...</p>;
   if (!goal) return <p>Goal not found</p>;
 
   {/*一時的に追加*/}
-  function completeAllTasksForSmallGoal(smallGoalId) {
-    setGoal(prevGoal => {
-      const updatedGoals = prevGoal.small_goals.map(smallGoal => {
-        if (smallGoal.id === smallGoalId) {
-          const updatedTasks = smallGoal.tasks.map(task => ({ ...task, completed: true }));
-          return { ...smallGoal, tasks: updatedTasks };
-        }
-        return smallGoal;
-      });
-      return { ...prevGoal, small_goals: updatedGoals };
-    });
-  }
+  //function completeAllTasksForSmallGoal(smallGoalId) {
+  //  setGoal(prevGoal => {
+  //    const updatedGoals = prevGoal.small_goals.map(smallGoal => {
+  //      if (smallGoal.id === smallGoalId) {
+  //        const updatedTasks = smallGoal.tasks.map(task => ({ ...task, completed: true }));
+  //        return { ...smallGoal, tasks: updatedTasks };
+  //      }
+  //      return smallGoal;
+  //    });
+  //    return { ...prevGoal, small_goals: updatedGoals };
+  //  });
+  //}
   {/*一時的に追加*/}
 
   return (
@@ -317,7 +416,7 @@ function GoalPage() {
             )}
 
             {/* 各smallGoalのタスクが全て完了しているか確認 */}
-            {/*{!smallGoal.completed && (
+            {!smallGoal.completed && (
               <ul>
                 {smallGoal.tasks?.map((task) => (
                   <li key={task.id}>
@@ -333,9 +432,9 @@ function GoalPage() {
                   </li>
                 ))}
               </ul>
-            )}*/}
+            )}
             {/*一時的に追加*/}
-            {!smallGoal.completed && (
+            {/*{!smallGoal.completed && (
                 <>
                   <button className="btn btn-secondary" onClick={() => completeAllTasksForSmallGoal(smallGoal.id)}>
                     Complete All Tasks
@@ -357,17 +456,22 @@ function GoalPage() {
                   </ul>
                 </>
             )}
-            {/*一時的に追加*/}
+            一時的に追加*/}
             <div>**************************************</div>
           </div>
         ))}
 
-        <Link href={`/goals/${goalId}/edit`}>
-          <div>Edit Goal</div>
-        </Link>
-        <Link href={`/index-goal`} onClick={deleteGoal}>
-          <div>Delete Goal</div>
-        </Link>
+        {!goal.completed && (
+          <>
+            <Link href={`/goals/${goalId}/edit`}>
+              <div>Edit Goal</div>
+            </Link>
+            <Link href={`/index-goal`} onClick={deleteGoal}>
+              <div>Delete Goal</div>
+            </Link>
+          </>
+        )}
+
         <Link href={`/goals/${goalId}/new-small_goal`}>
           <div className={'btn btn-primary'}>Add New Small Goal</div>
         </Link>

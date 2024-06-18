@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Layout from '../../../components/Layout';
 import '../../../components/styles.css';
@@ -11,6 +11,14 @@ function NewSmallGoal() {
   const [tasks, setTasks] = useState([{ id: Date.now(), content: '' }]);
   const [difficulty, setDifficulty] = useState('');
   const [deadline, setDeadline] = useState('');
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const messageFromQuery = router.query.message;
+    if (messageFromQuery) {
+      setMessage(decodeURIComponent(messageFromQuery));
+    }
+  }, [router.query]);
 
   const handleTaskChange = (index, value) => {
     const newTasks = tasks.map((task, i) => {
@@ -23,7 +31,7 @@ function NewSmallGoal() {
   };
 
   const addTask = () => {
-    setTasks([...tasks, { id: Date.now(), content: '' }]);
+    setTasks([...tasks, { id: `temp-${Date.now()}`, content: '' }]);
   };
 
   const removeTask = (index) => {
@@ -39,27 +47,29 @@ function NewSmallGoal() {
         title,
         difficulty,
         deadline,
-        tasks_attributes: tasks.map(task => ({ 
-          id: task.id, 
-          content: task.content 
+        tasks_attributes: tasks.map(task => ({
+          // 新しいタスクにはIDを含めない
+          content: task.content
         }))
       }
     });
-
-    const token = localStorage.getItem('token');
 
     try {
       const response = await fetch(`http://localhost:3000/api/goals/${goalId}/small_goals`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body
       });
 
       if (response.ok) {
-        router.push(`/goals/${goalId}`);
+        const data = await response.json();
+        router.push({
+          pathname: `/goals/${goalId}`,
+          query: { message: encodeURIComponent(data.message) }
+        });
       } else {
         const errorData = await response.json();
         console.error("Error submitting small goal:", errorData);
@@ -71,6 +81,7 @@ function NewSmallGoal() {
 
   return (
     <Layout>
+      {message && <p>{message}</p>}
       <h1>Let's Set Small Goals</h1>
       <form onSubmit={handleSubmit}>
         <div>
@@ -93,10 +104,13 @@ function NewSmallGoal() {
               onChange={(e) => handleTaskChange(index, e.target.value)}
               required
             />
-            <button type="button" onClick={addTask}>Add Task</button>
             <button type="button" onClick={() => removeTask(index)}>Remove Task</button>
           </div>
         ))}
+
+        <br />{/* 改行の挿入*/}
+        <button type="button" onClick={() => addTask()}>Add Task</button>
+
         <div>
           <label htmlFor="difficulty">Difficulty</label>
           <select
@@ -123,10 +137,13 @@ function NewSmallGoal() {
             required
           />
         </div>
+
         <button type="submit" className="btn btn-primary">Submit</button>
+
         <Link href={`/goals/${goalId}`}>
           <div className={'btn btn-primary'}>Back</div>
         </Link>
+
       </form>
     </Layout>
   );
