@@ -66,7 +66,6 @@ const Header = () => {
               <span>You are Logged In</span>
               <Link href="/dashboard">Dashboard</Link>
               <a href="/logout" onClick={handleLogout}>Log out</a>
-              
             </div>
           ) : (
             <ul className="flex_list">
