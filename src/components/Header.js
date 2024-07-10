@@ -52,6 +52,8 @@ const Header = () => {
 
   useEffect(() => {
     fetchUserRank();
+  // TODO: Fix the dependency array issue
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

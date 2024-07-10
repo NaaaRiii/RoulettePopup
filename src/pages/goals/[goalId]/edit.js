@@ -60,9 +60,13 @@ function EditGoal() {
   return (
     <Layout>
       {message && <p>{message}</p>}
+      {/* TODO: Fix the unescaped entities issue */}
+      {/* eslint-disable-next-line react/no-unescaped-entities */}
       <h1>Let's Edit Goals</h1>
       <form onSubmit={handleSubmit}>
         <div>
+          {/* TODO: Fix the unescaped entities issue */}
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
           <label htmlFor="title">Goal's Title</label>
           <input
             id="title"

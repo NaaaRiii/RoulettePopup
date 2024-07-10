@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:14 as builder
+FROM node:20 as builder
 
 # Set working directory
 WORKDIR /app
@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=builder /app ./
 
 # Expose the port the app runs on
-EXPOSE 4000
+EXPOSE 3000
 
 # Start the application
 CMD ["npm", "start"]

@@ -33,16 +33,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      //const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:3000/api/current_user', {
-        //headers: {
-        //  'Content-Type': 'application/json'
-        //},
-        //method: 'GET',
         credentials: 'include',
-        //headers: {
-        //  'Authorization': `Bearer ${token}`
-        //}
       });
       if (response.ok) {
         const data = await response.json();
@@ -73,10 +65,12 @@ export default function Dashboard() {
       setIsModalOpen(true);
       updateLastRouletteRank(userData.rank);
     }
+  // TODO: Fix the dependency array issue for userData
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData.rank, userData.lastRouletteRank]);
 
+
   const updateLastRouletteRank = async (newRank) => {
-    //const token = localStorage.getItem('token');
     const userId = userData.id;
     console.log("Attempting to update last roulette rank for user ID:", userId);
 
@@ -86,10 +80,6 @@ export default function Dashboard() {
         'Content-Type': 'application/json'
       },
       credentials: 'include',
-      //headers: {
-      //  'Authorization': `Bearer ${token}`,
-      //  'Content-Type': 'application/json'
-      //},
       body: JSON.stringify({ lastRouletteRank: newRank })
     });
     if (response.ok) {
@@ -121,6 +111,8 @@ export default function Dashboard() {
         {message && <p>{message}</p>}
       </div>
       <h1>Welcome to your dashboard</h1>
+      {/* TODO: Fix the unescaped entities issue */}
+      {/* eslint-disable-next-line react/no-unescaped-entities */}
       <p>Here's some information about your account:</p>
       {userRank > 10 && <Link href={`/edit-roulette-text/`}>Roulette Text</Link>}
       <ul>

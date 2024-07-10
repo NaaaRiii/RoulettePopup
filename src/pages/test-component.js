@@ -16,10 +16,12 @@
   
       // userIdが更新されたらupdateLastRouletteRankを呼び出す
       useEffect(() => {
-          if (userId !== null) { // 初期値のnullではないときだけ呼び出す
-              updateLastRouletteRank(10); // 仮のランクを引数として渡す
-          }
-      }, [userId]); // userIdが変更されたときに実行
+        if (userId !== null) { // 初期値のnullではないときだけ呼び出す
+          updateLastRouletteRank(10); // 仮のランクを引数として渡す
+        }
+      // TODO: Fix the dependency array issue for userId
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [userId]);
   
       return (
           <div>

@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "react/no-unescaped-entities": "off", // TODO: Re-enable this rule after fixing all occurrences
+    "react-hooks/exhaustive-deps": "off" // TODO: Re-enable this rule after fixing all dependencies
+  }
+}

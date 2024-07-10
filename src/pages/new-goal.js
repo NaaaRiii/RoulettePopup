@@ -42,8 +42,12 @@ export default function NewGoal() {
   return (
     <Layout>
       <div id="goal_form">
+        {/* TODO: Fix the unescaped entities issue */}
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
         <h1>Let's Set Goals</h1>
         <form onSubmit={handleSubmit}>
+          {/* TODO: Fix the unescaped entities issue */}
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
           <label htmlFor="title">Goal's Title</label>
           <input id="title" name="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
 

@@ -44,7 +44,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import EditRouletteText from './editRouletteText';
+import EditRouletteText from './edit-roulette-text';
 import '@testing-library/jest-dom';
 import fetchMock from 'jest-fetch-mock';
 

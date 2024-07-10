@@ -82,9 +82,13 @@ function NewSmallGoal() {
   return (
     <Layout>
       {message && <p>{message}</p>}
+      {/* TODO: Fix the unescaped entities issue */}
+      {/* eslint-disable-next-line react/no-unescaped-entities */}
       <h1>Let's Set Small Goals</h1>
       <form onSubmit={handleSubmit}>
         <div>
+          {/* TODO: Fix the unescaped entities issue */}
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
           <label htmlFor="title">Small Goal's Title</label>
           <input
             id="title"

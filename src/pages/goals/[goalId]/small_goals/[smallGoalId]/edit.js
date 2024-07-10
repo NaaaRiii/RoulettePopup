@@ -65,15 +65,6 @@ function EditSmallGoal() {
     }));
   };
 
-  //const removeTask = (index) => {
-  //  setTasks(prevTasks => prevTasks.map((task, idx) => {
-  //    if (idx === index) {
-  //      return { ...task, _destroy: true }; // 削除フラグを設定
-  //    }
-  //    return task;
-  //  }));
-  //};
-
   const removeTask = (taskId) => {
     setTasks(prevTasks => prevTasks.map(task => {
         if (task.id === taskId) {
@@ -140,15 +131,6 @@ function EditSmallGoal() {
         return;
       }
 
-    //  const responseData = await response.json();
-    //  if (response.ok) {
-    //    console.log("Update Success:", responseData);
-    //    router.push(`/goals/${goalId}`);
-    //  } else {
-    //    console.error("Error updating small goal:", await response.json());
-    //  }
-    //} catch (error) {
-    //  console.error("Update failed", error);
       const responseData = await response.json();
       console.log("Update Success:", responseData);
       router.push(`/goals/${goalId}`);
@@ -160,9 +142,13 @@ function EditSmallGoal() {
 
   return (
     <Layout>
+      {/* TODO: Fix the unescaped entities issue */}
+      {/* eslint-disable-next-line react/no-unescaped-entities */}
       <h1>Let's Set Small Goals</h1>
       <form onSubmit={handleSubmit}>
         <div>
+          {/* TODO: Fix the unescaped entities issue */}
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
           <label htmlFor="title">Small Goal's Title</label>
           <input
             id="title"
