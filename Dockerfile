@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Run the application
-FROM node:14
+FROM node:20
 
 # Set working directory
 WORKDIR /app
@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=builder /app ./
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 4000
 
 # Start the application
 CMD ["npm", "start"]
