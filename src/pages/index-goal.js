@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useGoals } from '../contexts/GoalsContext';
 import Link from 'next/link';
 import Layout from '../components/Layout';
+import ExpCalendar from './calendar';
 import '../components/styles.css';
 
 function IndexGoal() {
@@ -9,15 +10,11 @@ function IndexGoal() {
   const { refresh } = useGoals();
 
   useEffect(() => {
-    //const token = localStorage.getItem('token');
     const fetchGoals = async () => {
       try {
         const response = await fetch('http://localhost:3000/api/goals', {
         method: 'GET',
         credentials: 'include'
-      //headers: {
-      //  'Authorization': `Bearer ${token}`
-      //}
     });
     
     if (!response.ok) {
@@ -46,19 +43,38 @@ fetchGoals();
 
   return (
     <Layout>
-      <h1>Welcome! These are your Goals!</h1>
-      <ul>
-        {goalsState.map((goal) => (
-          <li key={goal.id}>
-            <Link href={`/goals/${goal.id}`}>
-              {goal.title}
-            </Link>
-            {goal.completed && (
-              <strong><span>達成</span></strong>
-            )}
-          </li>
-        ))}
-      </ul>
+       <div className='dashboard'>
+        <div className='dashboard-container'>
+          <div className='dashboard-left-container'>
+            <h1>Welcome! These are your Goals!</h1>
+              <ul>
+                {goalsState.map((goal) => (
+                  <li key={goal.id}>
+                    <Link href={`/goals/${goal.id}`}>
+                      {goal.title}
+                    </Link>
+                    {goal.completed && (
+                      <strong><span>達成</span></strong>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className='dashboard-right-container'>
+            <div className='calendar'>
+              <h2>Calendar</h2>
+              <ExpCalendar />
+            </div>
+
+            <h2>Here are your recent activities:</h2>
+            {/*{latestCompletedGoals.map(goal => (
+              <div key={goal.id} className="small-goal">
+                <p>{goal.title} <strong>完了!</strong> {formatDate(goal.completed_time)}</p>
+              </div>
+            ))}*/}
+          </div>
+        </div>
     </Layout>
   );
 }

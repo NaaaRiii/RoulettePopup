@@ -19,13 +19,14 @@
 /* 今日の日付のスタイルを上書きして、特別な表示を無効にする */
 .react-calendar__tile--now {
   background: none !important;
-  color: #000 !important; /* 通常のテキストカラーに合わせます */
+  color: #22a0ca !important; /* 通常のテキストカラーに合わせます */
   font-weight: normal !important; /* もし変更されていたら、通常のフォントウェイトに */
+  text-decoration: none !important; /* アンダーラインを非表示にする */
 }
 
 /* 今月の日付に下線を引く */
 .react-calendar__month-view__days__day {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* 前月と次月の日付の下線を取り除く */

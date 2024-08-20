@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Link from 'next/link';
-import Layout from '../components/Layout';
+//import Layout from '../components/Layout';
 import '../components/styles.css';
 
 const LoginPage = () => {
@@ -36,50 +36,68 @@ const LoginPage = () => {
   };
 
   return (
-    <Layout>
+    //<Layout>
       <div className="login-form">
-        <div className="login">
-          <h1>Log in</h1>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-          <form onSubmit={handleSubmit}>
-            <label>
-              Email:
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="form-control"
-                required
-              />
-            </label>
+        <div className="background-image">
+          <header className="header">
+            <h1>Plus ONE</h1> 
+          </header>
+          <div className="login">
+            <h1>Log in</h1>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            <form onSubmit={handleSubmit}>
+              <label>
+                Email:
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="form-control"
+                  required
+                />
+              </label>
 
-            <label>
-              Password:
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="form-control"
-                required
-              />
-            </label>
+              <label>
+                Password:
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="form-control"
+                  required
+                />
+              </label>
 
-            <label className="checkbox inline">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              Remember me on this computer
-            </label>
+              <label className="checkbox inline">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                Remember me on this computer
+              </label>
 
-            <button type="submit" className="btn btn-primary">Log in</button>
-          </form>
+              <button type="submit" className="button">Log in</button>
+            </form>
 
-          <p>New user? <Link href="/signup">Sign up now!</Link></p>
+            <p className="sign-up-link">
+              <span className="new-user-text">New user?</span> 
+              <Link href="/signup" className="sign-up-now-link">Sign up now!</Link>
+            </p>
+          </div>
+
+          <div className="log-dex-footer">
+          <ul className="flex_list">
+            <li>About</li>
+            <li>Contact Us</li>
+          </ul>
+          <div className="footer_copyright">
+            ©︎ 2023 Plus ONE, Inc.
+          </div>
+        </div>
         </div>
       </div>
-    </Layout>
+    //</Layout>
   );
 };
 

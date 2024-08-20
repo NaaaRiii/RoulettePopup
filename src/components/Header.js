@@ -60,7 +60,7 @@ const Header = () => {
     <div className="flex_header">
       <div>
         <div className="flex_header-logo">
-          <Link href="/" id="logo">Plus ONE</Link>
+          <Link href="/dashboard" id="logo">Plus ONE</Link>
         </div>
         <nav className="flex_header-list">
           {isLoggedIn ? (
