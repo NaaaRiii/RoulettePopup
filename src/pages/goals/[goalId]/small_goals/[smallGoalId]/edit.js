@@ -127,7 +127,7 @@ function EditSmallGoal() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error updating small goal:", errorText);
-        alert("Update error: " + errorText);  // ユーザーへのエラー表示
+        alert("Update error: " + errorText);
         return;
       }
 
@@ -158,38 +158,7 @@ function EditSmallGoal() {
             required
           />
         </div>
-        {/*{tasks.map((task, index) => (
-          <div key={task.id}>
-            <label htmlFor={`task-${task.id}`}>Task</label>
-            <input
-              id={`task-${task.id}`}
-              type="text"
-              name="content"
-              data-index={index}
-              value={task.content}
-              onChange={handleChange}
-              required
-            />
-            <button type="button" onClick={() => addTask()}>Add Task</button>
-            <button type="button" onClick={() => removeTask(index)}>Remove Task</button>
-          </div>
-        ))}*/}
-        {/*// タスクリストの表示部分の key を ID に変更*/}
-        {/*{tasks.filter(task => !task._destroy).map((task, index) => (
-          <div key={task.id}>
-            <label htmlFor={`task-${task.id}`}>Task</label>
-            <input
-              id={`task-${task.id}`}
-              type="text"
-              name="content"
-              value={task.content}
-              onChange={handleChange}
-              required
-            />
-            
-            <button type="button" onClick={() => removeTask(task.id)}>Remove Task</button>
-          </div>
-        ))}*/}
+
         {tasks.filter(task => !task._destroy).map((task) => (
           <div key={task.id}>
             <label htmlFor={`task-${task.id}`}>Task</label>

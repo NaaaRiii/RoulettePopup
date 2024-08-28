@@ -36,11 +36,6 @@ function IndexGoal() {
 fetchGoals();
 }, [refresh]);
 
-  //    .then((response) => response.json())
-  //    .then((data) => setGoalsState(data))
-  //    .catch((error) => console.error('Error fetching data:', error));
-  //}, [refresh]);
-
   return (
     <Layout>
        <div className='dashboard'>
@@ -63,7 +58,6 @@ fetchGoals();
           </div>
           <div className='dashboard-right-container'>
             <div className='calendar'>
-              <h2>Calendar</h2>
               <ExpCalendar />
             </div>
 

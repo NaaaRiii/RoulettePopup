@@ -92,7 +92,7 @@ const EditRouletteText = () => {
   return (
     <Layout>
       <div>
-      {flashMessage && <div className="flash-message">{flashMessage}</div>}
+        {flashMessage && <div className="flash-message">{flashMessage}</div>}
         <h1>Edit your Roulette</h1>
         <h2>Number of tickets: {tickets}</h2>
 
@@ -137,11 +137,13 @@ const EditRouletteText = () => {
             Number: {rouletteText.number}, Text: {rouletteText.text}
           </div>
         ))}
-      </div>
-      <div>
-      <Link href="/dashboard">
-          <div className={'btn btn-primary'}>Back</div>
-      </Link>
+
+        <div>
+          <Link href="/dashboard">
+              <div className={'btn btn-primary'}>Back</div>
+          </Link>
+        </div>
+
       </div>
     </Layout>
   );

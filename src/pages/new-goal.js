@@ -11,7 +11,6 @@ export default function NewGoal() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const token = localStorage.getItem('token');
     const body = JSON.stringify({ title, content, deadline });
 
     try {
@@ -41,24 +40,26 @@ export default function NewGoal() {
 
   return (
     <Layout>
-      <div id="goal_form">
-        {/* TODO: Fix the unescaped entities issue */}
-        {/* eslint-disable-next-line react/no-unescaped-entities */}
-        <h1>Let's Set Goals</h1>
-        <form onSubmit={handleSubmit}>
+      <div className="goal_form dashboard">
+        <div id="goal_form">
           {/* TODO: Fix the unescaped entities issue */}
           {/* eslint-disable-next-line react/no-unescaped-entities */}
-          <label htmlFor="title">Goal's Title</label>
-          <input id="title" name="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <h1>Let's Set Goals</h1>
+          <form onSubmit={handleSubmit}>
+            {/* TODO: Fix the unescaped entities issue */}
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
+            <label htmlFor="title">Goal's Title</label>
+            <input id="title" name="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-          <label htmlFor="content">Content</label>
-          <input id="content" name="content" type="text" value={content} onChange={(e) => setContent(e.target.value)} />
+            <label htmlFor="content">Content</label>
+            <input id="content" name="content" type="text" value={content} onChange={(e) => setContent(e.target.value)} />
 
-          <label htmlFor="deadline">Deadline</label>
-          <input id="deadline" name="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+            <label htmlFor="deadline">Deadline</label>
+            <input id="deadline" name="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
 
-          <button type="submit" className="btn btn-primary">設定</button>
-        </form>
+            <button type="submit" className="btn btn-primary">設定</button>
+          </form>
+        </div>
       </div>
     </Layout>
   );

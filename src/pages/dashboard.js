@@ -6,7 +6,9 @@ import Link from 'next/link';
 import ExpCalendar from './calendar';
 import ExpChart from './area-chart';
 import Image from 'next/image';
+import NewGoalModal from '../components/create-goal';
 import '../components/styles.css';
+
 
 export default function Dashboard() {
   const [goalsState, setGoalsState] = useState([]);
@@ -35,6 +37,15 @@ export default function Dashboard() {
     setIsModalOpen(!isModalOpen);
   };
 
+  const handleOpenModal = (e) => {
+    e.preventDefault();
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   useEffect(() => {
     const fetchGoals = async () => {
       try {
@@ -48,8 +59,8 @@ export default function Dashboard() {
         }
   
         const data = await response.json();
-        console.log("API Response Data:", data); // APIから取得したデータをログに出力
-  
+        console.log("API Response Data:", data);
+
         if (!Array.isArray(data)) {
           throw new Error('Data is not an array');
         }
@@ -130,14 +141,14 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      {isModalOpen && (
+      {/*{isModalOpen && (
         <div id="modal" className="modal">
           <div className="modal-content">
             <iframe src="http://localhost:4000/roulette-popup" width="500" height="500"></iframe>
             <span className="close-button" onClick={toggleModal}>Close</span>
           </div>
         </div>
-      )}
+      )}*/}
 
       <div>
         {message && <p>{message}</p>}
@@ -189,86 +200,56 @@ export default function Dashboard() {
             </div>
 
             <div class="button-container">
-              <Link href="/new-goal">
-                <div className={'btn btn-primary'}>Set Goal!</div>
+              {/*<Link href="/new-goal">
+                <div className={'btn btn-primary'}>目標を設定する</div>
+              </Link>*/}
+              <Link href="/new-goal" onClick={handleOpenModal}>
+                <div className={'btn btn-primary'}>目標を設定する</div>
               </Link>
-              <Link href="/index-goal">
-                <div className={'btn btn-primary'}>Your Goals</div>
+              <NewGoalModal isOpen={isModalOpen} onClose={handleCloseModal} />
+              <Link href="/completed-goal">
+                <div className={'btn btn-primary'}>達成した目標</div>
               </Link>
             </div>
-
-            {/*<div className='small-goals'>
-              {goalsState
-                .filter(goal => !goal.completed)
-                .map((goal) => {
-                  console.log("goal.small_goals:", goal.small_goals);
-
-                  const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
-                  console.log("Incomplete small goals:", incompleteSmallGoals);
-
-                  return (
-                    <div key={goal.id}>
-                      <h3>goal title : {goal.title}</h3>
-                      <h4>Small Goals:</h4>
-                      {incompleteSmallGoals.length > 0 ? (
-                        incompleteSmallGoals.map((smallGoal) => (
-                          <div key={smallGoal.id}>
-                            <h3>{smallGoal.title}</h3>
-                            <p>Difficulty: {smallGoal.difficulty}</p>
-                            <p>Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
-                            <p>Completed: No</p>
-                          </div>
-                        ))
-                      ) : (
-                        <p>No incomplete small goals available</p>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>*/}
 
             <div className='small-goals'>
-              {goalsState
-                .filter(goal => !goal.completed) // 未達成のゴールのみをフィルタリング
-                .map((goal) => {
-                  const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
+            {goalsState
+              .filter(goal => !goal.completed)
+              .map((goal) => {
+                const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
 
-                  return (
-                    <div key={goal.id} className="c-card small-goals">
-                      <div className="small-goal__image-container">
-                        <Image
-                          src="/images/pen-memo3.png"
-                          alt="Goal Image"
-                          width={60}
-                          height={60}
-                          className="small-goal__image"
-                        />
-                      </div>
-                      <div className="small-goal__content-container">
-                        <p className="goal-title">{goal.title}</p>
-                        {incompleteSmallGoals.map((smallGoal) => (
-                          <div key={smallGoal.id} className="small-goal__content">
-                            <p className="small-goal__title">{smallGoal.title}</p>
-                            <p className="small-goal__deadline">Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="small-goal__button-container">
-                        <Link href={`/goals/${goal.id}`}>
-                          <button className="small-goal__confirm-button">確認</button>
-                        </Link>
+                return incompleteSmallGoals.map((smallGoal) => (
+                  <div key={smallGoal.id} className='c-card small-goals'>
+                    <div className='small-goal__image-container'>
+                      <Image
+                        src='/images/pen-memo3.png'
+                        alt='Goal Image'
+                        width={60}
+                        height={60}
+                        className='small-goal__image'
+                      />
+                    </div>
+                    <div className='small-goal__content-container'>
+                      <p className='goal-title'>{goal.title}</p> {/* Goalのタイトルは各small-goalに表示されます */}
+                      <div className='small-goal__content'>
+                        <p className='small-goal__title'>{smallGoal.title}</p>
+                        <p className='small-goal__deadline'>Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
                       </div>
                     </div>
-                  );
-                })}
-            </div>
-
+                    <div className='small-goal__button-container'>
+                      <Link href={`/goals/${goal.id}`}>
+                        <button className='small-goal__confirm-button'>確認</button>
+                      </Link>
+                    </div>
+                  </div>
+                ));
+              })}
+          </div>
 
           </div>
           
-          <div className='dashboard-right-container'>
+          <div className='right-container'>
             <div className='calendar'>
-              <h2>Calendar</h2>
               <ExpCalendar />
             </div>
 
