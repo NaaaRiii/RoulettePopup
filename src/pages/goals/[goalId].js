@@ -172,9 +172,9 @@ function GoalPage() {
             ...prevGoal,
             small_goals: prevGoal.small_goals.filter(sg => sg.id !== smallGoalId)
           }));
-          alert('小目標が削除されました。');
+          alert('Small Goalが削除されました。');
         } else {
-          alert('小目標の削除に失敗しました。');
+          alert('Small Goalの削除に失敗しました。');
         }
       })
       .catch(() => alert('通信に失敗しました。'));
@@ -343,6 +343,9 @@ function GoalPage() {
                       <div className="goalid-small-goal__actions">
                         <Link href="#" onClick={(e) => { e.preventDefault(); openEditSmallGoalModal(smallGoal); }}>
                           <div className="goalid-small-goal__edit-link">Edit</div>
+                        </Link>
+                        <Link href="#" onClick={(e) => { e.preventDefault(); deleteSmallGoal(smallGoal.id); }}>
+                          <div className="goalid-small-goal__delete-link">Delete</div>
                         </Link>
                       </div>
                     </div>
