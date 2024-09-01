@@ -94,7 +94,10 @@ const RoulettePopup = () => {
       >
         {segments}
       </div>
-      <button onClick={startSpinning} disabled={isSpinning}>Start</button>
+      <div className="start-button">
+        <button onClick={startSpinning} disabled={isSpinning}>Start
+        </button>
+      </div>
       {/*{!isSpinning && selectedSegment && <div>Selected Segment: {selectedSegment}</div>}*/}
       {/*<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>*/}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>

@@ -370,13 +370,13 @@ label {
   display: flex;
   justify-content: center;
   min-height: 100vh;
+  background: #f9fbfe;
 }
 
 .dashboard-container {
   display: flex;
   width: 100%;
   min-height: 400px;
-  padding: 15px 0;
 }
 
 .dashboard-left-container {
@@ -416,7 +416,7 @@ label {
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   margin-bottom: 20px;
   position: relative;
-  width: 60%;
+  width: 400px;
 }
 
 .user-profile {
@@ -449,7 +449,9 @@ label {
 
 .user-profile__roulette{
   font-size: 0.95rem;
-  max-width: 107px;
+  white-space: nowrap; /* テキストを折り返さない */
+  overflow: hidden; /* オーバーフローを隠す */
+  text-overflow: ellipsis; /* テキストがオーバーフローしたときに...を表示する */
 }
 
 .user-profile__image {
@@ -468,7 +470,6 @@ label {
 
 .user-profile__rank,
 .user-profile__exp {
-  flex: 1;
   padding-left: 10px;
 }
 
@@ -736,6 +737,32 @@ label {
 
 .edit-roulette-right-container {
   flex: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+.roulette-description.c-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  width: 600px;
+}
+
+.roulette-description ul {
+  margin-top: 20px;
+  list-style-position: outside;
+  padding-left: 20px;
+}
+
+.roulette-description li {
+  margin-bottom: 10px;
+  text-indent: 0;
+  padding-left: 0;
+  text-align: left;
 }
 
 .roulette{
@@ -746,13 +773,12 @@ label {
 .roulette-text-card {
   display: flex;
   width: 100%;
-  height: 100%;
 }
 
 .roulette-text-image {
-  flex: 3;
+  flex: 4;
   max-width: 30%;
-  padding-right: 16px;
+  padding-right: 20px;
 }
 
 .roulette-text-image img {
@@ -763,7 +789,7 @@ label {
 }
 
 .roulette-text-content {
-  flex: 7;
+  flex: 6;
   display: flex;
   flex-direction: column;
   justify-content: center;

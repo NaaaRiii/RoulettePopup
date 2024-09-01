@@ -177,7 +177,7 @@ export default function Dashboard() {
                       {userData?.name}
                     </div>
                     <div className='user-profile__roulette'>
-                      {userRank > 10 && <Link href={`/edit-roulette-text/`}>Roulette</Link>}
+                      {userRank > 10 && <Link href={`/edit-roulette-text/`}>ごほうびルーレット</Link>}
                     </div>
                   </div>
                 </div>

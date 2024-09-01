@@ -38,6 +38,10 @@
   z-index: 10;
 }
 
+.start-button {
+  margin-top: 20px;
+}
+
 .segment {
   position: absolute;
   width: 50%;

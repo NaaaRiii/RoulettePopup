@@ -154,17 +154,6 @@ const EditRouletteText = () => {
             )}
           </div>
 
-          {/*<div className="roulette-texts-list">
-            {rouletteTexts.map((rouletteText) => (
-              <div key={rouletteText.id} className="roulette-text-item">
-                <div>
-                  <span className="roulette-number">Number: {rouletteText.number}</span>
-                  <span className="roulette-text">Text: {rouletteText.text}</span>
-                </div>
-              </div>
-            ))}
-          </div>*/}
-
           <div className="roulette-texts-list">
             {rouletteTexts.map((rouletteText) => (
               <div key={rouletteText.id} className="c-card roulette-text-item">
@@ -189,7 +178,19 @@ const EditRouletteText = () => {
           <div className="roulette">
             <RoulettePopup />
           </div>
+          {/*<div className="c-card">*/}
+          <div className="roulette-description c-card">
+            <ul>
+              <li>ルーレットはRankが10上がるごとに、1つ編集できるようになります。<br />
+                また、同時にルーレットを1回、回すことができるようになります。</li>
+              <li>ルーレットを回すことと内容を編集することは、任意のタイミングで別々に行うことができますが、回数に制限があります。</li>
+              <li>回数については左上を参照してください。</li>
+            </ul>
+          </div>
+          {/*</div>*/}
+
         </div>
+
       </div>
     </Layout>
   );
