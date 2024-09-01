@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
+import RoulettePopup from '../components/RoulettePopup';
 import '../components/styles.css';
 
 const EditRouletteText = () => {
@@ -10,7 +11,6 @@ const EditRouletteText = () => {
   const [showForm, setShowForm] = useState(false);
   const [editedText, setEditedText] = useState('');
   const [flashMessage, setFlashMessage] = useState('');
-
 
   useEffect(() => {
     fetch('http://localhost:3000/api/roulette_texts/tickets', {
@@ -29,7 +29,7 @@ const EditRouletteText = () => {
     })
       .then(response => response.json())
       .then(data => {
-        if (Array.isArray(data)) { // 配列であることを確認
+        if (Array.isArray(data)) {
           setRouletteTexts(data);
           const selectedText = data.find(text => text.number === parseInt(rouletteNumber));
           setEditedText(selectedText ? selectedText.text : '');
@@ -91,59 +91,105 @@ const EditRouletteText = () => {
 
   return (
     <Layout>
-      <div>
-        {flashMessage && <div className="flash-message">{flashMessage}</div>}
-        <h1>Edit your Roulette</h1>
-        <h2>Number of tickets: {tickets}</h2>
+      {flashMessage && <div className="flash-message">{flashMessage}</div>}
+      <div className="edit-roulette-container">
+        <div className="edit-roulette-left-container">
+          <h2 className="page-title">ごほうびルーレット</h2>
+          <h3 className="ticket-info">チケットを『{tickets}』枚持っています。</h3>
+          <h3 className="roulette-edit-info">ルーレットの内容を『{tickets}』個、編集することができます。</h3>
 
-        {/*<div id="edit-roulette-text-form" style={{ display: showForm ? 'block' : 'none' }}>
-          <form onSubmit={handleSubmit}>
-            <select value={rouletteNumber} onChange={(e) => setNumber(e.target.value)} required>
-              <option value="" disabled selected>Select a number</option>
-              {[...Array(12).keys()].map(n => (
-                <option key={n+1} value={n+1}>{n+1}</option>
-              ))}
-            </select>
-            <input type="text" className="roulette-text" value={rouletteTexts} onChange={(e) => setText(e.target.value)} required />
-            <button type="submit">Save Changes</button>
-          </form>
-        </div>*/}
-        <div id="edit-roulette-text-form" style={{ display: showForm ? 'block' : 'none' }}>
-          <form onSubmit={handleSubmit}>
-            <select value={rouletteNumber} onChange={(e) => setRouletteNumber(e.target.value)} required>
-              <option value="" disabled>Select a number</option>
-              {[...Array(12).keys()].map(n => (
-                <option key={n+1} value={n+1}>{n+1}</option>
-              ))}
-            </select>
-            <input type="text" className="roulette-text" value={editedText} onChange={(e) => setEditedText(e.target.value)} required />
-            <button type="submit">Save Changes</button>
-          </form>
-        </div>
+          <div>
+            {tickets > 0 && !showForm && (
+              <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
+                ルーレットを編集する
+              </button>
+            )}
 
-        {tickets > 0 ? (
-          <button type="button" className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-          Edit text using tickets
-          </button>
-        ) : (
-          <button type="button" className="btn btn-primary" disabled>
-            Edit text using tickets
-          </button>
-        )}
+            {showForm && (
+              <div id="edit-roulette-text-form" className="form-container visible">
+                <form onSubmit={handleSubmit}>
+                  <div className="form-group">
+                    <label htmlFor="rouletteNumber">編集したい数字を選んでください。</label>
+                    <select
+                      id="rouletteNumber"
+                      value={rouletteNumber}
+                      onChange={(e) => setRouletteNumber(e.target.value)}
+                      required
+                    >
+                      <option value="" disabled>数字を選択</option>
+                      {[...Array(12).keys()].map(n => (
+                        <option key={n+1} value={n+1}>{n+1}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="rouletteText">Edit text</label>
+                    <input
+                      type="text"
+                      id="rouletteText"
+                      className="roulette-text"
+                      value={editedText}
+                      onChange={(e) => setEditedText(e.target.value)}
+                      required
+                    />
+                  </div>
 
-        {/* ルーレットテキストのリスト表示 */}
-        {rouletteTexts.map((rouletteText) => (
-          <div key={rouletteText.id}>
-            Number: {rouletteText.number}, Text: {rouletteText.text}
+                  <div className="button-group">
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (window.confirm("この内容で保存しますか？")) {
+                          handleSubmit(e);
+                        }
+                      }}
+                    >
+                      内容を保存する
+                    </button>
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>キャンセル</button>
+                  </div>
+                </form>
+              </div>
+            )}
           </div>
-        ))}
 
-        <div>
-          <Link href="/dashboard">
-              <div className={'btn btn-primary'}>Back</div>
-          </Link>
+          {/*<div className="roulette-texts-list">
+            {rouletteTexts.map((rouletteText) => (
+              <div key={rouletteText.id} className="roulette-text-item">
+                <div>
+                  <span className="roulette-number">Number: {rouletteText.number}</span>
+                  <span className="roulette-text">Text: {rouletteText.text}</span>
+                </div>
+              </div>
+            ))}
+          </div>*/}
+
+          <div className="roulette-texts-list">
+            {rouletteTexts.map((rouletteText) => (
+              <div key={rouletteText.id} className="c-card roulette-text-item">
+                <div className="roulette-text-card">
+                  <div className="roulette-text-image">
+                    <img 
+                      src={`/images/${rouletteText.number}.jpeg`} 
+                      alt={`Roulette Image ${rouletteText.number}`} 
+                    />
+                  </div>
+                  <div className="roulette-text-content">
+                    <span className="roulette-text">{rouletteText.text}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
         </div>
 
+        <div className="edit-roulette-right-container">
+          <div className="roulette">
+            <RoulettePopup />
+          </div>
+        </div>
       </div>
     </Layout>
   );

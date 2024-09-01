@@ -5,7 +5,6 @@ import '../components/RoulettePopup.css';
 const RoulettePage = () => {
   return (
     <div>
-      <h1>ルーレット</h1>
       <RoulettePopup />
     </div>
   );

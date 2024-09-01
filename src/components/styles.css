@@ -721,3 +721,60 @@ label {
   width: 100px;
   height: 100px;
 }
+
+.edit-roulette-container {
+  display: flex;
+  min-height: 100vh;
+  padding: 20px 20px;
+}
+
+.edit-roulette-left-container {
+  flex: 6;
+  display: flex;
+  flex-direction: column; 
+}
+
+.edit-roulette-right-container {
+  flex: 4;
+}
+
+.roulette{
+  padding: 30px;
+  padding-right: 100px;
+}
+
+.roulette-text-card {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.roulette-text-image {
+  flex: 3;
+  max-width: 30%;
+  padding-right: 16px;
+}
+
+.roulette-text-image img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.roulette-text-content {
+  flex: 7;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.roulette-number {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.roulette-text {
+  font-size: 1rem;
+  color: #2b2929;
+}
