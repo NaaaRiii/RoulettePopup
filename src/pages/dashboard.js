@@ -3,14 +3,15 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import Layout from '../components/Layout';
 import Link from 'next/link';
-import ExpCalendar from './calendar';
-import ExpChart from './area-chart';
+import withAuth from '../utils/withAuth';
+import ExpCalendar from '../components/Calendar';
+import ExpChart from '../components/AreaChart';
 import Image from 'next/image';
-import NewGoalModal from '../components/create-goal';
+import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
 
 
-export default function Dashboard() {
+function Dashboard() {
   const [goalsState, setGoalsState] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userRank, setUserRank] = useState(0);
@@ -285,3 +286,5 @@ export default function Dashboard() {
     </Layout>
   );
 }
+
+export default withAuth(Dashboard);

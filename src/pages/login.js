@@ -1,8 +1,21 @@
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 //import Layout from '../components/Layout';
 import '../components/styles.css';
+
+
+const checkLoginStatus = async () => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/check_login`, {
+    method: 'GET',
+    credentials: 'include'
+  });
+  if (response.ok) {
+    const data = await response.json();
+    return data.logged_in;
+  }
+  return false;
+};
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -10,6 +23,19 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      const isLoggedIn = await checkLoginStatus();
+      if (isLoggedIn) {
+        router.push('/dashboard');
+      }
+    };
+    checkLogin();
+    if (router.query.message) {
+      alert(decodeURIComponent(router.query.message));
+    }
+  }, [router]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();

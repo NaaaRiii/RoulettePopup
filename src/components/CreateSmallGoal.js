@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
-import styles from '../components/create_goal.module.css';
+import styles from '../components/CreateGoal.module.css';
 
 
 export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAdded }) {

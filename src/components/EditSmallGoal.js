@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import styles from '../components/create_goal.module.css';
+import styles from '../components/CreateGoal.module.css';
 
 export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId, onSmallGoalUpdated }) {
   const [title, setTitle] = useState('');

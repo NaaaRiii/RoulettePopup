@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ExpAreaChart from '../components/ExpAreaChart';
+import ExpAreaChart from './ExpAreaChart';
 
 export default function HomePage() {
   const [data, setData] = useState([]);

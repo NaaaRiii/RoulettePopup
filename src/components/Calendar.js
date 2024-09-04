@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import '../components/calendar.css';
+import '../components/Calendar.css';
 
 const ExpCalendar = () => {
   const [activities, setActivities] = useState({});

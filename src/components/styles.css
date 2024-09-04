@@ -416,7 +416,7 @@ label {
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   margin-bottom: 20px;
   position: relative;
-  width: 400px;
+  width: 650px;
 }
 
 .user-profile {
@@ -462,9 +462,9 @@ label {
 .profile-image {
   width: 85px;
   height: 85px;
-  border-radius: 50%; /* 画像を円形にする */
-  object-fit: cover; /* 画像が枠に収まるようにトリミングする */
-  border: 2px solid #ddd; /* 画像に境界線を追加 */
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
 }
 
 
@@ -770,9 +770,15 @@ label {
   padding-right: 100px;
 }
 
+/* これ */
 .roulette-text-card {
   display: flex;
-  width: 100%;
+  background-color: #fff;
+  border-radius: 3px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  margin-bottom: 20px;
+  position: relative;
+  width: 400px;
 }
 
 .roulette-text-image {

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
+import withAuth from '../utils/withAuth';
+import Image from 'next/image';
 import RoulettePopup from '../components/RoulettePopup';
 import '../components/styles.css';
 
@@ -156,12 +158,14 @@ const EditRouletteText = () => {
 
           <div className="roulette-texts-list">
             {rouletteTexts.map((rouletteText) => (
-              <div key={rouletteText.id} className="c-card roulette-text-item">
+              <div key={rouletteText.id} className="roulette-text-item">
                 <div className="roulette-text-card">
                   <div className="roulette-text-image">
-                    <img 
+                    <Image
                       src={`/images/${rouletteText.number}.jpeg`} 
                       alt={`Roulette Image ${rouletteText.number}`} 
+                      width={100}
+                      height={100}
                     />
                   </div>
                   <div className="roulette-text-content">
@@ -196,4 +200,4 @@ const EditRouletteText = () => {
   );
 };
 
-export default EditRouletteText;
+export default withAuth(EditRouletteText);

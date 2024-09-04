@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
-import styles from '../components/create_goal.module.css';
+import styles from '../components/CreateGoal.module.css';
 
 export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
   const router = useRouter();

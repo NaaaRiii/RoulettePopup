@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
+import withAuth from '../utils/withAuth';
 import '../components/styles.css';
 
-export default function NewGoal() {
+function NewGoal() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -64,3 +65,5 @@ export default function NewGoal() {
     </Layout>
   );
 }
+
+export default withAuth(NewGoal);

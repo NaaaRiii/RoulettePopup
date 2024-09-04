@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useGoals } from '../contexts/GoalsContext';
 import Link from 'next/link';
 import Layout from '../components/Layout';
-import ExpCalendar from './calendar';
+import ExpCalendar from '../components/Calendar';
+import withAuth from '../utils/withAuth';
 import '../components/styles.css';
 
 function IndexGoal() {
@@ -73,4 +74,4 @@ fetchGoals();
   );
 }
 
-export default IndexGoal;
+export default withAuth(IndexGoal);

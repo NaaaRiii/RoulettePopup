@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import styles from '../components/create_goal.module.css';
+import styles from '../components/CreateGoal.module.css';
 
 
 export default function NewGoalModal({ isOpen, onClose }) {

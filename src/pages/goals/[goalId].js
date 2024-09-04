@@ -4,10 +4,10 @@ import { useGoals } from '../../contexts/GoalsContext';
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
-import ExpCalendar from '../calendar';
-import CreateSmallGoal from '../../components/create-small-goal';
-import EditGoalModal from '../../components/edit-goal';
-import EditSmallGoalModal from '../../components/edit-small-goal';
+import ExpCalendar from '../components/Calendar';
+import CreateSmallGoal from '../../components/CreateSmallGoal';
+import EditGoalModal from '../../components/EditGoal';
+import EditSmallGoalModal from '../../components/EditSmallGoal';
 import '../../components/styles.css';
 
 function GoalPage() {
