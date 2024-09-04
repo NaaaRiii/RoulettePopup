@@ -4,7 +4,7 @@ import { useGoals } from '../../contexts/GoalsContext';
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
-import ExpCalendar from '../components/Calendar';
+import ExpCalendar from '../../components/Calendar';
 import CreateSmallGoal from '../../components/CreateSmallGoal';
 import EditGoalModal from '../../components/EditGoal';
 import EditSmallGoalModal from '../../components/EditSmallGoal';
