@@ -25,6 +25,7 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
       setTasks([{ id: Date.now(), content: '' }]);
       setDifficulty('');
       setDeadline('');
+      setMessage('');
     }
   }, [isOpen]);
 
@@ -46,6 +47,11 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
     if (tasks.length > 1) {
       setTasks(tasks.filter((_, i) => i !== index));
     }
+  };
+
+  const handleClose = () => {
+    setMessage('');
+    onClose();
   };
 
   const handleSubmit = async (event) => {
@@ -79,10 +85,11 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
         onClose();
       } else {
         const errorData = await response.json();
-        console.error("Error submitting small goal:", errorData);
+        setMessage(errorData.errors.join(', '));
       }
     } catch (error) {
       console.error("Submission failed", error);
+      setMessage('Submission failed, please try again.');
     }
   };
 
@@ -92,6 +99,13 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <h2>Small Goalを設定しよう!</h2>
+
+        {message && (
+        <div className={styles.errorMessage}>
+          {message}
+        </div>
+      )}
+
         <form onSubmit={handleSubmit}>
           <label htmlFor="title">Small Goalのタイトル</label>
           <input
@@ -143,7 +157,7 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
           </div>
           <button type="submit" className="btn btn-primary">設定する</button>
         </form>
-        <button onClick={onClose} className={styles.closeButton}>Close</button>
+        <button onClick={handleClose} className={styles.closeButton}>Close</button>
       </div>
     </div>
   );

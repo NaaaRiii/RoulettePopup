@@ -31,3 +31,8 @@
   font-size: 16px;
   cursor: pointer;
 }
+
+.errorMessage {
+  color: red;
+  margin-bottom: 1rem;
+}
