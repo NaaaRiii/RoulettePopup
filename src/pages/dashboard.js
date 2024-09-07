@@ -13,6 +13,7 @@ import '../components/styles.css';
 
 function Dashboard() {
   const [goalsState, setGoalsState] = useState([]);
+  const [deletedGoalId, setDeletedGoalId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userRank, setUserRank] = useState(0);
   const [userData, setUserData] = useState({
@@ -45,6 +46,30 @@ function Dashboard() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const deleteGoal = () => {
+    if (window.confirm('Are you sure?')) {
+      fetch(`http://localhost:3000/api/goals/${goalId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      })
+        .then((response) => {
+          if (response.ok) {
+            //setDeletedGoalId(goalId);  // 削除されたgoalIdを保存
+            setGoalsState((prevGoals) =>
+              prevGoals.filter((goal) => goal.id !== goalId)
+            );  // 削除されたgoalをgoalsStateから除外
+            router.push('/dashboard');
+          } else {
+            alert('Failed to delete the goal.');
+          }
+        })
+        .catch(() => alert('Communication has failed.'));
+    }
   };
 
   useEffect(() => {
@@ -215,7 +240,7 @@ function Dashboard() {
 
             <div className='small-goals'>
             {goalsState
-              .filter(goal => !goal.completed)
+              .filter(goal => !goal.completed && goal.id !== deletedGoalId)
               .map((goal) => {
                 const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
 
@@ -223,7 +248,7 @@ function Dashboard() {
                   <div key={smallGoal.id} className='c-card small-goals'>
                     <div className='small-goal__image-container'>
                       <Image
-                        src='/images/pen-memo3.png'
+                        src='/images/pen-memo4.png'
                         alt='Goal Image'
                         width={60}
                         height={60}

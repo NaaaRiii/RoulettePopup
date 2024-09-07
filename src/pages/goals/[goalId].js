@@ -11,6 +11,7 @@ import EditSmallGoalModal from '../../components/EditSmallGoal';
 import '../../components/styles.css';
 
 function GoalPage() {
+  const { goalsState, setGoalsState } = useGoals();
   const router = useRouter();
   const { goalId } = router.query;
   const [goal, setGoal] = useState({ small_goals: [] });
@@ -50,6 +51,11 @@ function GoalPage() {
   const closeEditSmallGoalModal = () => {
     setIsEditSmallGoalModalOpen(false);
   };
+
+  const handleGoalUpdated = async (updatedGoal) => {
+    await fetchGoalData();
+  };
+  
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -147,13 +153,17 @@ function GoalPage() {
       })
       .then(response => {
         if (response.ok) {
-          refreshGoals();
-          router.push('/index-goal');
+          setGoalsState(prevGoals => prevGoals.filter(goal => goal.id !== goalId));
+          router.push('/dashboard');
         } else {
+          console.error(`Error: ${response.statusText}`);
           alert('Failed to delete the goal.');
         }
       })
-      .catch(() => alert('Communication has failed.'));
+      .catch((error) => {
+        console.error('Communication has failed:', error);
+        alert('Communication has failed.');
+      });
     }
   };
 
@@ -281,10 +291,11 @@ function GoalPage() {
                   <EditGoalModal 
                     isOpen={isEditGoalModalOpen} 
                     onClose={closeEditGoalModal} 
-                    goalId={goalId} 
+                    goalId={goalId}
+                    onGoalUpdated={handleGoalUpdated}
                   />
 
-                  <Link href={`/index-goal`} onClick={deleteGoal}>
+                  <Link href={`/dashboard`} onClick={deleteGoal}>
                     <div>Delete Goal</div>
                   </Link>
                 </>

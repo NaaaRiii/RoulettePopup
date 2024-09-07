@@ -26,7 +26,7 @@ export default function NewGoalModal({ isOpen, onClose }) {
       if (response.ok) {
         const data = await response.json();
         router.push({
-          pathname: `/goals/${data.id}/new-small_goal`,
+          pathname: `/goals/${data.id}`,
           query: { message: encodeURIComponent(data.message) },
         });
       } else {

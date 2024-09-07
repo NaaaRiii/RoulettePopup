@@ -8,13 +8,14 @@ export function useGoals() {
 
 export const GoalsProvider = ({ children }) => {
   const [refresh, setRefresh] = useState(false);
+  const [goalsState, setGoalsState] = useState([]);
 
   const refreshGoals = () => {
     setRefresh(!refresh);
   };
 
   return (
-    <GoalsContext.Provider value={{ refresh, refreshGoals }}>
+    <GoalsContext.Provider value={{ refresh, refreshGoals, goalsState, setGoalsState }}>
       {children}
     </GoalsContext.Provider>
   );

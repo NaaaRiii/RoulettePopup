@@ -50,10 +50,10 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
       });
 
       if (response.ok) {
-        setMessage('Goal was successfully updated');
-        onGoalUpdated(updatedGoal);
-        onClose();
-        router.push(`/goals/${goalId}?message=Goal was successfully updated`);
+        setMessage('Goalを編集しました');
+        if (onGoalUpdated) {
+          onGoalUpdated(updatedGoal);
+        }
       } else {
         const errorData = await response.json();
         console.error("Error updating goal:", errorData);
