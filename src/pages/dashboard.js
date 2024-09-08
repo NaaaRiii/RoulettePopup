@@ -221,7 +221,6 @@ function Dashboard() {
             </div>
 
             <div className='chart'>
-              <h2>Chart</h2>
               <ExpChart />
             </div>
 
