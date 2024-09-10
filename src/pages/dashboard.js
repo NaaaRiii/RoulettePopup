@@ -5,7 +5,7 @@ import Layout from '../components/Layout';
 import Link from 'next/link';
 import withAuth from '../utils/withAuth';
 import ExpCalendar from '../components/Calendar';
-import ExpChart from '../components/AreaChart';
+import ExpLineChart from '../components/ExpLineChart';
 import Image from 'next/image';
 import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
@@ -59,7 +59,7 @@ function Dashboard() {
       })
         .then((response) => {
           if (response.ok) {
-            //setDeletedGoalId(goalId);  // 削除されたgoalIdを保存
+            setDeletedGoalId(goalId);  // 削除されたgoalIdを保存
             setGoalsState((prevGoals) =>
               prevGoals.filter((goal) => goal.id !== goalId)
             );  // 削除されたgoalをgoalsStateから除外
@@ -98,7 +98,7 @@ function Dashboard() {
     };
   
     fetchGoals();
-  }, []);  
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -221,7 +221,7 @@ function Dashboard() {
             </div>
 
             <div className='chart'>
-              <ExpChart />
+              <ExpLineChart />
             </div>
 
             <div class="button-container">
