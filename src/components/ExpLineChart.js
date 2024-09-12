@@ -19,7 +19,6 @@
 //    addDays(today, 1)
 //  ];
 
-//  // APIからデータを取得
 //  useEffect(() => {
 //    const fetchData = async () => {
 //      try {
@@ -33,20 +32,14 @@
 //        }
 
 //        const jsonData = await response.json();
-//        console.log("API Response Data:", jsonData);
-
 //        if (!Array.isArray(jsonData)) {
 //          throw new Error('Data is not an array');
 //        }
 
-//        // データフォーマットを適用し、コンソールで日付とexpを確認
-//        const formattedData = jsonData.map(item => {
-//          console.log(`Date: ${item.date}, Exp: ${item.exp}`);
-//          return {
-//            day: item.date,
-//            exp: item.exp,
-//          };
-//        });
+//        const formattedData = jsonData.map(item => ({
+//          day: item.date,
+//          exp: item.exp,
+//        }));
 
 //        setData(formattedData);
 //      } catch (error) {
@@ -57,45 +50,21 @@
 //    fetchData();
 //  }, []);
 
-//  // フォーマットした日付をX軸に表示するための関数
-//  //const formatXAxis = (index) => {
-//  //  const date = dateRange[index];
-//  //  return format(date, 'M/d');
-//  //};
-
-//  // カスタムTickコンポーネント
 //  const CustomTick = ({ x, y, payload }) => {
 //    const index = payload.value;
 //    const date = dateRange[index];
 //    const formattedDate = format(date, 'M/d');
-
-//    // 今日の日付と比較
 //    const isToday = format(today, 'M/d') === formattedDate;
 
 //    return (
 //      <g transform={`translate(${x},${y})`}>
 //        <text textAnchor="middle" style={{ fill: isToday ? 'red' : '#666' }}>
-//          <tspan x="0" dy="0.71em">
-//            {formattedDate}
-//          </tspan>
+//          <tspan x="0" dy="0.71em">{formattedDate}</tspan>
 //        </text>
 //      </g>
 //    );
 //  };
 
-//  // カスタムツールチップコンポーネント
-//  const CustomTooltip = ({ active, payload }) => {
-//    if (active && payload && payload.length) {
-//      return (
-//        <div className="custom-tooltip" style={{ backgroundColor: '#fff', padding: '5px', border: '1px solid #ccc' }}>
-//          <p>{`Exp: ${payload[0].value}`}</p>
-//        </div>
-//      );
-//    }
-//    return null;
-//  };
-
-//  // データのdayキーを日付インデックスに変更
 //  const updatedData = data.map((item, index) => ({
 //    ...item,
 //    day: index
@@ -104,16 +73,16 @@
 //  return (
 //    <ResponsiveContainer width="100%" height={400}>
 //      <LineChart data={updatedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-//        <CartesianGrid 
-//          stroke="#ccc" 
-//          strokeDasharray=""
-//          vertical={false}
-//          horizontal={false}
-//        />
+//        <CartesianGrid stroke="#ccc" strokeDasharray="" vertical={false} horizontal={false} />
 //        <XAxis dataKey="day" tick={<CustomTick />} />
 //        <YAxis tick={false} />
-//        <Tooltip content={<CustomTooltip />} />
-//        <Line type="monotone" dataKey="exp" stroke="#8884d8" dot={{ r: 5 }} activeDot={{ r: 8 }} />
+//        <Tooltip cursor={<false />} />
+//        <Line
+//          type="monotone"
+//          dataKey="exp"
+//          stroke="#8884d8"
+//          dot={{ r: 5 }}
+//        />
 //      </LineChart>
 //    </ResponsiveContainer>
 //  );
@@ -122,8 +91,10 @@
 //export default ExpLineChart;
 
 
+
+
 import React, { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, subDays, addDays } from 'date-fns';
 
 const ExpLineChart = () => {
@@ -189,11 +160,12 @@ const ExpLineChart = () => {
     );
   };
 
+  // カスタムツールチップコンポーネント
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
         <div className="custom-tooltip" style={{ backgroundColor: '#fff', padding: '5px', border: '1px solid #ccc' }}>
-          <p>{`Exp: ${payload[0].value}`}</p>
+          <p style={{ color: '#593459' }}>{`Exp: ${payload[0].value}`}</p>
         </div>
       );
     }
@@ -205,31 +177,18 @@ const ExpLineChart = () => {
     day: index
   }));
 
-  const CustomActiveDot = (props) => {
-    const { cx, cy, stroke, index } = props;
-
-    return (
-      <>
-        {/* 垂直線をドットまで描画 */}
-        <line x1={cx} x2={cx} y1={cy} y2={400} stroke={stroke} strokeDasharray="3 3" />
-        <Dot {...props} />
-      </>
-    );
-  };
-
   return (
     <ResponsiveContainer width="100%" height={400}>
       <LineChart data={updatedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="#ccc" strokeDasharray="" vertical={false} horizontal={false} />
         <XAxis dataKey="day" tick={<CustomTick />} />
         <YAxis tick={false} />
-        <Tooltip cursor={<false />} />
+        <Tooltip content={<CustomTooltip />} cursor={false} />
         <Line
           type="monotone"
           dataKey="exp"
           stroke="#8884d8"
           dot={{ r: 5 }}
-          activeDot={<CustomActiveDot />}
         />
       </LineChart>
     </ResponsiveContainer>

@@ -147,23 +147,29 @@ function GoalPage() {
       fetch(`http://localhost:3000/api/goals/${goalId}`, {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        credentials: 'include'
+        credentials: 'include',
       })
-      .then(response => {
-        if (response.ok) {
-          setGoalsState(prevGoals => prevGoals.filter(goal => goal.id !== goalId));
-          router.push('/dashboard');
-        } else {
-          console.error(`Error: ${response.statusText}`);
-          alert('Failed to delete the goal.');
-        }
-      })
-      .catch((error) => {
-        console.error('Communication has failed:', error);
-        alert('Communication has failed.');
-      });
+        .then(response => {
+          if (response.ok) {
+            // goalが削除されたことを確認するアラートを表示
+            alert('goalが削除されました');
+
+            // 最新の目標データを取得して更新
+            refreshGoals();
+  
+            // アラートのOKボタンを押した後にdashboardに遷移
+            router.push('/dashboard');
+          } else {
+            console.error(`Error: ${response.statusText}`);
+            alert('Failed to delete the goal.');
+          }
+        })
+        .catch(error => {
+          console.error('Communication has failed:', error);
+          alert('Communication has failed.');
+        });
     }
   };
 
@@ -295,7 +301,7 @@ function GoalPage() {
                     onGoalUpdated={handleGoalUpdated}
                   />
 
-                  <Link href={`/dashboard`} onClick={deleteGoal}>
+                  <Link href={`#`} onClick={deleteGoal}>
                     <div>Delete Goal</div>
                   </Link>
                 </>
