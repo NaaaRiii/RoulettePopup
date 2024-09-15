@@ -34,7 +34,6 @@ a {
   width: 100%;
   z-index: 1000;
   background-color: #FFFCE4;
-  color: #fff;
   height: 90px;
 }
 
@@ -43,6 +42,15 @@ a {
   float: left;
   padding: 0 40px;
   line-height: 90px;
+}
+
+#logo {
+  color: #373741;
+  text-decoration: none;
+}
+
+#logo:hover {
+  color: #373741; /* ホバー時の色を赤に変更 */
 }
 
 .logged_in {
@@ -56,12 +64,11 @@ a {
   gap: 15px;
 }
 
-/* layoutのfooter */
 .footer {
   width: 100%;
   z-index: 1000;
   background-color: #FFFCE4;
-  color: #0000EE;
+  color: #c8c8be;
   align-items: center;
 }
 
@@ -180,13 +187,12 @@ label {
   left: 0;
   width: 100%;
   z-index: 1000;
-  color: rgb(22, 138, 233);
+  color: #288bd6;
   padding: 10px 20px;
   box-sizing: border-box;
 }
 
 .header h1 {
-  /*margin: 0;*/
   font-size: 30px;
   padding: 10px;
 }
@@ -381,7 +387,7 @@ label {
 .dashboard-left-container {
   flex: 7;
   padding: 20px;
-  background-color: #FDFAF0;
+  background-color: #f7f7ed;
   border-right: 1px solid #ddd;
 }
 

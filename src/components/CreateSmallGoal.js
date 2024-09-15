@@ -128,6 +128,7 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
               <button type="button" onClick={() => removeTask(index)}>Remove Task</button>
             </div>
           ))}
+
           <button type="button" onClick={addTask}>Add Task</button>
           <div>
             <label htmlFor="difficulty">Difficulty</label>

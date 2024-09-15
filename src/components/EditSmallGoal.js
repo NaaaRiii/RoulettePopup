@@ -10,89 +10,88 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-  
-    // Dateオブジェクトが有効かどうかを確認
+
     if (isNaN(date.getTime())) {
       console.error('Invalid date:', dateString);
-      return 'Invalid date'; // エラーが発生した場合のデフォルト値
+      return 'Invalid date';
     }
-  
+
     return format(date, 'yyyy-MM-dd');
   };
-  
 
   useEffect(() => {
     if (smallGoal) {
+      console.log("Editing Small Goal:", smallGoal);
       setTitle(smallGoal.title);
       setDifficulty(smallGoal.difficulty);
       setDeadline(formatDate(smallGoal.deadline));
       setTasks(smallGoal.tasks.map(task => ({ ...task, _destroy: false })));
     }
-  }, [smallGoal]); 
+  }, [smallGoal]);
 
-  const handleChange = (e, taskId) => {
-    const newTasks = tasks.map((task) =>
-      task.id === taskId ? { ...task, content: e.target.value } : task
-    );
-    setTasks(newTasks);
+  const handleTaskChange = (taskId, value) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId ? { ...task, content: value } : task
+    ));
   };
 
   const addTask = () => {
-    setTasks([...tasks, { id: null, content: '', _destroy: false }]);
+    setTasks([...tasks, { id: `temp-${Date.now()}`, content: '' }]);
   };
 
   const removeTask = (taskId) => {
-    setTasks(tasks.map(task => task.id === taskId ? { ...task, _destroy: true } : task));
-  };
-
-  const handleSmallGoalUpdated = (updatedSmallGoal) => {
-    setGoal(prevGoal => ({
-      ...prevGoal,
-      small_goals: prevGoal.small_goals.map(sg => 
-        sg.id === updatedSmallGoal.id ? updatedSmallGoal : sg
-      )
-    }));
+    setTasks(tasks.map(task => 
+      task.id === taskId ? { ...task, _destroy: true } : task
+    ));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     if (!goalId || !smallGoal?.id) {
       console.error("goalId or smallGoal.id is undefined.");
       return;
     }
-  
+
     const updatedSmallGoal = {
       title,
       difficulty,
       deadline,
-      tasks_attributes: tasks.map((task) =>
-        task._destroy ? { id: task.id, _destroy: true } : { id: task.id, content: task.content }
+      tasks_attributes: tasks.map(task =>
+        task._destroy
+          ? { id: task.id, _destroy: true }
+          : {
+              ...(task.id && typeof task.id === 'string' && task.id.startsWith('temp-')
+                ? {} // 新規タスクにはIDを送らない
+                : { id: task.id }), // 既存タスクにはIDを送る
+              content: task.content,
+            }
       ),
     };
-  
+
     try {
       const response = await fetch(
         `http://localhost:3000/api/goals/${goalId}/small_goals/${smallGoal.id}`,
         {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(updatedSmallGoal),
         }
       );
-  
-      if (response.ok) {
-        const data = await response.json();
-        onSmallGoalUpdated(data); // 更新されたSmall Goalデータを渡して即時に反映
-        onClose(); // モーダルを閉じる
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to update small goal:', errorText);
+        alert('Failed to update small goal: ' + errorText);
       } else {
-        console.error("Failed to update small goal.");
+        const data = await response.json();
+        onSmallGoalUpdated(data);
+        onClose();
       }
     } catch (error) {
-      console.error("Update failed", error);
+      console.error('Update failed', error);
+      alert('Failed to update small goal: ' + error.message);
     }
   };
 
@@ -101,7 +100,7 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h2>Small Goalを編集します</h2>
+        <h2>Small Goalを編集</h2>
         <form onSubmit={handleSubmit}>
           <label htmlFor="title">Small Goalのタイトル</label>
           <input
@@ -111,46 +110,51 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
             onChange={(e) => setTitle(e.target.value)}
             required
           />
-          <label htmlFor="difficulty">難易度</label>
-          <select
-            id="difficulty"
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
-            required
-          >
-            <option value="ものすごく簡単">ものすごく簡単</option>
-            <option value="簡単">簡単</option>
-            <option value="普通">普通</option>
-            <option value="難しい">難しい</option>
-            <option value="とても難しい">とても難しい</option>
-          </select>
 
-          <label htmlFor="deadline">締切日</label>
-          <input
-            id="deadline"
-            type="date"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-            required
-          />
-
-          {tasks.filter(task => !task._destroy).map((task) => (
-            <div key={task.id}>
-              <label htmlFor={`task-${task.id}`}>Task</label>
+          {tasks.filter(task => !task._destroy).map((task, index) => (
+            <div key={task.id || `temp-${index}`}>
+              <label htmlFor={`task-${task.id || `temp-${index}`}`}>Task</label>
               <input
-                id={`task-${task.id}`}
+                id={`task-${task.id || `temp-${index}`}`}
                 type="text"
-                name="content"
                 value={task.content}
-                onChange={(e) => handleChange(e, task.id)}
+                onChange={(e) => handleTaskChange(task.id, e.target.value)}
                 required
               />
-              <button type="button" onClick={() => removeTask(task.id)}>Remove Task</button>
+              {tasks.filter(task => !task._destroy).length > 1 && (
+                <button type="button" onClick={() => removeTask(task.id)}>
+                  Remove Task
+                </button>
+              )}
             </div>
           ))}
 
-          <button type="button" onClick={() => addTask()}>Add Task</button>
-
+          <button type="button" onClick={addTask}>Add Task</button>
+          <div>
+            <label htmlFor="difficulty">Difficulty</label>
+            <select
+              id="difficulty"
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              required
+            >
+              <option value="ものすごく簡単">ものすごく簡単</option>
+              <option value="簡単">簡単</option>
+              <option value="普通">普通</option>
+              <option value="難しい">難しい</option>
+              <option value="とても難しい">とても難しい</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="deadline">締切日</label>
+            <input
+              id="deadline"
+              type="date"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              required
+            />
+          </div>
           <button type="submit" className="btn btn-primary">Update Small Goal</button>
         </form>
         <button onClick={onClose} className={styles.closeButton}>Close</button>
