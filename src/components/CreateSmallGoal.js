@@ -115,19 +115,22 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
             onChange={(e) => setTitle(e.target.value)}
             required
           />
-          {tasks.map((task, index) => (
-            <div key={task.id}>
-              <label htmlFor={`task-${task.id}`}>Task</label>
-              <input
-                id={`task-${task.id}`}
-                type="text"
-                value={task.content}
-                onChange={(e) => handleTaskChange(index, e.target.value)}
-                required
-              />
-              <button type="button" onClick={() => removeTask(index)}>Remove Task</button>
-            </div>
-          ))}
+
+          <div className={styles.tasksContainer}>
+            {tasks.map((task, index) => (
+              <div key={task.id}>
+                <label htmlFor={`task-${task.id}`}>Task</label>
+                <input
+                  id={`task-${task.id}`}
+                  type="text"
+                  value={task.content}
+                  onChange={(e) => handleTaskChange(index, e.target.value)}
+                  required
+                />
+                <button type="button" onClick={() => removeTask(index)}>Remove Task</button>
+              </div>
+            ))}
+          </div>
 
           <button type="button" onClick={addTask}>Add Task</button>
           <div>

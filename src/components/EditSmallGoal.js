@@ -111,23 +111,25 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
             required
           />
 
-          {tasks.filter(task => !task._destroy).map((task, index) => (
-            <div key={task.id || `temp-${index}`}>
-              <label htmlFor={`task-${task.id || `temp-${index}`}`}>Task</label>
-              <input
-                id={`task-${task.id || `temp-${index}`}`}
-                type="text"
-                value={task.content}
-                onChange={(e) => handleTaskChange(task.id, e.target.value)}
-                required
-              />
-              {tasks.filter(task => !task._destroy).length > 1 && (
-                <button type="button" onClick={() => removeTask(task.id)}>
-                  Remove Task
-                </button>
-              )}
-            </div>
-          ))}
+          <div className={styles.tasksContainer}>
+            {tasks.filter(task => !task._destroy).map((task, index) => (
+              <div key={task.id || `temp-${index}`}>
+                <label htmlFor={`task-${task.id || `temp-${index}`}`}>Task</label>
+                <input
+                  id={`task-${task.id || `temp-${index}`}`}
+                  type="text"
+                  value={task.content}
+                  onChange={(e) => handleTaskChange(task.id, e.target.value)}
+                  required
+                />
+                {tasks.filter(task => !task._destroy).length > 1 && (
+                  <button type="button" onClick={() => removeTask(task.id)}>
+                    Remove Task
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
 
           <button type="button" onClick={addTask}>Add Task</button>
           <div>

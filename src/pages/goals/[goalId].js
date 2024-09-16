@@ -55,7 +55,6 @@ function GoalPage() {
   const handleGoalUpdated = async (updatedGoal) => {
     await fetchGoalData();
   };
-  
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
