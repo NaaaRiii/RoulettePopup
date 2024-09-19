@@ -1,3 +1,71 @@
+//import { useEffect, useState } from 'react';
+//import Calendar from 'react-calendar';
+//import 'react-calendar/dist/Calendar.css';
+//import '../components/Calendar.css';
+
+//const ExpCalendar = () => {
+//  const [activities, setActivities] = useState({});
+
+//  useEffect(() => {
+//    const fetchData = async () => {
+//      try {
+//        const response = await fetch('http://localhost:3000/api/daily_exp', {
+//          credentials: 'include',
+//        });
+
+//        if (!response.ok) {
+//          throw new Error('Network response was not ok');
+//        }
+
+//        const data = await response.json();
+//        setActivities(data);
+//      } catch (error) {
+//        console.error('There has been a problem with your fetch operation:', error);
+//      }
+//    };
+
+//    fetchData();
+//  }, []);
+
+//  const tileClassName = ({ date, view }) => {
+//    if (view === 'month') {
+//      const today = new Date();
+//      const dayKey = date.toLocaleDateString('sv-SE');
+//      const expGained = Number(activities[dayKey]);
+
+//      if (date.toDateString() === today.toDateString()) {
+//        return 'react-calendar__tile--now';
+//      }
+
+//      console.log(dayKey, expGained);
+
+//      if (expGained) {
+//        if (expGained > 100) {
+//          return 'exp-high';
+//        } else if (expGained > 50) {
+//          return 'exp-medium';
+//        } else {
+//          return 'exp-low';
+//        }
+//      }
+//    }
+//  };
+
+//  return (
+//    <div>
+//      <Calendar
+//        locale="en-US"
+//        calendarType="iso8601"
+//        tileClassName={tileClassName}
+//      />
+//    </div>
+//  );
+//}
+
+//export default ExpCalendar;
+
+
+
 import { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -29,23 +97,28 @@ const ExpCalendar = () => {
 
   const tileClassName = ({ date, view }) => {
     if (view === 'month') {
-      const today = new Date();
       const dayKey = date.toLocaleDateString('sv-SE');
       const expGained = Number(activities[dayKey]);
 
-      if (date.toDateString() === today.toDateString()) {
-        return 'react-calendar__tile--now';
-      }
-
-      console.log(dayKey, expGained);
-
-      if (expGained) {
-        if (expGained > 100) {
-          return 'exp-high';
-        } else if (expGained > 50) {
-          return 'exp-medium';
+      if (expGained >= 1) {
+        if (expGained >= 80) {
+          return 'exp-level-80';
+        } else if (expGained >= 70) {
+          return 'exp-level-70';
+        } else if (expGained >= 60) {
+          return 'exp-level-60';
+        } else if (expGained >= 50) {
+          return 'exp-level-50';
+        } else if (expGained >= 40) {
+          return 'exp-level-40';
+        } else if (expGained >= 30) {
+          return 'exp-level-30';
+        } else if (expGained >= 20) {
+          return 'exp-level-20';
+        } else if (expGained >= 10) {
+          return 'exp-level-10';
         } else {
-          return 'exp-low';
+          return 'exp-level-1';
         }
       }
     }
@@ -60,6 +133,6 @@ const ExpCalendar = () => {
       />
     </div>
   );
-}
+};
 
 export default ExpCalendar;

@@ -13,15 +13,15 @@
 /* マウスカーソルが日付にフーバーしても反応しないようにする */
 .react-calendar__tile:hover {
   background: none !important;
-  cursor: default !important; /* カーソルをデフォルト状態に保持 */
+  cursor: default !important;
 }
 
 /* 今日の日付のスタイルを上書きして、特別な表示を無効にする */
 .react-calendar__tile--now {
   background: none !important;
-  color: #22a0ca !important; /* 通常のテキストカラーに合わせます */
-  font-weight: normal !important; /* もし変更されていたら、通常のフォントウェイトに */
-  text-decoration: none !important; /* アンダーラインを非表示にする */
+  color: #ca22a3 !important;
+  font-weight: normal !important;
+  text-decoration: none !important;
 }
 
 /* 今月の日付に下線を引く */
@@ -49,12 +49,39 @@
   border-bottom: 1px solid #000; /* 黒色の1px実線 */
 }
 
-.exp-high {
-  background-color: #ff0000; /* 濃い赤 */
+/* 経験値に応じた色のスタイル */
+.exp-level-1 {
+  background-color: #e0f7fa !important;
 }
-.exp-medium {
-  background-color: #ff9999; /* 中程度の赤 */
+
+.exp-level-10 {
+  background-color: #b2ebf2 !important;
 }
-.exp-low {
-  background-color: #ffcccc; /* 薄い赤 */
+
+.exp-level-20 {
+  background-color: #80deea !important;
+}
+
+.exp-level-30 {
+  background-color: #4dd0e1 !important;
+}
+
+.exp-level-40 {
+  background-color: #26c6da !important;
+}
+
+.exp-level-50 {
+  background-color: #00bcd4 !important;
+}
+
+.exp-level-60 {
+  background-color: #cd7f32 !important;
+}
+
+.exp-level-70 {
+  background-color: #c0c0c0 !important;
+}
+
+.exp-level-80 {
+  background-color: #ffd700 !important;
 }
