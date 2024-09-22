@@ -18,6 +18,7 @@ function Dashboard() {
   const [userRank, setUserRank] = useState(0);
   const [userData, setUserData] = useState({
     name: '',
+    currentTitle: '',
     totalExp: 0,
     rank: 0,
     lastRouletteRank: 0,
@@ -107,6 +108,9 @@ function Dashboard() {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched user data:', data); // ここでレスポンスを確認
+  
+        // 必要なデータをセット
         setUserRank(data.rank);
         const storedLastRouletteRank = localStorage.getItem('lastRouletteRank') || data.last_roulette_rank;
         const formattedData = {
@@ -115,10 +119,8 @@ function Dashboard() {
         };
         setUserData(formattedData);
         setLatestCompletedGoals(data.latestCompletedGoals);
-  
-        console.log("User ID:", formattedData.id);
-        console.log("Fetched rank:", formattedData.rank);
-        console.log("Last roulette rank:", formattedData.lastRouletteRank);
+
+        console.log('Formatted data:', formattedData);
       } else {
         console.error('Failed to fetch user data');
       }
@@ -128,7 +130,7 @@ function Dashboard() {
   }, []);
   
   useEffect(() => {
-    console.log("Current rank:", userData.rank, "Last roulette rank:", userData.lastRouletteRank);
+    console.log("Current rank:", userData.rank, "Last roulette rank:", userData.lastRouletteRank, "title:", userData.currentTitle);
     if (userData.rank >= 10 && Math.floor(userData.rank / 10) > Math.floor(userData.lastRouletteRank / 10)) {
       console.log("Modal should open now.");
       setIsModalOpen(true);
@@ -137,7 +139,6 @@ function Dashboard() {
   // TODO: Fix the dependency array issue for userData
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData.rank, userData.lastRouletteRank]);
-
 
   const updateLastRouletteRank = async (newRank) => {
     const userId = userData.id;
@@ -164,6 +165,12 @@ function Dashboard() {
       console.error("Failed to update last roulette rank due to network error");
     }
   };
+
+  useEffect(() => {
+    if (userData.rank >= 121) {
+      setIsRank121ModalOpen(true); // Open Rank121 modal when rank is 121
+    }
+  }, [userData.rank]);
 
   return (
     <Layout>
@@ -199,6 +206,9 @@ function Dashboard() {
                     />
                     </div>
                   <div className='user-profile__info'>
+                    <div className='user-profile__title'>
+                      {userData?.currentTitle}
+                    </div>
                     <div className='user-profile__name'>
                       {userData?.name}
                     </div>
