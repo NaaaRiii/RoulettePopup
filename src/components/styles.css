@@ -33,7 +33,7 @@ a {
   left: 0;
   width: 100%;
   z-index: 1000;
-  background-color: #FFFCE4;
+  background-color: rgb(240, 239, 226);
   height: 90px;
 }
 
@@ -64,7 +64,7 @@ a {
   gap: 15px;
 }
 
-.footer {
+/*.footer {
   width: 100%;
   z-index: 1000;
   background-color: #FFFCE4;
@@ -73,10 +73,11 @@ a {
 }
 
 .layout-footer_copyright {
+  color: #373741;
   font-size: 0.9rem;
   text-align: left;
   margin-left: 5px;
-}
+}*/
 
 .main {
   margin-top: 90px;

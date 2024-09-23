@@ -67,6 +67,7 @@ const Header = () => {
             <div className="logged_in">
               <span>You are Logged In</span>
               <Link href="/dashboard">Dashboard</Link>
+              <Link href="/dashboard">How to Use</Link>
               <a href="/logout" onClick={handleLogout}>Log out</a>
             </div>
           ) : (
