@@ -377,7 +377,6 @@ function GoalPage() {
                 onSmallGoalUpdated={handleSmallGoalUpdated}
               />
 
-              {/* 完了済みのSmall Goalsセクション */}
               <div className="goal-content-bottom-bottom">
                 {goal.small_goals.filter(smallGoal => smallGoal.completed).map(smallGoal => (
                   <div key={smallGoal.id} className="c-card goalid-small-goal">
@@ -391,10 +390,20 @@ function GoalPage() {
                       </div>
                       <span className="goalid-small-goal__completed"><strong>完了!</strong></span>
                     </div>
+
+                    {/* タスクを「・」付きで表示 */}
+                    <div className="goalid-small-goal__tasks-completed">
+                      <ul>
+                        {smallGoal.tasks?.map(task => (
+                          <li key={task.id}>
+                            ・{task.content} {/* チェックボックスの代わりに「・」を表示 */}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 ))}
               </div>
-
             </div>
 
             <div className="button-container">

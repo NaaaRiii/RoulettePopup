@@ -24,6 +24,14 @@ li {
 }
 
 a {
+  color: rgb(72, 99, 141);
+  text-decoration: none;
+}
+
+a:visited,
+a:active,
+a:hover {
+  color: rgb(72, 99, 141);
   text-decoration: none;
 }
 
@@ -374,11 +382,12 @@ label {
   display: flex;
   justify-content: center;
   min-height: 100vh;
-  background: #f9fbfe;
+  color: #373741;
 }
 
 .dashboard-container {
   display: flex;
+  color: #373741;
   width: 100%;
   min-height: 400px;
 }
@@ -390,9 +399,10 @@ label {
   border-right: 1px solid #ddd;
 }
 
-.right-container {
+.dashboard-right-container {
   flex: 3;
   padding: 20px;
+  color: #373741;
   background-color: #FFFFF5;
   display: flex;
   flex-direction: column;
@@ -416,6 +426,7 @@ label {
 
 .c-card {
   background-color: #FFFCEB;
+  color: #373741;
   border-radius: 3px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   margin-bottom: 20px;
@@ -428,7 +439,6 @@ label {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #2b546a;
   }
 
 .row {
@@ -480,7 +490,6 @@ label {
 .user-profile__rank h2,
 .user-profile__exp h2 {
   font-size: 18px;
-  color: #333;
   margin: 0;
 }
 
@@ -513,6 +522,7 @@ label {
 .small-goal__content-container {
   flex: 8;
   display: flex;
+  color: #373741;
   flex-direction: column;
 }
 
@@ -521,11 +531,6 @@ label {
   height: 100%;
   object-fit: cover;
   border: 2px solid #ddd;
-}
-
-.goal-title {
-  font-size: 1rem;
-  margin-bottom: 7px;
 }
 
 .small-goal__content {
@@ -565,12 +570,18 @@ label {
 
 .goal-page-container {
   justify-content: space-between;
+  background-color: #f7f7ed;
   width: 100%;
   min-height: 100vh;
 }
 
+.goalid-small-goal__tasks-completed li {
+  margin-bottom: 5px; /* リストアイテムの間隔を調整 */
+}
+
 .goal-content-top {
   display: flex;
+  color: #373741;
   justify-content: space-between;
   padding: 20px 0;
   border-bottom: 2px solid #ccc;
@@ -601,15 +612,15 @@ label {
 }
 
 .c-card.goalid-small-goal {
-  background-color: #fff;
+  background-color: #FFFCEB;
   border-radius: 3px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   padding: 15px;
-  flex: 0 1 calc(25% - 20px); /* 4列にするための設定、gapを引いてカードの幅を計算 */
-  box-sizing: border-box; /* パディングやボーダーを含めてサイズを計算 */
+  flex: 0 1 calc(25% - 20px);
+  box-sizing: border-box;
 }
 
 .goalid-small-goal__top {
@@ -702,6 +713,8 @@ label {
 
 .goal-content {
   display: flex;
+  height: 100%;
+  background-color: #f7f7ed;
   flex-direction: column;
   justify-content: center;
   flex: 1;
@@ -710,7 +723,7 @@ label {
 .goal-title {
   font-size: 1.2rem;
   margin-bottom: 10px;
-  color: #333;
+  color: #373741;
 }
 
 .goal-date {

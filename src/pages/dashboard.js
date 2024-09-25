@@ -283,7 +283,7 @@ function Dashboard() {
 
           </div>
           
-          <div className='right-container'>
+          <div className='dashboard-right-container'>
             <div className='calendar'>
               <ExpCalendar />
             </div>
