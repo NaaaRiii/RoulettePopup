@@ -305,6 +305,16 @@ function GoalPage() {
                   </Link>
                 </>
               )}
+
+              <div className="button-container">
+                <button onClick={openModal} className={'btn btn-primary'}>Add New Small Goal</button>
+                <CreateSmallGoal
+                  isOpen={isModalOpen}
+                  onClose={closeModal}
+                  goalId={goalId}
+                  onSmallGoalAdded={handleSmallGoalAdded}
+                />
+              </div>
             </div>
 
             <div className='goal-content-top-right-container'>
@@ -388,7 +398,7 @@ function GoalPage() {
                         <p className="goalid-small-goal__deadline">Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
                         <p className="goalid-small-goal__difficulty">Difficulty: {smallGoal.difficulty}</p>
                       </div>
-                      <span className="goalid-small-goal__completed"><strong>完了!</strong></span>
+                      <span className="completed-text"><strong>完了!</strong></span>
                     </div>
 
                     {/* タスクを「・」付きで表示 */}
@@ -404,19 +414,6 @@ function GoalPage() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            <div className="button-container">
-              <button onClick={openModal} className={'btn btn-primary'}>Add New Small Goal</button>
-              <CreateSmallGoal
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                goalId={goalId}
-                onSmallGoalAdded={handleSmallGoalAdded}
-              />
-              <Link href="/dashboard">
-                <div className={'btn btn-primary'}>Back</div>
-              </Link>
             </div>
           </div>
         </div>

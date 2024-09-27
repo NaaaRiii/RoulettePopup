@@ -108,7 +108,7 @@ function Dashboard() {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched user data:', data); // ここでレスポンスを確認
+        console.log('Fetched user data:', data);
   
         // 必要なデータをセット
         setUserRank(data.rank);
@@ -166,11 +166,11 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    if (userData.rank >= 121) {
-      setIsRank121ModalOpen(true); // Open Rank121 modal when rank is 121
-    }
-  }, [userData.rank]);
+  //useEffect(() => {
+  //  if (userData.rank >= 121) {
+  //    setIsRank121ModalOpen(true);
+  //  }
+  //}, [userData.rank]);
 
   return (
     <Layout>
@@ -289,34 +289,43 @@ function Dashboard() {
             </div>
 
             <div className='unmet-goals'>
-              <h3>未達成の目標</h3>
+              <h3>進行中の目標</h3>
               <ul>
                 {goalsState
                   .filter((goal) => !goal.completed)
+                  .sort((a, b) => {
+                    const dateA = a.deadline ? new Date(a.deadline) : Infinity; // 期限がない場合は無限大で後に
+                    const dateB = b.deadline ? new Date(b.deadline) : Infinity; // 期限がない場合は無限大で後に
+                    return dateA - dateB; // 昇順でソート（期限が近い順）
+                  })
                   .map((goal) => (
-                    <li key={goal.id}>
-                      <Link href={`/goals/${goal.id}`}>
+                    <li key={goal.id} className="unmet-goals-card">
+                      <Link href={`/goals/${goal.id}`} className="unmet-goals">
                         {goal.title}
                       </Link>
-                      <p>Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}</p>
+                      <p className="goal-deadline">
+                        Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
+                      </p>
                     </li>
                   ))}
               </ul>
-            </div>
 
-
-            <h2>Here are your recent activities:</h2>
-            {latestCompletedGoals.map(goal => (
-              <div key={goal.id} className="small-goal">
-                <p>{goal.title} <strong>完了!</strong> {formatDate(goal.completed_time)}</p>
+              <div className='dashboard-right-container-bottom'>
+                <h3>最近完了したSmall-Goal</h3>
+                {latestCompletedGoals.map(goal => (
+                  <div key={goal.id} className="bottom-small-goal-card">
+                    <p>{goal.title}</p>
+                    <p>
+                      <span className="completed-text">完了!</span>
+                      <span className="completed-time">{formatDate(goal.completed_time)}</span>
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-
         </div>
-
       </div>
-
     </Layout>
   );
 }
