@@ -72,11 +72,14 @@ a:hover {
   gap: 15px;
 }
 
-/*.footer {
+.footer {
   width: 100%;
+  height: 50px;
   z-index: 1000;
-  background-color: #FFFCE4;
+  background-color: rgb(240, 239, 226);
   color: #c8c8be;
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -85,7 +88,7 @@ a:hover {
   font-size: 0.9rem;
   text-align: left;
   margin-left: 5px;
-}*/
+}
 
 .main {
   margin-top: 90px;
@@ -99,11 +102,11 @@ a:hover {
 
 .button-container {
   max-width: 1170px;
-  margin: 0 auto;
-  padding: 0 2.8%;
+  margin: 30px auto;
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
 }
-
-/* フォーム関連のスタイル */
 
 .form-control {
   display: block;
@@ -125,7 +128,6 @@ label {
   padding: 10px 10px;
   margin-top: 20px;
   margin-bottom: 10px;
-  border-radius: 3px;
   border: none;
   cursor: pointer;
 }
@@ -227,13 +229,6 @@ label {
   font-size: 3rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   margin-bottom: 20px;
-}
-
-/* ボタンのスタイル */
-.button-container {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
 }
 
 .button {
@@ -394,14 +389,27 @@ label {
 
 .dashboard-left-container {
   flex: 7;
-  padding: 20px;
+  padding: 30px;
+  padding-left: 30px;
   background-color: #f7f7ed;
   border-right: 1px solid #ddd;
 }
 
+.user-profile-container{
+  padding-left: 20px;
+}
+
+.dashboard-left-bottom-container {
+  padding-left: 20px; 
+}
+
+.small-goals{
+  padding-left: 10px;
+}
+
 .dashboard-right-container {
   flex: 3;
-  padding: 20px;
+  padding: 30px;
   color: #373741;
   background-color: #FFFFF5;
   display: flex;
@@ -447,6 +455,16 @@ label {
   margin-top: 20px;
   width: 100%;
   height: 400px;
+}
+
+.user-profile-card {
+  background-color: #FFFCEB;
+  color: #373741;
+  border-radius: 3px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  margin-bottom: 20px;
+  position: relative;
+  width: 650px;
 }
 
 .c-card {
@@ -608,13 +626,65 @@ label {
   display: flex;
   color: #373741;
   justify-content: space-between;
-  padding: 20px 0;
+  padding: 0 50px;
+  padding-top: 40px;
+  padding-bottom: 20px;
   border-bottom: 2px solid #ccc;
 }
 
 .goal-content-top-left-container {
   flex: 7;
-  padding-right: 20px;
+  padding-left: 30px;
+}
+
+.goal-content-top-left-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #FFFCEB;
+  height: 70%;
+  width: 70%;
+  border-radius: 3px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  padding: 50px 60px;
+}
+
+.completed-goal-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.completed-goal-button,
+.button-completed-goal {
+  width: 20%;
+  padding: 10px 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+}
+
+.goal-content-top-left-lower-part{
+  padding-top: 20px;
+}
+
+.goal-content-top-left-lower-part-link {
+  padding-top: 15px;
+}
+
+.deadline-text {
+  font-size: 1.1rem;
+}
+
+.delete-goal-link{
+  display: flex;
+  cursor: pointer;
+  justify-content: flex-end;
+}
+
+.edit-goal-link {
+  margin-bottom: 20px;
 }
 
 .goal-content-top-right-container {
@@ -622,18 +692,17 @@ label {
 }
 
 .goal-content-bottom {
-  margin-top: 15px;
+  margin: 30px 80px;
   display: flex;
-  flex-direction: column; /* 上下に配置 */
-  gap: 20px; /* 上下のスペースを設定 */
+  flex-direction: column;
+  gap: 20px;
 }
 
 .goal-content-bottom-top,
 .goal-content-bottom-bottom {
   display: flex;
-  flex-wrap: wrap; /* 横並びで、スペースが足りなくなった場合には折り返す */
-  gap: 20px; /* カード間のスペースを設定 */
-  justify-content: flex-start; /* カードを左揃えにする */
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .c-card.goalid-small-goal {
@@ -699,10 +768,11 @@ label {
 }
 
 .goalid-small-goal__edit-link,
-.goalid-small-goal__delete-link {
-  color: #007bff;
+.goalid-small-goal__delete-link,
+.add-small-goal-button-link,
+.edit-goal-link {
+  color: #4283c8;
   cursor: pointer;
-  text-decoration: underline;
 }
 
 .goalid-small-goal__edit-link:hover,

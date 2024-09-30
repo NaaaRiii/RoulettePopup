@@ -266,54 +266,70 @@ function GoalPage() {
   return (
     <Layout>
       <div className='goal-page-container'>
-        <div className="goal-content">
+        <div className='goal-content'>
         {message && <p>{message}</p>}
-          <div className="goal-content-top">
+          <div className='goal-content-top'>
             <div className='goal-content-top-left-container'>
-              <h1>Goal Title:</h1>
-              <h3>{goal.title}</h3>
-              {goal.completed ? (
-                <p>このGoalは達成しました!</p>
-              ) : (
-                <>
-                  <p>このGoalを完了しますか?</p>
-                  {goal.small_goals?.some(sg => !sg.completed) ? (
-                    <button disabled className="btn btn-success">Completed Goal</button>
-                  ) : (
-                    <button onClick={completeGoal} className="btn btn-success">Completed Goal</button>
-                  )}
-                </>
-              )}
-              <h2>Goal Content:</h2>
-              <h3>{goal.content}</h3>
-              <p>Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}</p>
+              <div className='goal-content-top-left-card'>
+                <h2>目標 : {goal.title}</h2>
+                  <div className='completed-goal-button-container'>
+                    {goal.completed ? (
+                      <p>このGoalは達成しました!</p>
+                    ) : (
+                      <>
+                        <p>このGoalを完了しますか?</p>
+                          {goal.small_goals?.some(sg => !sg.completed) ? (
+                            <button disabled className='completed-goal-button'>Completed Goal</button>
+                          ) : (
+                            <button onClick={completeGoal} className='button-completed-goal'>Completed Goal</button>
+                          )}
+                      </>
+                    )}
+                  </div>
 
-                {!goal.completed && (
-                <>
-                  <Link href="#" onClick={openEditGoalModal}>
-                    <div>目標を編集する</div>
-                  </Link>
-                  <EditGoalModal 
-                    isOpen={isEditGoalModalOpen} 
-                    onClose={closeEditGoalModal} 
-                    goalId={goalId}
-                    onGoalUpdated={handleGoalUpdated}
-                  />
+                <div className='goal-content-top-left-lower-part'>
+                  <h2>内容 : {goal.content}</h2>
+                  <p className='deadline-text'>期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}</p>
+                  <div className='goal-content-top-left-lower-part-link'>
+                    {!goal.completed && (
+                      <>
+                        <Link href={`#`} onClick={openEditGoalModal}>
+                          <div className='edit-goal-link'>
+                            目標を編集する
+                          </div>
+                        </Link>
+                        <EditGoalModal 
+                          isOpen={isEditGoalModalOpen} 
+                          onClose={closeEditGoalModal} 
+                          goalId={goalId}
+                          onGoalUpdated={handleGoalUpdated}
+                        />
+
+                      </>
+                    )}
+
+                    <div className='add-small-goal-button'>
+                      <Link href={`#`} onClick={openModal}>
+                        <div className='add-small-goal-button-link'>
+                          Small Goalの作成
+                        </div>
+                      </Link>
+                      <CreateSmallGoal
+                        isOpen={isModalOpen}
+                        onClose={closeModal}
+                        goalId={goalId}
+                        onSmallGoalAdded={handleSmallGoalAdded}
+                      />
+                    </div>
+                  </div>
 
                   <Link href={`#`} onClick={deleteGoal}>
-                    <div>Delete Goal</div>
+                    <div className='delete-goal-link'>
+                      Delete Goal
+                    </div>
                   </Link>
-                </>
-              )}
-
-              <div className="button-container">
-                <button onClick={openModal} className={'btn btn-primary'}>Add New Small Goal</button>
-                <CreateSmallGoal
-                  isOpen={isModalOpen}
-                  onClose={closeModal}
-                  goalId={goalId}
-                  onSmallGoalAdded={handleSmallGoalAdded}
-                />
+                  
+                </div>
               </div>
             </div>
 
@@ -322,7 +338,6 @@ function GoalPage() {
                 <ExpCalendar />
               </div>
             </div>
-
           </div>
 
           <div className="goal-content-bottom">
@@ -331,7 +346,7 @@ function GoalPage() {
             <div className="goal-content-bottom-top">
               {goal.small_goals.filter(smallGoal => !smallGoal.completed).map(smallGoal => (
                 <div key={smallGoal.id} className="c-card goalid-small-goal">
-                  <div className={`goalid-small-goal__top`}>
+                  <div className={'goalid-small-goal__top'}>
                     <div className="goalid-small-goal__left">
                       <h3 className="goalid-small-goal__title">{smallGoal.title}</h3>
                     </div>
@@ -366,12 +381,12 @@ function GoalPage() {
                         )}
                       </div>
 
-                      <div className="goalid-small-goal__actions">
-                        <Link href="#" onClick={(e) => { e.preventDefault(); openEditSmallGoalModal(smallGoal); }}>
-                          <div className="goalid-small-goal__edit-link">Edit</div>
+                      <div className='goalid-small-goal__actions'>
+                        <Link href='#' onClick={(e) => { e.preventDefault(); openEditSmallGoalModal(smallGoal); }}>
+                          <div className='goalid-small-goal__edit-link'>Edit</div>
                         </Link>
-                        <Link href="#" onClick={(e) => { e.preventDefault(); deleteSmallGoal(smallGoal.id); }}>
-                          <div className="goalid-small-goal__delete-link">Delete</div>
+                        <Link href='#' onClick={(e) => { e.preventDefault(); deleteSmallGoal(smallGoal.id); }}>
+                          <div className='goalid-small-goal__delete-link'>Delete</div>
                         </Link>
                       </div>
                     </div>

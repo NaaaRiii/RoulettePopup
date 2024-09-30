@@ -7,6 +7,9 @@ const ExpCalendar = () => {
   const [activities, setActivities] = useState({});
 
   useEffect(() => {
+    const today = new Date();
+    console.log("Today's Date:", today.toLocaleDateString('sv-SE'));
+
     const fetchData = async () => {
       try {
         const response = await fetch('http://localhost:3000/api/daily_exp', {
@@ -18,6 +21,7 @@ const ExpCalendar = () => {
         }
 
         const data = await response.json();
+        console.log("Fetched activities:", data);
         setActivities(data);
       } catch (error) {
         console.error('There has been a problem with your fetch operation:', error);
@@ -29,7 +33,9 @@ const ExpCalendar = () => {
 
   const tileClassName = ({ date, view }) => {
     if (view === 'month') {
-      const dayKey = date.toLocaleDateString('sv-SE');
+      //const dayKey = date.toLocaleDateString('sv-SE');
+      const dayKey = date.toISOString().split('T')[0];
+      console.log("Checking date:", dayKey, activities[dayKey]);
       const expGained = Number(activities[dayKey]);
 
       if (expGained >= 1) {
@@ -57,13 +63,11 @@ const ExpCalendar = () => {
   };
 
   return (
-    //<div>
       <Calendar
         locale="en-US"
         calendarType="iso8601"
         tileClassName={tileClassName}
       />
-    //</div>
   );
 };
 

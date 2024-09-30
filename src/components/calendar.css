@@ -22,7 +22,7 @@
 /* マウスカーソルが日付にフーバーしても反応しないようにする */
 .react-calendar__tile:hover {
   cursor: default !important;
-  background-color: none;
+  background-color: none !important;
 }
 
 /* 今日の日付のスタイルを上書きして、特別な表示を無効にする */
@@ -34,9 +34,9 @@
 }
 
 /* 今月の日付に下線を引く */
-.react-calendar__month-view__days__day {
+/*.react-calendar__month-view__days__day {
   text-decoration: none;
-}
+}*/
 
 /* 前月と次月の日付の下線を取り除く */
 .react-calendar__month-view__days__day--neighboringMonth {
@@ -57,7 +57,6 @@
 .react-calendar__month-view__days__day:not(.react-calendar__month-view__days__day--weekend) {
   color: #555557;
 }
-
 
 /* ナビゲーションバーの下に線を引く */
 .react-calendar__navigation {
@@ -98,5 +97,42 @@
 }
 
 .exp-level-80 {
+  background-color: #ffd700 !important;
+}
+
+/* 今日の日付が経験値クラスを持っているときのスタイルを適用 */
+.exp-level-1.react-calendar__tile--now {
+  background-color: #e0f7fa !important; /* 今日の日付用の背景色 */
+}
+
+.exp-level-10.react-calendar__tile--now {
+  background-color: #b2ebf2 !important;
+}
+
+.exp-level-20.react-calendar__tile--now {
+  background-color: #80deea !important;
+}
+
+.exp-level-30.react-calendar__tile--now {
+  background-color: #4dd0e1 !important;
+}
+
+.exp-level-40.react-calendar__tile--now {
+  background-color: #26c6da !important;
+}
+
+.exp-level-50.react-calendar__tile--now {
+  background-color: #00bcd4 !important;
+}
+
+.exp-level-60.react-calendar__tile--now {
+  background-color: #cd7f32 !important;
+}
+
+.exp-level-70.react-calendar__tile--now {
+  background-color: #c0c0c0 !important;
+}
+
+.exp-level-80.react-calendar__tile--now {
   background-color: #ffd700 !important;
 }

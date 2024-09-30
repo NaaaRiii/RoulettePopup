@@ -190,42 +190,49 @@ function Dashboard() {
       <div className='dashboard'>
         <div className='dashboard-container'>
           <div className='dashboard-left-container'>
-            <h1>Welcome to your dashboard</h1>
-            {/* TODO: Fix the unescaped entities issue */}
-            {/* eslint-disable-next-line react/no-unescaped-entities */}
-            <div className='c-card'>
-              <div className='row user-profile'>
-                <div className='user-profile__basic'>
-                  <div className='user-profile__image'>
-                    <Image
-                      src="/images/learn.png"
-                      alt="User Profile Image"
-                      width={60}
-                      height={60}
-                      className="profile-image"
-                    />
-                    </div>
-                  <div className='user-profile__info'>
-                    <div className='user-profile__title'>
-                      {userData?.currentTitle}
-                    </div>
-                    <div className='user-profile__name'>
-                      {userData?.name}
-                    </div>
-                    <div className='user-profile__roulette'>
-                      {userRank > 10 && <Link href={`/edit-roulette-text/`}>ごほうびルーレット</Link>}
+            <div className='user-profile-container'>
+              <h1>Welcome to your dashboard</h1>
+              {/* TODO: Fix the unescaped entities issue */}
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
+              <div className='user-profile-card'>
+                <div className='user-profile'>
+                  <div className='user-profile__basic'>
+                    <div className='user-profile__image'>
+                      <Image
+                        src="/images/learn.png"
+                        alt="User Profile Image"
+                        width={60}
+                        height={60}
+                        className="profile-image"
+                      />
+                      </div>
+                    <div className='user-profile__info'>
+                      <div className='user-profile__title'>
+                        {userData?.currentTitle}
+                      </div>
+                      <div className='user-profile__name'>
+                        {userData?.name}
+                      </div>
+                      <div className='user-profile__roulette'>
+                        {userRank > 10 && <Link href={`/edit-roulette-text/`}>ごほうびルーレット</Link>}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className='user-profile__separator'>
-                </div>
-                <div className='user-profile__rank'>
-                  <h2>Your EXP: {userData?.totalExp}</h2>
-                </div>
-                <div className='user-profile__separator'>
-                </div>
-                <div className='user-profile__exp'>
-                  <h2>Your Rank: {userData?.rank}</h2>
+
+                  <div className='user-profile__separator'>
+                  </div>
+
+                  <div className='user-profile__rank'>
+                    <h2>Your EXP: {userData?.totalExp}</h2>
+                  </div>
+
+                  <div className='user-profile__separator'>
+                  </div>
+
+                  <div className='user-profile__exp'>
+                    <h2>Your Rank: {userData?.rank}</h2>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -234,51 +241,54 @@ function Dashboard() {
               <ExpLineChart />
             </div>
 
-            <div class="button-container">
-              {/*<Link href="/new-goal">
-                <div className={'btn btn-primary'}>目標を設定する</div>
-              </Link>*/}
-              <Link href="/new-goal" onClick={handleOpenModal}>
-                <div className={'btn btn-primary'}>目標を設定する</div>
-              </Link>
-              <NewGoalModal isOpen={isModalOpen} onClose={handleCloseModal} />
-              <Link href="/completed-goal">
-                <div className={'btn btn-primary'}>達成した目標</div>
-              </Link>
+            <div className='dashboard-left-bottom-container'>
+              <div class='button-container'>
+                {/*<Link href="/new-goal">
+                  <div className={'btn btn-primary'}>目標を設定する</div>
+                </Link>*/}
+                <Link href="/new-goal" onClick={handleOpenModal}>
+                  <div className={'btn btn-primary'}>目標を設定する</div>
+                </Link>
+                <NewGoalModal isOpen={isModalOpen} onClose={handleCloseModal} />
+                <Link href="/completed-goal">
+                  <div className={'btn btn-primary'}>達成した目標</div>
+                </Link>
+              </div>
+
+              <div className='small-goals'>
+                {goalsState
+                  .filter(goal => !goal.completed && goal.id !== deletedGoalId)
+                  .map((goal) => {
+                    const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
+
+                    return incompleteSmallGoals.map((smallGoal) => (
+                      <div key={smallGoal.id} className='c-card small-goals'>
+                        <div className='small-goal__image-container'>
+                          <Image
+                            src='/images/pen-memo4.png'
+                            alt='Goal Image'
+                            width={60}
+                            height={60}
+                            className='small-goal__image'
+                          />
+                        </div>
+                        <div className='small-goal__content-container'>
+                          <p className='goal-title'>{goal.title}</p> {/* Goalのタイトルは各small-goalに表示されます */}
+                          <div className='small-goal__content'>
+                            <p className='small-goal__title'>{smallGoal.title}</p>
+                            <p className='small-goal__deadline'>Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
+                          </div>
+                        </div>
+                        <div className='small-goal__button-container'>
+                          <Link href={`/goals/${goal.id}`}>
+                            <button className='small-goal__confirm-button'>確認</button>
+                          </Link>
+                        </div>
+                      </div>
+                    ));
+                  })}
             </div>
 
-            <div className='small-goals'>
-            {goalsState
-              .filter(goal => !goal.completed && goal.id !== deletedGoalId)
-              .map((goal) => {
-                const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
-
-                return incompleteSmallGoals.map((smallGoal) => (
-                  <div key={smallGoal.id} className='c-card small-goals'>
-                    <div className='small-goal__image-container'>
-                      <Image
-                        src='/images/pen-memo4.png'
-                        alt='Goal Image'
-                        width={60}
-                        height={60}
-                        className='small-goal__image'
-                      />
-                    </div>
-                    <div className='small-goal__content-container'>
-                      <p className='goal-title'>{goal.title}</p> {/* Goalのタイトルは各small-goalに表示されます */}
-                      <div className='small-goal__content'>
-                        <p className='small-goal__title'>{smallGoal.title}</p>
-                        <p className='small-goal__deadline'>Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
-                      </div>
-                    </div>
-                    <div className='small-goal__button-container'>
-                      <Link href={`/goals/${goal.id}`}>
-                        <button className='small-goal__confirm-button'>確認</button>
-                      </Link>
-                    </div>
-                  </div>
-                ));
-              })}
           </div>
 
           </div>
