@@ -33,8 +33,7 @@ const ExpCalendar = () => {
 
   const tileClassName = ({ date, view }) => {
     if (view === 'month') {
-      //const dayKey = date.toLocaleDateString('sv-SE');
-      const dayKey = date.toISOString().split('T')[0];
+      const dayKey = date.toLocaleDateString('sv-SE');
       console.log("Checking date:", dayKey, activities[dayKey]);
       const expGained = Number(activities[dayKey]);
 
