@@ -103,24 +103,30 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
         <h2>Small Goalを編集</h2>
         <form onSubmit={handleSubmit}>
           <label htmlFor="title">Small Goalのタイトル</label>
-          <input
+          <textarea
             id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            className={styles.textareaField}
+            rows={2}
+            cols={50}
           />
 
           <div className={styles.tasksContainer}>
             {tasks.filter(task => !task._destroy).map((task, index) => (
               <div key={task.id || `temp-${index}`}>
                 <label htmlFor={`task-${task.id || `temp-${index}`}`}>Task</label>
-                <input
+                <textarea
                   id={`task-${task.id || `temp-${index}`}`}
                   type="text"
                   value={task.content}
                   onChange={(e) => handleTaskChange(task.id, e.target.value)}
                   required
+                  className={styles.textareaField}
+                  rows={2}
+                  cols={50}
                 />
                 {tasks.filter(task => !task._destroy).length > 1 && (
                   <button type="button" onClick={() => removeTask(task.id)}>
@@ -148,13 +154,14 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
             </select>
           </div>
           <div>
-            <label htmlFor="deadline">締切日</label>
+            <label htmlFor="deadline">期限</label>
             <input
               id="deadline"
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
               required
+              className={styles.deadlineField}
             />
           </div>
           <button type="submit" className="btn btn-primary">Update Small Goal</button>

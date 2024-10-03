@@ -43,16 +43,44 @@ export default function NewGoalModal({ isOpen, onClose }) {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h2>目標を設定しよう！</h2>
+        <h2>目標を設定する</h2>
         <form onSubmit={handleSubmit}>
-          <label htmlFor="title">目標にタイトルをつけよう！</label>
-          <input id="title" name="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <label htmlFor="title">目標のタイトル</label>
+          <textarea
+            id="title"
+            name="title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className={styles.textareaField}
+            rows={2}
+            cols={50}
+          />
 
           <label htmlFor="content">Content</label>
-          <input id="content" name="content" type="text" value={content} onChange={(e) => setContent(e.target.value)} />
+          <textarea
+            id="content"
+            name="content"
+            type="text"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            required
+            className={styles.textareaField}
+            rows={2}
+            cols={50}
+          />
 
-          <label htmlFor="deadline">Deadline</label>
-          <input id="deadline" name="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+          <label htmlFor="deadline">期限</label>
+          <input
+            id="deadline"
+            name="deadline"
+            type="date"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            required
+            className={styles.deadlineField}
+          />
 
           <button type="submit" className="btn btn-primary">設定する
           </button>

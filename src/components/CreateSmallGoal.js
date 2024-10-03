@@ -2,9 +2,7 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import styles from '../components/CreateGoal.module.css';
 
-
 export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAdded }) {
-
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [tasks, setTasks] = useState([{ id: Date.now(), content: '' }]);
@@ -101,47 +99,63 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
         <h2>Small Goalを設定しよう!</h2>
 
         {message && (
-        <div className={styles.errorMessage}>
-          {message}
-        </div>
-      )}
+          <div className={styles.errorMessage}>
+            {message}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <label htmlFor="title">Small Goalのタイトル</label>
-          <input
+          <textarea
             id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            className={styles.textareaField}
+            rows={2}
+            cols={50}
           />
 
           <div className={styles.tasksContainer}>
             {tasks.map((task, index) => (
               <div key={task.id}>
                 <label htmlFor={`task-${task.id}`}>Task</label>
-                <input
+                <textarea
                   id={`task-${task.id}`}
                   type="text"
                   value={task.content}
                   onChange={(e) => handleTaskChange(index, e.target.value)}
                   required
+                  className={styles.textareaField}
+                  rows={2}
+                  cols={50}
                 />
-                <button type="button" onClick={() => removeTask(index)}>Remove Task</button>
+                <button
+                  type="button"
+                  onClick={() => removeTask(index)}
+                  className={styles.taskButton} // Removeボタンにスタイルを適用
+                >
+                  タスクの削除
+                </button>
               </div>
             ))}
           </div>
 
-          <button type="button" onClick={addTask}>Add Task</button>
+          <button type="button" onClick={addTask} className={styles.addTaskButton}>
+            タスクの追加
+          </button>
+
           <div>
-            <label htmlFor="difficulty">Difficulty</label>
+            <label htmlFor="difficulty">難易度の設定</label>
             <select
               id="difficulty"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
               required
+              //className={styles.selectField}
             >
-              <option value="">Select Difficulty</option>
+              <option value="">難易度を選択</option>
               <option value="ものすごく簡単">ものすごく簡単</option>
               <option value="簡単">簡単</option>
               <option value="普通">普通</option>
@@ -149,19 +163,26 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
               <option value="とても難しい">とても難しい</option>
             </select>
           </div>
+
           <div>
-            <label htmlFor="deadline">Deadline</label>
+            <label htmlFor="deadline">期限</label>
             <input
               id="deadline"
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
               required
+              className={styles.deadlineField}
             />
           </div>
-          <button type="submit" className="btn btn-primary">設定する</button>
+
+          <button type="submit" className="btn btn-primary">
+            設定する
+          </button>
         </form>
-        <button onClick={handleClose} className={styles.closeButton}>Close</button>
+        <button onClick={handleClose} className={styles.closeButton}>
+          Close
+        </button>
       </div>
     </div>
   );

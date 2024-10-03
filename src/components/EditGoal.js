@@ -72,26 +72,32 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
         <h2>目標を編集しよう！</h2>
         <form onSubmit={handleSubmit}>
           <label htmlFor="title">目標のタイトル</label>
-          <input
+          <textarea
             id="title"
             name="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            className={styles.textareaField}
+            rows={2}
+            cols={50}
           />
 
           <label htmlFor="content">Content</label>
-          <input
+          <textarea
             id="content"
             name="content"
             type="text"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             required
+            className={styles.textareaField}
+            rows={2}
+            cols={50}
           />
 
-          <label htmlFor="deadline">Deadline</label>
+          <label htmlFor="deadline">期限</label>
           <input
             id="deadline"
             name="deadline"
@@ -99,6 +105,7 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
             required
+            className={styles.deadlineField}
           />
 
           <button type="submit" className="btn btn-primary">Update Goal</button>

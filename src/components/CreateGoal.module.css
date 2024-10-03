@@ -6,6 +6,8 @@
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .tasksContainer {
@@ -42,5 +44,27 @@
 
 .errorMessage {
   color: red;
-  margin-bottom: 1rem;
+  margin-bottom: 15px;
+}
+
+.textareaField,
+.taskInputField {
+  width: 400px;
+  padding: 5px;
+  font-size: 14px;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  font-family: "UD デジタル 教科書体 N-R", "UD Digi Kyokasho NP-R", sans-serif;
+}
+
+.deadlineField {
+  font-family: "UD デジタル 教科書体 N-R", "UD Digi Kyokasho NP-R", sans-serif;
+}
+
+button.btn-primary {
+  padding: 10px 20px;
+  font-size: 18px;
+  margin-top: 20px;
 }

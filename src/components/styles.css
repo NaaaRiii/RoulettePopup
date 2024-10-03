@@ -775,6 +775,11 @@ label {
   cursor: pointer;
 }
 
+.add-small-goal-button-link {
+  color: #3b924b;
+  cursor: pointer;
+}
+
 .goalid-small-goal__edit-link:hover,
 .goalid-small-goal__delete-link:hover {
   text-decoration: none;
