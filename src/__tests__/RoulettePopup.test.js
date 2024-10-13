@@ -2,8 +2,8 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 
 import '@testing-library/jest-dom';
-import RoulettePopup from './RoulettePopup';
-import { fetchRouletteText } from './utils';
+import RoulettePopup from '../components/RoulettePopup';
+import { fetchRouletteText } from '../components/utils';
 
 // fetchRouletteText 関数のモック
 jest.mock('./utils', () => ({
