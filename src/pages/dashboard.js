@@ -10,7 +10,6 @@ import Image from 'next/image';
 import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
 
-
 function Dashboard() {
   const [goalsState, setGoalsState] = useState([]);
   const [deletedGoalId, setDeletedGoalId] = useState(null);
@@ -18,7 +17,7 @@ function Dashboard() {
   const [userRank, setUserRank] = useState(0);
   const [userData, setUserData] = useState({
     name: '',
-    currentTitle: '',
+    //currentTitle: '',
     totalExp: 0,
     rank: 0,
     lastRouletteRank: 0,
@@ -80,18 +79,17 @@ function Dashboard() {
           method: 'GET',
           credentials: 'include',
         });
-  
+    
         if (!response.ok) {
-          throw new Error('Failed to fetch data');
+          throw new Error(`Failed to fetch data, status code: ${response.status}`);
         }
-  
+    
         const data = await response.json();
-        console.log("API Response Data:", data);
-
+        
         if (!Array.isArray(data)) {
-          throw new Error('Data is not an array');
+          throw new Error('Expected an array but got invalid data format');
         }
-  
+    
         setGoalsState(data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -112,10 +110,10 @@ function Dashboard() {
   
         // 必要なデータをセット
         setUserRank(data.rank);
-        const storedLastRouletteRank = localStorage.getItem('lastRouletteRank') || data.last_roulette_rank;
+        //const storedLastRouletteRank = data.last_roulette_rank || localStorage.getItem('lastRouletteRank');
         const formattedData = {
           ...data,
-          lastRouletteRank: parseInt(storedLastRouletteRank, 10) || 0
+          lastRouletteRank: parseInt(data.last_roulette_rank, 10) || 0
         };
         setUserData(formattedData);
         setLatestCompletedGoals(data.latestCompletedGoals);
@@ -130,10 +128,10 @@ function Dashboard() {
   }, []);
   
   useEffect(() => {
-    console.log("Current rank:", userData.rank, "Last roulette rank:", userData.lastRouletteRank, "title:", userData.currentTitle);
+    console.log("Current rank:", userData.rank, "Last roulette rank:", userData.lastRouletteRank);
     if (userData.rank >= 10 && Math.floor(userData.rank / 10) > Math.floor(userData.lastRouletteRank / 10)) {
-      console.log("Modal should open now.");
-      setIsModalOpen(true);
+      //console.log("Modal should open now.");
+      //setIsModalOpen(true);
       updateLastRouletteRank(userData.rank);
     }
   // TODO: Fix the dependency array issue for userData
@@ -142,6 +140,11 @@ function Dashboard() {
 
   const updateLastRouletteRank = async (newRank) => {
     const userId = userData.id;
+    if (!userId) {
+      console.error('User ID is undefined. Cannot update last roulette rank.');
+      return;
+    }
+
     console.log("Attempting to update last roulette rank for user ID:", userId);
 
     const response = await fetch(`http://localhost:3000/api/current_users/${userId}/update_rank`, {
@@ -152,14 +155,26 @@ function Dashboard() {
       credentials: 'include',
       body: JSON.stringify({ lastRouletteRank: newRank })
     });
+
     if (response.ok) {
       const resData = await response.json();
-      if(resData.success) {
+      console.log('resData:', resData);
+      //if (resData.success) {
+      //  console.log("Update response received and successful");
+      //  localStorage.setItem('lastRouletteRank', newRank);
+      //  setUserData(prev => ({ ...prev, lastRouletteRank: newRank }));
+      //}
+      if (resData.success) {
         console.log("Update response received and successful");
-        localStorage.setItem('lastRouletteRank', newRank);
-        setUserData(prev => ({ ...prev, lastRouletteRank: newRank }));
+        //localStorage.setItem('lastRouletteRank', newRank);
+        const formattedData = {
+          ...userData,
+          lastRouletteRank: parseInt(newRank, 10) || 0
+        };
+        setUserData(formattedData);
+        console.log('Updated formatted data:', formattedData);
       } else {
-        console.error("Failed to update last roulette rank due to server error", resData.message);
+        console.error("Failed to update last roulette rank due to server error", resData.message || 'No error message provided');
       }
     } else {
       console.error("Failed to update last roulette rank due to network error");
@@ -242,7 +257,7 @@ function Dashboard() {
             </div>
 
             <div className='dashboard-left-bottom-container'>
-              <div class='button-container'>
+              <div className='button-container'>
                 {/*<Link href="/new-goal">
                   <div className={'btn btn-primary'}>目標を設定する</div>
                 </Link>*/}

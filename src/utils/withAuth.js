@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
@@ -21,7 +22,7 @@ const withAuth = (WrappedComponent) => {
               query: { message: 'ログインをしてください' }
             });
           } else {
-            setLoading(false); // ログインしている場合のみ loading を false にする
+            setLoading(false);
           }
         } catch (error) {
           console.error('Error checking login status:', error);
