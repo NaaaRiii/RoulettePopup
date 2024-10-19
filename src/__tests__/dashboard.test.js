@@ -1,7 +1,6 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import Dashboard from '../pages/dashboard';
-//import { updateLastRouletteRank } from '../pages/dashboard';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import '@testing-library/jest-dom';
@@ -57,9 +56,10 @@ jest.mock('../contexts/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
 
-//jest.mock('../utils/updateLastRouletteRank', () => ({
-//  updateLastRouletteRank: jest.fn(),
-//}));
+jest.mock('next/link', () => {
+  const ActualLink = jest.requireActual('next/link');
+  return ActualLink;
+});
 
 describe('Dashboard page', () => {
   const mockGoalsData = [
@@ -128,37 +128,6 @@ describe('Dashboard page', () => {
 		],
   };
 
-  //beforeEach(() => {
-  //  global.fetch = jest.fn((url, options) => {
-  //    console.log('Mock fetch called with URL:', url);
-	//		console.log('Fetch options:', options);
-
-  //    if (url.includes('/api/goals')) {
-  //      return Promise.resolve({
-  //        ok: true,
-  //        json: () => Promise.resolve(mockGoalsData),
-  //      });
-  //    } else if (url.includes('/api/current_user')) {
-  //      return Promise.resolve({
-  //        ok: true,
-  //        json: () => Promise.resolve(mockUserData),
-  //      });
-  //    } else if (url.includes('/api/current_users/') && url.includes('/update_rank')) {
-	//			console.log('Mock fetch matched /update_rank');
-	//			return Promise.resolve({
-	//				ok: true,
-	//				//json: () => Promise.resolve({ success: true }),
-	//				json: () => Promise.resolve(mockUserData),
-	//			});
-	//		} else {
-	//			console.log('Mock fetch did not match any condition');
-	//			return Promise.resolve({
-	//				ok: true,
-	//				json: () => Promise.resolve({}),
-	//			});
-	//		}
-	//	});
-
 	beforeEach(() => {
 		global.fetch = jest.fn((url, options) => {
 			console.log('Mock fetch called with URL:', url);
@@ -204,20 +173,15 @@ describe('Dashboard page', () => {
     };
     useRouter.mockReturnValue(mockRouter);
 
-    render(<Dashboard />);
+		render(<Dashboard />);
 
-    // ローディングが消えるのを待つ
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-    });
+		// 非同期にレンダリングされる要素をfindByで取得
+		const userName = await screen.findByText('Sample User');
+		expect(userName).toBeInTheDocument();
 
-    // データが表示されるか確認
-    await waitFor(() => {
-      expect(screen.getByText('Sample User')).toBeInTheDocument();
-      expect(screen.getByText('Your EXP: 140')).toBeInTheDocument();
-      expect(screen.getByText('Your Rank: 20')).toBeInTheDocument();
-    });
-  });
+		expect(screen.getByText('Your EXP: 140')).toBeInTheDocument();
+		expect(screen.getByText('Your Rank: 20')).toBeInTheDocument();
+	});
 
 	it('calls updateLastRouletteRank when rank increases past a multiple of 10', async () => {
 		const mockFetch = jest.spyOn(global, 'fetch');
@@ -225,7 +189,6 @@ describe('Dashboard page', () => {
 		render(<Dashboard />);
 	
 		await waitFor(() => {
-			// fetch が /update_rank に対して呼び出されたか確認
 			expect(mockFetch).toHaveBeenCalledWith(
 				expect.stringContaining('/api/current_users/7/update_rank'),
 				expect.objectContaining({
@@ -242,11 +205,31 @@ describe('Dashboard page', () => {
 
 	it('updates lastRouletteRank when rank increases past a multiple of 10', async () => {
 		render(<Dashboard />);
+
+	 // 非同期にレンダリングされる要素をfindByで取得
+	 const rankText = await screen.findByText('Your Rank: 20');
+	 expect(rankText).toBeInTheDocument();
+ });
+
+	it('opens the goal creation modal when the button is clicked', async () => {
+		render(<Dashboard />);
 	
-		await waitFor(() => {
-			// userData.lastRouletteRank が更新されたか確認
-			expect(screen.getByText('Your Rank: 20')).toBeInTheDocument();
-		});
-	});
+		// "目標を設定する"ボタンを取得
+		//const setGoalButton = screen.getByText('目標を設定する');
+		const setGoalButton = await screen.findByText('目標を設定する');
+
+		fireEvent.click(setGoalButton);
+
+		// モーダルのタイトルをfindByで取得
+    const modalTitle = await screen.findByRole('heading', { name: '目標を設定する' });
+    expect(modalTitle).toBeInTheDocument();
+  });
+	
+	it('renders the completed goals link with correct href', async () => {
+    render(<Dashboard />);
+
+    const completedGoalLink = await screen.findByText('達成した目標');
+    expect(completedGoalLink.closest('a')).toHaveAttribute('href', '/completed-goal');
+  });
 	
 });

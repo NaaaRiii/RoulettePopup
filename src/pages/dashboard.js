@@ -258,9 +258,6 @@ function Dashboard() {
 
             <div className='dashboard-left-bottom-container'>
               <div className='button-container'>
-                {/*<Link href="/new-goal">
-                  <div className={'btn btn-primary'}>目標を設定する</div>
-                </Link>*/}
                 <Link href="/new-goal" onClick={handleOpenModal}>
                   <div className={'btn btn-primary'}>目標を設定する</div>
                 </Link>
@@ -271,6 +268,7 @@ function Dashboard() {
               </div>
 
               <div className='small-goals'>
+                <h2>進行中のSmall Goal</h2>
                 {goalsState
                   .filter(goal => !goal.completed && goal.id !== deletedGoalId)
                   .map((goal) => {
