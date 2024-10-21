@@ -312,19 +312,19 @@ function Dashboard() {
             </div>
 
             <div className='unmet-goals'>
-              <h3>進行中の目標</h3>
+              <h3>進行中のGoal</h3>
               <ul>
                 {goalsState
                   .filter((goal) => !goal.completed)
                   .sort((a, b) => {
-                    const dateA = a.deadline ? new Date(a.deadline) : Infinity; // 期限がない場合は無限大で後に
-                    const dateB = b.deadline ? new Date(b.deadline) : Infinity; // 期限がない場合は無限大で後に
-                    return dateA - dateB; // 昇順でソート（期限が近い順）
+                    const dateA = a.deadline ? new Date(a.deadline) : Infinity;
+                    const dateB = b.deadline ? new Date(b.deadline) : Infinity;
+                    return dateA - dateB;
                   })
                   .map((goal) => (
                     <li key={goal.id} className="unmet-goals-card">
                       <Link href={`/goals/${goal.id}`} className="unmet-goals">
-                        {goal.title}
+                        <span data-testId="goal-title">{goal.title}</span> 
                       </Link>
                       <p className="goal-deadline">
                         Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}

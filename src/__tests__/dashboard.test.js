@@ -34,7 +34,7 @@ jest.mock('../components/ExpLineChart', () => {
 });
 
 jest.mock('../components/Layout', () => {
-  const MockedLayout = ({ children }) => <div>{children}</div>;
+  const MockedLayout = ({ children }) => <div data-testid="layout">{children}</div>;
   MockedLayout.displayName = 'MockedLayout';
   return MockedLayout;
 });
@@ -86,6 +86,52 @@ describe('Dashboard page', () => {
         },
       ],
     },
+		{
+			id: 256,
+			user_id: 7,
+			content: 'This is an unmet sample goal.',
+			title: 'First Unmet Goal',
+			deadline: '2024-12-25',
+			small_goal: null,
+			completed: false,
+			completed_time: null,
+			small_goals: [
+				{
+					id: 266,
+					goal_id: 256,
+					title: 'First Unmet Small Goal',
+					difficulty: 'easy',
+					deadline: '2024-12-15T21:07:11.668+09:00',
+					task: 'test',
+					completed: false,
+					completed_time: null,
+					exp: 30,
+				},
+			],
+		},
+		{
+			id: 257,
+			user_id: 7,
+			content: 'This is another unmet sample goal.',
+			title: 'Second Unmet Goal',
+			deadline: '2024-12-31',
+			small_goal: null,
+			completed: false,
+			completed_time: null,
+			small_goals: [
+				{
+					id: 267,
+					goal_id: 257,
+					title: 'Second Unmet Small Goal',
+					difficulty: 'easy',
+					deadline: '2024-12-15T21:07:11.668+09:00',
+					task: 'test',
+					completed: false,
+					completed_time: null,
+					exp: 30,
+				},
+			],
+		},
   ];
 
   const mockUserData = {
@@ -128,7 +174,21 @@ describe('Dashboard page', () => {
 		],
   };
 
+	let mockPush;
+
 	beforeEach(() => {
+		mockPush = jest.fn();
+
+    useRouter.mockReturnValue({
+      query: {},
+      push: mockPush,
+    });
+
+    useAuth.mockReturnValue({
+      isLoggedIn: true,
+      userRank: 20,
+    });
+
 		global.fetch = jest.fn((url, options) => {
 			console.log('Mock fetch called with URL:', url);
 			console.log('Fetch options:', options);
@@ -159,12 +219,11 @@ describe('Dashboard page', () => {
 				});
 			}
 		});
-
-    useAuth.mockReturnValue({
-      isLoggedIn: true,
-      userRank: 20,
-    });
   });
+
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
 
   it('renders the dashboard with user profile and goals', async () => {
     const mockRouter = {
@@ -210,26 +269,121 @@ describe('Dashboard page', () => {
 	 const rankText = await screen.findByText('Your Rank: 20');
 	 expect(rankText).toBeInTheDocument();
  });
-
-	it('opens the goal creation modal when the button is clicked', async () => {
+	
+	it('opens and closes the goal creation modal when the respective buttons are clicked', async () => {
 		render(<Dashboard />);
 	
-		// "目標を設定する"ボタンを取得
-		//const setGoalButton = screen.getByText('目標を設定する');
+		// "目標を設定する"ボタンを取得してクリック
 		const setGoalButton = await screen.findByText('目標を設定する');
-
 		fireEvent.click(setGoalButton);
-
-		// モーダルのタイトルをfindByで取得
-    const modalTitle = await screen.findByRole('heading', { name: '目標を設定する' });
-    expect(modalTitle).toBeInTheDocument();
-  });
 	
+		// モーダルが開いたことを確認
+		const modalTitle = await screen.findByRole('heading', { name: '目標を設定する' });
+		expect(modalTitle).toBeInTheDocument();
+	
+		// モーダル内の閉じるボタンを取得してクリック
+		const closeButton = screen.getByRole('button', { name: 'Close' }); // 'Close' は閉じるボタンのテキスト
+		fireEvent.click(closeButton);
+	
+		// モーダルが閉じたことを確認
+		await waitFor(() => {
+			expect(screen.queryByRole('heading', { name: '目標を設定する' })).not.toBeInTheDocument();
+		});
+	});	
+
 	it('renders the completed goals link with correct href', async () => {
     render(<Dashboard />);
 
     const completedGoalLink = await screen.findByText('達成した目標');
     expect(completedGoalLink.closest('a')).toHaveAttribute('href', '/completed-goal');
   });
+	
+	it('should render the latest completed Small-Goals', async () => {
+    render(<Dashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Completed Small Goal 1')).toBeInTheDocument();
+      expect(screen.getByText('Completed Small Goal 2')).toBeInTheDocument();
+    });
+
+    // 完了した時間の表示を確認
+    expect(screen.getByText('2024-04-24')).toBeInTheDocument();
+    expect(screen.getByText('2024-04-25')).toBeInTheDocument();
+  });
+
+	it('should render the Calendar component', async () => {
+		render(<Dashboard />);
+	
+		// Calendarコンポーネントがモックされたテキストを持つかどうかを確認
+		const calendarElement = await screen.findByText('Mocked ExpCalendar');
+		expect(calendarElement).toBeInTheDocument();
+	});
+	
+	it('should render the ExpLineChart component', async () => {
+		render(<Dashboard />);
+	
+		// ExpLineChartコンポーネントがモックされたテキストを持つかどうかを確認
+		const chartElement = await screen.findByText('Mocked ExpLineChart');
+		expect(chartElement).toBeInTheDocument();
+	});
+
+	it('should render unmet goals in the correct order by deadline', async () => {
+    render(<Dashboard />);
+
+    // 進行中の目標のタイトルを取得
+    const goalTitles = await screen.findAllByTestId('goal-title');
+
+    // 目標のタイトルが正しく表示されているか確認
+		expect(goalTitles[0]).toHaveTextContent('Sample Goal');
+		expect(goalTitles[1]).toHaveTextContent('First Unmet Goal');
+		expect(goalTitles[2]).toHaveTextContent('Second Unmet Goal');
+
+    // それぞれの期限が正しく表示されているかを確認
+		expect(screen.getByText('Deadline: 2024-01-22')).toBeInTheDocument();
+		expect(screen.getByText('Deadline: 2024-12-25')).toBeInTheDocument();
+		expect(screen.getByText('Deadline: 2024-12-31')).toBeInTheDocument();
+
+    // Goalsが期限順に並んでいるか確認（最初が "Sample Goal"、次が "First Unmet Goal"、最後が "Second Unmet Goal"）
+    const goalsList = screen.getAllByRole('listitem');
+		expect(goalsList[0]).toHaveTextContent('Sample Goal');
+		expect(goalsList[1]).toHaveTextContent('First Unmet Goal');
+		expect(goalsList[2]).toHaveTextContent('Second Unmet Goal');
+  });
+	
+	// 進行中のSmall Goalが表示され、遷移できるかを確認
+  it('should render ongoing Small Goals and allow navigation upon clicking "確認" button', async () => {
+		render(<Dashboard />);
+	
+		// "進行中のSmall Goal" セクションの見出しを取得
+		const smallGoalsHeader = await screen.findByText('進行中のSmall Goal');
+		expect(smallGoalsHeader).toBeInTheDocument();
+	
+		// Small Goal のタイトルを取得
+		const smallGoalTitles = await screen.findAllByText(/Sample Small Goal|First Unmet Small Goal|Second Unmet Small Goal/);
+		expect(smallGoalTitles.length).toBe(3);
+	
+		// 各Small Goalに対する"確認"ボタンを取得
+		const confirmButtons = screen.getAllByText('確認');
+		expect(confirmButtons.length).toBe(3);
+	
+		// 各ボタンが正しいリンクにラップされているか確認
+		confirmButtons.forEach((button, index) => {
+			const expectedHref = `/goals/${mockGoalsData[index].id}`;
+			const linkElement = button.closest('a');
+			expect(linkElement).toHaveAttribute('href', expectedHref);
+		});
+	});
+	
+	it('should render the Layout component correctly', async () => {
+		render(<Dashboard />);
+	
+		// Layout コンポーネントがレンダリングされていることを確認
+		const layoutElement = await screen.findByTestId('layout');
+		expect(layoutElement).toBeInTheDocument();
+	
+		// Layout の子要素が正しくレンダリングされているか確認
+		// 例えば、Dashboard コンポーネントの一部を確認
+		expect(screen.getByText('Sample User')).toBeInTheDocument();
+	});
 	
 });
