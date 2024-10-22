@@ -386,4 +386,53 @@ describe('Dashboard page', () => {
 		expect(screen.getByText('Sample User')).toBeInTheDocument();
 	});
 	
+	//userRank が 10 を超える場合、「ごほうびルーレット」リンクが表示されることを確認するテスト
+	 it('should render the "ごほうびルーレット" link when userRank > 10', async () => {
+    // userRank は beforeEach で 20 に設定されているため、変更不要
+
+    render(<Dashboard />);
+
+    // 「ごほうびルーレット」リンクが表示されていることを確認
+    const rouletteLink = await screen.findByText('ごほうびルーレット');
+    expect(rouletteLink).toBeInTheDocument();
+
+    // リンクの href 属性が正しいことを確認
+    expect(rouletteLink.closest('a')).toHaveAttribute('href', '/edit-roulette-text');
+  });
+
+  //userRank が 10 の場合、「ごほうびルーレット」リンクが表示されることを確認するテスト
+  it('should render the "ごほうびルーレット" link when userRank is 10', async () => {
+    // userRank を 10 に設定
+    useAuth.mockReturnValue({
+      isLoggedIn: true,
+      userRank: 10,
+    });
+
+    render(<Dashboard />);
+
+    // 「ごほうびルーレット」リンクが表示されていることを確認
+    const rouletteLink = await screen.findByText('ごほうびルーレット');
+    expect(rouletteLink).toBeInTheDocument();
+
+    // リンクの href 属性が正しいことを確認
+    expect(rouletteLink.closest('a')).toHaveAttribute('href', '/edit-roulette-text');
+  });
+
+	//userRank が 9 の場合、「ごほうびルーレット」リンクが表示されないことを確認するテスト
+  it('should not render the "ごほうびルーレット" link when userRank is 9', async () => {
+    // userRank を 9 に設定
+    useAuth.mockReturnValue({
+      isLoggedIn: true,
+      userRank: 9,
+    });
+
+    render(<Dashboard />);
+
+    // 「ごほうびルーレット」リンクが表示されていないことを確認
+    await waitFor(() => {
+      const rouletteLink = screen.queryByText('ごほうびルーレット');
+      expect(rouletteLink).not.toBeInTheDocument();
+    });
+  });
+
 });
