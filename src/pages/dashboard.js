@@ -91,6 +91,7 @@ function Dashboard() {
         }
     
         setGoalsState(data);
+        console.log('Fetched goalsState:', data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -180,6 +181,8 @@ function Dashboard() {
       console.error("Failed to update last roulette rank due to network error");
     }
   };
+
+
 
   //useEffect(() => {
   //  if (userData.rank >= 121) {
@@ -324,7 +327,7 @@ function Dashboard() {
                   .map((goal) => (
                     <li key={goal.id} className="unmet-goals-card">
                       <Link href={`/goals/${goal.id}`} className="unmet-goals">
-                        <span data-testId="goal-title">{goal.title}</span> 
+                        <span data-testid="goal-title">{goal.title}</span> 
                       </Link>
                       <p className="goal-deadline">
                         Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}

@@ -39,14 +39,32 @@ jest.mock('../components/Layout', () => {
   return MockedLayout;
 });
 
-jest.mock('../utils/withAuth', () => ({
-  __esModule: true,
-  default: (Component) => {
-    const MockedWithAuth = (props) => <Component {...props} />;
-    MockedWithAuth.displayName = `withAuth(${Component.displayName || Component.name || 'Component'})`;
-    return MockedWithAuth;
-  },
-}));
+// withAuth モックの修正
+jest.mock('../utils/withAuth', () => {
+  const React = require('react');
+  const { useAuth } = require('../contexts/AuthContext');
+  const { useRouter } = require('next/router');
+
+  return {
+    __esModule: true,
+    default: (Component) => {
+      const MockedWithAuth = (props) => {
+        const { isLoggedIn } = useAuth();
+        const router = useRouter();
+
+        React.useEffect(() => {
+          if (!isLoggedIn) {
+            router.push('/login');
+          }
+        }, [isLoggedIn, router]);
+
+        return isLoggedIn ? <Component {...props} /> : null;
+      };
+      MockedWithAuth.displayName = `withAuth(${Component.displayName || Component.name || 'Component'})`;
+      return MockedWithAuth;
+    },
+  };
+});
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -132,6 +150,29 @@ describe('Dashboard page', () => {
 				},
 			],
 		},
+		{
+			id: 258,
+			user_id: 7,
+			content: 'This is a completed sample goal.',
+			title: 'Completed Goal',
+			deadline: '2024-11-30',
+			small_goal: null,
+			completed: true,
+			completed_time: '2024-05-01T12:00:00+09:00',
+			small_goals: [
+				{
+					id: 268,
+					goal_id: 258,
+					title: 'Completed Small Goal',
+					difficulty: 'easy',
+					deadline: '2024-11-15T21:07:11.668+09:00',
+					task: 'test',
+					completed: true,
+					completed_time: '2024-05-01T12:00:00+09:00',
+					exp: 30,
+				},
+			],
+		},
   ];
 
   const mockUserData = {
@@ -189,38 +230,42 @@ describe('Dashboard page', () => {
       userRank: 20,
     });
 
-		global.fetch = jest.fn((url, options) => {
-			console.log('Mock fetch called with URL:', url);
-			console.log('Fetch options:', options);
-	
-			if (url === 'http://localhost:3000/api/goals') {
-				console.log('Mock fetch matched /api/goals');
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve(mockGoalsData),
-				});
-			} else if (url === 'http://localhost:3000/api/current_user') {
-				console.log('Mock fetch matched /api/current_user');
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve(mockUserData),
-				});
-			} else if (url.endsWith('/update_rank')) {
-				console.log('Mock fetch matched /update_rank');
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve({ success: true }),
-				});
-			} else {
-				console.log('Mock fetch did not match any condition for URL:', url);
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve({}),
-				});
-			}
-		});
+    global.fetch = jest.fn((url, options) => {
+      console.log('Mock fetch called with URL:', url);
+      console.log('Fetch options:', options);
+
+      if (url === 'http://localhost:3000/api/goals') {
+        console.log('Mock fetch matched /api/goals');
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockGoalsData),
+        });
+      } else if (url === 'http://localhost:3000/api/current_user') {
+        console.log('Mock fetch matched /api/current_user');
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockUserData),
+        });
+      } else if (url.endsWith('/update_rank')) {
+        console.log('Mock fetch matched /update_rank');
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ success: true }),
+        });
+      } else {
+        console.log('Mock fetch did not match any condition for URL:', url);
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({}),
+        });
+      }
+    });
+
+		// コンソールログをスパイ
+    jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
+	
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
@@ -435,4 +480,50 @@ describe('Dashboard page', () => {
     });
   });
 
+	it('redirects to login page if user is not logged in', async () => {
+		// ユーザーがログインしていない状態をモック
+		useAuth.mockReturnValue({
+			isLoggedIn: false,
+			userRank: null,
+		});
+	
+		render(<Dashboard />);
+	
+		// リダイレクトが実行されるまで待機
+		await waitFor(() => {
+			expect(mockPush).toHaveBeenCalledWith('/login');
+		});
+	});
+	
+  it('renders only goals with completed: false as ongoing goals', async () => {
+		// ダッシュボードをレンダリング
+		render(<Dashboard />);
+	
+		// "進行中のGoal" セクションの見出しを確認
+		const header = await screen.findByText('進行中のGoal');
+		expect(header).toBeInTheDocument();
+	
+		// 完了していないゴールのみが表示されていることを確認
+		const ongoingGoals = mockGoalsData.filter(goal => !goal.completed);
+	
+		// 表示されている全てのgoal-titleを取得
+		const goalTitleElements = await screen.findAllByTestId('goal-title');
+	
+		// 表示されているゴールの数が完了していないゴールの数と一致することを確認
+		expect(goalTitleElements).toHaveLength(ongoingGoals.length);
+	
+		// 各完了していないゴールのタイトルが表示されていることを確認
+		ongoingGoals.forEach(goal => {
+			const isGoalPresent = goalTitleElements.some(element => element.textContent === goal.title);
+			expect(isGoalPresent).toBe(true);
+		});
+	
+		// 完了済みゴールが表示されていないことを確認
+		const completedGoals = mockGoalsData.filter(goal => goal.completed);
+		completedGoals.forEach(goal => {
+			const completedGoalTitle = screen.queryByText(goal.title);
+			expect(completedGoalTitle).not.toBeInTheDocument();
+		});
+	});
+	
 });

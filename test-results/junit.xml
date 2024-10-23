@@ -1,0 +1,1414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="17" failures="3" errors="0" time="5.639">
+  <testsuite name="Dashboard page" errors="0" failures="3" skipped="0" timestamp="2024-10-23T03:23:17" time="4.408" tests="17">
+    <testcase classname="Dashboard page renders the dashboard with user profile and goals" name="Dashboard page renders the dashboard with user profile and goals" time="0.168">
+    </testcase>
+    <testcase classname="Dashboard page calls updateLastRouletteRank when rank increases past a multiple of 10" name="Dashboard page calls updateLastRouletteRank when rank increases past a multiple of 10" time="0.061">
+    </testcase>
+    <testcase classname="Dashboard page updates lastRouletteRank when rank increases past a multiple of 10" name="Dashboard page updates lastRouletteRank when rank increases past a multiple of 10" time="0.026">
+    </testcase>
+    <testcase classname="Dashboard page opens and closes the goal creation modal when the respective buttons are clicked" name="Dashboard page opens and closes the goal creation modal when the respective buttons are clicked" time="0.143">
+    </testcase>
+    <testcase classname="Dashboard page renders the completed goals link with correct href" name="Dashboard page renders the completed goals link with correct href" time="0.007">
+    </testcase>
+    <testcase classname="Dashboard page should render the latest completed Small-Goals" name="Dashboard page should render the latest completed Small-Goals" time="0.029">
+    </testcase>
+    <testcase classname="Dashboard page should render the Calendar component" name="Dashboard page should render the Calendar component" time="0.016">
+    </testcase>
+    <testcase classname="Dashboard page should render the ExpLineChart component" name="Dashboard page should render the ExpLineChart component" time="0.02">
+    </testcase>
+    <testcase classname="Dashboard page should render unmet goals in the correct order by deadline" name="Dashboard page should render unmet goals in the correct order by deadline" time="1.062">
+      <failure>Error: Unable to find an element by: [data-testid=&quot;unmet-goal-title&quot;]
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      data-testid=&quot;layout&quot;
+    &gt;
+      &lt;div /&gt;
+      &lt;div
+        class=&quot;dashboard&quot;
+      &gt;
+        &lt;div
+          class=&quot;dashboard-container&quot;
+        &gt;
+          &lt;div
+            class=&quot;dashboard-left-container&quot;
+          &gt;
+            &lt;div
+              class=&quot;user-profile-container&quot;
+            &gt;
+              &lt;h1&gt;
+                Welcome to your dashboard
+              &lt;/h1&gt;
+              &lt;div
+                class=&quot;user-profile-card&quot;
+              &gt;
+                &lt;div
+                  class=&quot;user-profile&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;user-profile__basic&quot;
+                  &gt;
+                    &lt;div
+                      class=&quot;user-profile__image&quot;
+                    &gt;
+                      &lt;img
+                        alt=&quot;User Profile Image&quot;
+                        class=&quot;profile-image&quot;
+                        data-nimg=&quot;1&quot;
+                        decoding=&quot;async&quot;
+                        height=&quot;60&quot;
+                        loading=&quot;lazy&quot;
+                        src=&quot;/_next/image?url=%2Fimages%2Flearn.png&amp;w=128&amp;q=75&quot;
+                        srcset=&quot;/_next/image?url=%2Fimages%2Flearn.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Flearn.png&amp;w=128&amp;q=75 2x&quot;
+                        style=&quot;color: transparent;&quot;
+                        width=&quot;60&quot;
+                      /&gt;
+                    &lt;/div&gt;
+                    &lt;div
+                      class=&quot;user-profile__info&quot;
+                    &gt;
+                      &lt;div
+                        class=&quot;user-profile__title&quot;
+                      /&gt;
+                      &lt;div
+                        class=&quot;user-profile__name&quot;
+                      &gt;
+                        Sample User
+                      &lt;/div&gt;
+                      &lt;div
+                        class=&quot;user-profile__roulette&quot;
+                      &gt;
+                        &lt;a
+                          href=&quot;/edit-roulette-text&quot;
+                        &gt;
+                          ごほうびルーレット
+                        &lt;/a&gt;
+                      &lt;/div&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;user-profile__separator&quot;
+                  /&gt;
+                  &lt;div
+                    class=&quot;user-profile__rank&quot;
+                  &gt;
+                    &lt;h2&gt;
+                      Your EXP: 
+                      140
+                    &lt;/h2&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;user-profile__separator&quot;
+                  /&gt;
+                  &lt;div
+                    class=&quot;user-profile__exp&quot;
+                  &gt;
+                    &lt;h2&gt;
+                      Your Rank: 
+                      20
+                    &lt;/h2&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div
+              class=&quot;chart&quot;
+            &gt;
+              &lt;div&gt;
+                Mocked ExpLineChart
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div
+              class=&quot;dashboard-left-bottom-container&quot;
+            &gt;
+              &lt;div
+                class=&quot;button-container&quot;
+              &gt;
+                &lt;a
+                  href=&quot;/new-goal&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;btn btn-primary&quot;
+                  &gt;
+                    目標を設定する
+                  &lt;/div&gt;
+                &lt;/a&gt;
+                &lt;a
+                  href=&quot;/completed-goal&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;btn btn-primary&quot;
+                  &gt;
+                    達成した目標
+                  &lt;/div&gt;
+                &lt;/a&gt;
+              &lt;/div&gt;
+              &lt;div
+                class=&quot;small-goals&quot;
+              &gt;
+                &lt;h2&gt;
+                  進行中のSmall Goal
+                &lt;/h2&gt;
+                &lt;div
+                  class=&quot;c-card small-goals&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;small-goal__image-container&quot;
+                  &gt;
+                    &lt;img
+                      alt=&quot;Goal Image&quot;
+                      class=&quot;small-goal__image&quot;
+                      data-nimg=&quot;1&quot;
+                      decoding=&quot;async&quot;
+                      height=&quot;60&quot;
+                      loading=&quot;lazy&quot;
+                      src=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75&quot;
+                      srcset=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75 2x&quot;
+                      style=&quot;color: transparent;&quot;
+                      width=&quot;60&quot;
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__content-container&quot;
+                  &gt;
+                    &lt;p
+                      class=&quot;goal-title&quot;
+                    &gt;
+                      Sample Goal
+                    &lt;/p&gt;
+                     
+                    &lt;div
+                      class=&quot;small-goal__content&quot;
+                    &gt;
+                      &lt;p
+                        class=&quot;small-goal__title&quot;
+                      &gt;
+                        Sample Small Goal
+                      &lt;/p&gt;
+                      &lt;p
+                        class=&quot;small-goal__deadline&quot;
+                      &gt;
+                        Deadline: 
+                        2024-12-15
+                      &lt;/p&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__button-container&quot;
+                  &gt;
+                    &lt;a
+                      href=&quot;/goals/255&quot;
+                    &gt;
+                      &lt;button
+                        class=&quot;small-goal__confirm-button&quot;
+                      &gt;
+                        確認
+                      &lt;/button&gt;
+                    &lt;/a&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div
+                  class=&quot;c-card small-goals&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;small-goal__image-container&quot;
+                  &gt;
+                    &lt;img
+                      alt=&quot;Goal Image&quot;
+                      class=&quot;small-goal__image&quot;
+                      data-nimg=&quot;1&quot;
+                      decoding=&quot;async&quot;
+                      height=&quot;60&quot;
+                      loading=&quot;lazy&quot;
+                      src=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75&quot;
+                      srcset=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75 2x&quot;
+                      style=&quot;color: transparent;&quot;
+                      width=&quot;60&quot;
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__content-container&quot;
+                  &gt;
+                    &lt;p
+                      class=&quot;goal-title&quot;
+                    &gt;
+                      First Unmet Goal
+                    &lt;/p&gt;
+                     
+                    &lt;div
+                      class=&quot;small-goal__content&quot;
+                    &gt;
+                      &lt;p
+                        class=&quot;small-goal__title&quot;
+                      &gt;
+                        First Unmet Small Goal
+                      &lt;/p&gt;
+                      &lt;p
+                        class=&quot;small-goal__deadline&quot;
+                      &gt;
+                        Deadline: 
+                        2024-12-15
+                      &lt;/p&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__button-container&quot;
+                  &gt;
+                    &lt;a
+                      href=&quot;/goals/256&quot;
+                    &gt;
+                      &lt;button
+                        class=&quot;small-goal__confirm-button&quot;
+                      &gt;
+                        確認
+                      &lt;/button&gt;
+                    &lt;/a&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div
+                  class=&quot;c-card small-goals&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;small-goal__image-container&quot;
+                  &gt;
+                    &lt;img
+                      alt=&quot;Goal Image&quot;
+                      class=&quot;small-goal__image&quot;
+                      data-nimg=&quot;1&quot;
+                      decoding=&quot;async&quot;
+                      height=&quot;60&quot;
+                      loading=&quot;lazy&quot;
+                      src=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75&quot;
+                      srcset=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75 2x&quot;
+                      style=&quot;color: transparent;&quot;
+                      width=&quot;60&quot;
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__content-container&quot;
+                  &gt;
+                    &lt;p
+                      class=&quot;goal-title&quot;
+                    &gt;
+                      Second Unmet Goal
+                    &lt;/p&gt;
+                     
+                    &lt;div
+                      class=&quot;small-goal__content&quot;
+                    &gt;
+                      &lt;p
+                        class=&quot;small-goal__title&quot;
+                      &gt;
+                        Second Unmet Small Goal
+                      &lt;/p&gt;
+                      &lt;p
+                        class=&quot;small-goal__deadline&quot;
+                      &gt;
+                        Deadline: 
+                        2024-12-15
+                      &lt;/p&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__button-container&quot;
+                  &gt;
+                    &lt;a
+                      href=&quot;/goals/257&quot;
+                    &gt;
+                      &lt;button
+                        class=&quot;small-goal__confirm-button&quot;
+                      &gt;
+                        確認
+                      &lt;/button&gt;
+                    &lt;/a&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div
+            class=&quot;dashboard-right-container&quot;
+          &gt;
+            &lt;div
+              class=&quot;calendar&quot;
+            &gt;
+              &lt;div&gt;
+                Mocked ExpCalendar
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div
+              class=&quot;unmet-goals&quot;
+            &gt;
+              &lt;h3&gt;
+                進行中のGoal
+              &lt;/h3&gt;
+              &lt;ul&gt;
+                &lt;li
+                  class=&quot;unmet-goals-card&quot;
+                &gt;
+                  &lt;a
+                    class=&quot;unmet-goals&quot;
+                    href=&quot;/goals/255&quot;
+                  &gt;
+                    &lt;span
+                      data-testid=&quot;unmet-goal-title-255&quot;
+                    &gt;
+                      Sample Goal
+                    &lt;/span&gt;
+                  &lt;/a&gt;
+                  &lt;p
+                    class=&quot;goal-deadline&quot;
+                  &gt;
+                    Deadline: 
+                    2024-01-22
+                  &lt;/p&gt;
+                &lt;/li&gt;
+                &lt;li
+                  class=&quot;unmet-goals-card&quot;
+                &gt;
+                  &lt;a
+                    class=&quot;unmet-goals&quot;
+                    href=&quot;/goals/256&quot;
+                  &gt;
+                    &lt;span
+                      data-testid=&quot;unmet-goal-title-256&quot;
+                    &gt;
+                      First Unmet Goal
+                    &lt;/span&gt;
+                  &lt;/a&gt;
+                  &lt;p
+                    class=&quot;goal-deadline&quot;
+                  &gt;
+                    Deadline: 
+                    2024-12-25
+                  &lt;/p&gt;
+                &lt;/li&gt;
+                &lt;li
+                  class=&quot;unmet-goals-card&quot;
+                &gt;
+                  &lt;a
+                    class=&quot;unmet-goals&quot;
+                    href=&quot;/goals/257&quot;
+                  &gt;
+                    &lt;span
+                      data-testid=&quot;unmet-goal-title-257&quot;
+                    &gt;
+                      Second Unmet Goal
+                    &lt;/span&gt;
+                  &lt;/a&gt;
+                  &lt;p
+                    class=&quot;goal-deadline&quot;
+                  &gt;
+                    Deadline: 
+                    2024-12-31
+                  &lt;/p&gt;
+                &lt;/li&gt;
+              &lt;/ul&gt;
+              &lt;div
+                class=&quot;dashboard-right-container-bottom&quot;
+              &gt;
+                &lt;h3&gt;
+                  最近完了したSmall-Goal
+                &lt;/h3&gt;
+                &lt;div
+                  class=&quot;bottom-small-goal-card&quot;
+                &gt;
+                  &lt;p&gt;
+                    Completed Small Goal 1
+                  &lt;/p&gt;
+                  &lt;p&gt;
+                    &lt;span
+                      class=&quot;completed-text&quot;
+                    &gt;
+                      完了!
+                    &lt;/span&gt;
+                    &lt;span
+                      class=&quot;completed-time&quot;
+                    &gt;
+                      2024-04-24
+                    &lt;/span&gt;
+                  &lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div
+                  class=&quot;bottom-small-goal-card&quot;
+                &gt;
+                  &lt;p&gt;
+                    Completed Small Goal 2
+                  &lt;/p&gt;
+                  &lt;p&gt;
+                    &lt;span
+                      class=&quot;completed-text&quot;
+                    &gt;
+                      完了!
+                    &lt;/span&gt;
+                    &lt;span
+                      class=&quot;completed-time&quot;
+                    &gt;
+                      2024-04-25
+                    &lt;/span&gt;
+                  &lt;/p&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+    at waitForWrapper (/Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+    at /Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+    at findAllByTestId (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:356:37)
+    at call (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at Generator.tryCatch (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at Generator._invoke [as next] (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at asyncGeneratorStep (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at asyncGeneratorStep (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at _next (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at new Promise (&lt;anonymous&gt;)
+    at Object.&lt;anonymous&gt; (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at Promise.then.completed (/Users/naaariii/projects/roulettepopup/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/naaariii/projects/roulettepopup/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/naaariii/projects/roulettepopup/node_modules/jest-circus/build/run.js:316:40)
+    at runNextTicks (node:internal/process/task_queues:60:5)
+    at listOnTimeout (node:internal/timers:540:9)
+    at processTimers (node:internal/timers:514:7)
+    at _runTest (/Users/naaariii/projects/roulettepopup/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/Users/naaariii/projects/roulettepopup/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/Users/naaariii/projects/roulettepopup/node_modules/jest-circus/build/run.js:121:9)
+    at run (/Users/naaariii/projects/roulettepopup/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/Users/naaariii/projects/roulettepopup/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/Users/naaariii/projects/roulettepopup/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/Users/naaariii/projects/roulettepopup/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/Users/naaariii/projects/roulettepopup/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Dashboard page should render ongoing Small Goals and allow navigation upon clicking &quot;確認&quot; button" name="Dashboard page should render ongoing Small Goals and allow navigation upon clicking &quot;確認&quot; button" time="0.042">
+    </testcase>
+    <testcase classname="Dashboard page should render the Layout component correctly" name="Dashboard page should render the Layout component correctly" time="0.028">
+    </testcase>
+    <testcase classname="Dashboard page should render the &quot;ごほうびルーレット&quot; link when userRank &gt; 10" name="Dashboard page should render the &quot;ごほうびルーレット&quot; link when userRank &gt; 10" time="0.025">
+    </testcase>
+    <testcase classname="Dashboard page should render the &quot;ごほうびルーレット&quot; link when userRank is 10" name="Dashboard page should render the &quot;ごほうびルーレット&quot; link when userRank is 10" time="0.019">
+    </testcase>
+    <testcase classname="Dashboard page should not render the &quot;ごほうびルーレット&quot; link when userRank is 9" name="Dashboard page should not render the &quot;ごほうびルーレット&quot; link when userRank is 9" time="0.022">
+    </testcase>
+    <testcase classname="Dashboard page redirects to login page if user is not logged in" name="Dashboard page redirects to login page if user is not logged in" time="0.003">
+    </testcase>
+    <testcase classname="Dashboard page removes a goal from ongoing goals when it is completed" name="Dashboard page removes a goal from ongoing goals when it is completed" time="0.022">
+      <failure>TestingLibraryElementError: Unable to find an element by: [data-testid=&quot;complete-button-255&quot;]
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      data-testid=&quot;layout&quot;
+    &gt;
+      &lt;div /&gt;
+      &lt;div
+        class=&quot;dashboard&quot;
+      &gt;
+        &lt;div
+          class=&quot;dashboard-container&quot;
+        &gt;
+          &lt;div
+            class=&quot;dashboard-left-container&quot;
+          &gt;
+            &lt;div
+              class=&quot;user-profile-container&quot;
+            &gt;
+              &lt;h1&gt;
+                Welcome to your dashboard
+              &lt;/h1&gt;
+              &lt;div
+                class=&quot;user-profile-card&quot;
+              &gt;
+                &lt;div
+                  class=&quot;user-profile&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;user-profile__basic&quot;
+                  &gt;
+                    &lt;div
+                      class=&quot;user-profile__image&quot;
+                    &gt;
+                      &lt;img
+                        alt=&quot;User Profile Image&quot;
+                        class=&quot;profile-image&quot;
+                        data-nimg=&quot;1&quot;
+                        decoding=&quot;async&quot;
+                        height=&quot;60&quot;
+                        loading=&quot;lazy&quot;
+                        src=&quot;/_next/image?url=%2Fimages%2Flearn.png&amp;w=128&amp;q=75&quot;
+                        srcset=&quot;/_next/image?url=%2Fimages%2Flearn.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Flearn.png&amp;w=128&amp;q=75 2x&quot;
+                        style=&quot;color: transparent;&quot;
+                        width=&quot;60&quot;
+                      /&gt;
+                    &lt;/div&gt;
+                    &lt;div
+                      class=&quot;user-profile__info&quot;
+                    &gt;
+                      &lt;div
+                        class=&quot;user-profile__title&quot;
+                      /&gt;
+                      &lt;div
+                        class=&quot;user-profile__name&quot;
+                      &gt;
+                        Sample User
+                      &lt;/div&gt;
+                      &lt;div
+                        class=&quot;user-profile__roulette&quot;
+                      &gt;
+                        &lt;a
+                          href=&quot;/edit-roulette-text&quot;
+                        &gt;
+                          ごほうびルーレット
+                        &lt;/a&gt;
+                      &lt;/div&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;user-profile__separator&quot;
+                  /&gt;
+                  &lt;div
+                    class=&quot;user-profile__rank&quot;
+                  &gt;
+                    &lt;h2&gt;
+                      Your EXP: 
+                      140
+                    &lt;/h2&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;user-profile__separator&quot;
+                  /&gt;
+                  &lt;div
+                    class=&quot;user-profile__exp&quot;
+                  &gt;
+                    &lt;h2&gt;
+                      Your Rank: 
+                      20
+                    &lt;/h2&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div
+              class=&quot;chart&quot;
+            &gt;
+              &lt;div&gt;
+                Mocked ExpLineChart
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div
+              class=&quot;dashboard-left-bottom-container&quot;
+            &gt;
+              &lt;div
+                class=&quot;button-container&quot;
+              &gt;
+                &lt;a
+                  href=&quot;/new-goal&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;btn btn-primary&quot;
+                  &gt;
+                    目標を設定する
+                  &lt;/div&gt;
+                &lt;/a&gt;
+                &lt;a
+                  href=&quot;/completed-goal&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;btn btn-primary&quot;
+                  &gt;
+                    達成した目標
+                  &lt;/div&gt;
+                &lt;/a&gt;
+              &lt;/div&gt;
+              &lt;div
+                class=&quot;small-goals&quot;
+              &gt;
+                &lt;h2&gt;
+                  進行中のSmall Goal
+                &lt;/h2&gt;
+                &lt;div
+                  class=&quot;c-card small-goals&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;small-goal__image-container&quot;
+                  &gt;
+                    &lt;img
+                      alt=&quot;Goal Image&quot;
+                      class=&quot;small-goal__image&quot;
+                      data-nimg=&quot;1&quot;
+                      decoding=&quot;async&quot;
+                      height=&quot;60&quot;
+                      loading=&quot;lazy&quot;
+                      src=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75&quot;
+                      srcset=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75 2x&quot;
+                      style=&quot;color: transparent;&quot;
+                      width=&quot;60&quot;
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__content-container&quot;
+                  &gt;
+                    &lt;p
+                      class=&quot;goal-title&quot;
+                    &gt;
+                      Sample Goal
+                    &lt;/p&gt;
+                     
+                    &lt;div
+                      class=&quot;small-goal__content&quot;
+                    &gt;
+                      &lt;p
+                        class=&quot;small-goal__title&quot;
+                      &gt;
+                        Sample Small Goal
+                      &lt;/p&gt;
+                      &lt;p
+                        class=&quot;small-goal__deadline&quot;
+                      &gt;
+                        Deadline: 
+                        2024-12-15
+                      &lt;/p&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__button-container&quot;
+                  &gt;
+                    &lt;a
+                      href=&quot;/goals/255&quot;
+                    &gt;
+                      &lt;button
+                        class=&quot;small-goal__confirm-button&quot;
+                      &gt;
+                        確認
+                      &lt;/button&gt;
+                    &lt;/a&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div
+                  class=&quot;c-card small-goals&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;small-goal__image-container&quot;
+                  &gt;
+                    &lt;img
+                      alt=&quot;Goal Image&quot;
+                      class=&quot;small-goal__image&quot;
+                      data-nimg=&quot;1&quot;
+                      decoding=&quot;async&quot;
+                      height=&quot;60&quot;
+                      loading=&quot;lazy&quot;
+                      src=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75&quot;
+                      srcset=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75 2x&quot;
+                      style=&quot;color: transparent;&quot;
+                      width=&quot;60&quot;
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__content-container&quot;
+                  &gt;
+                    &lt;p
+                      class=&quot;goal-title&quot;
+                    &gt;
+                      First Unmet Goal
+                    &lt;/p&gt;
+                     
+                    &lt;div
+                      class=&quot;small-goal__content&quot;
+                    &gt;
+                      &lt;p
+                        class=&quot;small-goal__title&quot;
+                      &gt;
+                        First Unmet Small Goal
+                      &lt;/p&gt;
+                      &lt;p
+                        class=&quot;small-goal__deadline&quot;
+                      &gt;
+                        Deadline: 
+                        2024-12-15
+                      &lt;/p&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__button-container&quot;
+                  &gt;
+                    &lt;a
+                      href=&quot;/goals/256&quot;
+                    &gt;
+                      &lt;button
+                        class=&quot;small-goal__confirm-button&quot;
+                      &gt;
+                        確認
+                      &lt;/button&gt;
+                    &lt;/a&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div
+                  class=&quot;c-card small-goals&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;small-goal__image-container&quot;
+                  &gt;
+                    &lt;img
+                      alt=&quot;Goal Image&quot;
+                      class=&quot;small-goal__image&quot;
+                      data-nimg=&quot;1&quot;
+                      decoding=&quot;async&quot;
+                      height=&quot;60&quot;
+                      loading=&quot;lazy&quot;
+                      src=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75&quot;
+                      srcset=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75 2x&quot;
+                      style=&quot;color: transparent;&quot;
+                      width=&quot;60&quot;
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__content-container&quot;
+                  &gt;
+                    &lt;p
+                      class=&quot;goal-title&quot;
+                    &gt;
+                      Second Unmet Goal
+                    &lt;/p&gt;
+                     
+                    &lt;div
+                      class=&quot;small-goal__content&quot;
+                    &gt;
+                      &lt;p
+                        class=&quot;small-goal__title&quot;
+                      &gt;
+                        Second Unmet Small Goal
+                      &lt;/p&gt;
+                      &lt;p
+                        class=&quot;small-goal__deadline&quot;
+                      &gt;
+                        Deadline: 
+                        2024-12-15
+                      &lt;/p&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__button-container&quot;
+                  &gt;
+                    &lt;a
+                      href=&quot;/goals/257&quot;
+                    &gt;
+                      &lt;button
+                        class=&quot;small-goal__confirm-button&quot;
+                      &gt;
+                        確認
+                      &lt;/button&gt;
+                    &lt;/a&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div
+            class=&quot;dashboard-right-container&quot;
+          &gt;
+            &lt;div
+              class=&quot;calendar&quot;
+            &gt;
+              &lt;div&gt;
+                Mocked ExpCalendar
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div
+              class=&quot;unmet-goals&quot;
+            &gt;
+              &lt;h3&gt;
+                進行中のGoal
+              &lt;/h3&gt;
+              &lt;ul&gt;
+                &lt;li
+                  class=&quot;unmet-goals-card&quot;
+                &gt;
+                  &lt;a
+                    class=&quot;unmet-goals&quot;
+                    href=&quot;/goals/255&quot;
+                  &gt;
+                    &lt;span
+                      data-testid=&quot;unmet-goal-title-255&quot;
+                    &gt;
+                      Sample Goal
+                    &lt;/span&gt;
+                  &lt;/a&gt;
+                  &lt;p
+                    class=&quot;goal-deadline&quot;
+                  &gt;
+                    Deadline: 
+                    2024-01-22
+                  &lt;/p&gt;
+                &lt;/li&gt;
+                &lt;li
+                  class=&quot;unmet-goals-card&quot;
+                &gt;
+                  &lt;a
+                    class=&quot;unmet-goals&quot;
+                    href=&quot;/goals/256&quot;
+                  &gt;
+                    &lt;span
+                      data-testid=&quot;unmet-goal-title-256&quot;
+                    &gt;
+                      First Unmet Goal
+                    &lt;/span&gt;
+                  &lt;/a&gt;
+                  &lt;p
+                    class=&quot;goal-deadline&quot;
+                  &gt;
+                    Deadline: 
+                    2024-12-25
+                  &lt;/p&gt;
+                &lt;/li&gt;
+                &lt;li
+                  class=&quot;unmet-goals-card&quot;
+                &gt;
+                  &lt;a
+                    class=&quot;unmet-goals&quot;
+                    href=&quot;/goals/257&quot;
+                  &gt;
+                    &lt;span
+                      data-testid=&quot;unmet-goal-title-257&quot;
+                    &gt;
+                      Second Unmet Goal
+                    &lt;/span&gt;
+                  &lt;/a&gt;
+                  &lt;p
+                    class=&quot;goal-deadline&quot;
+                  &gt;
+                    Deadline: 
+                    2024-12-31
+                  &lt;/p&gt;
+                &lt;/li&gt;
+              &lt;/ul&gt;
+              &lt;div
+                class=&quot;dashboard-right-container-bottom&quot;
+              &gt;
+                &lt;h3&gt;
+                  最近完了したSmall-Goal
+                &lt;/h3&gt;
+                &lt;div
+                  class=&quot;bottom-small-goal-card&quot;
+                &gt;
+                  &lt;p&gt;
+                    Completed Small Goal 1
+                  &lt;/p&gt;
+                  &lt;p&gt;
+                    &lt;span
+                      class=&quot;completed-text&quot;
+                    &gt;
+                      完了!
+                    &lt;/span&gt;
+                    &lt;span
+                      class=&quot;completed-time&quot;
+                    &gt;
+                      2024-04-24
+                    &lt;/span&gt;
+                  &lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div
+                  class=&quot;bottom-small-goal-card&quot;
+                &gt;
+                  &lt;p&gt;
+                    Completed Small Goal 2
+                  &lt;/p&gt;
+                  &lt;p&gt;
+                    &lt;span
+                      class=&quot;completed-text&quot;
+                    &gt;
+                      完了!
+                    &lt;/span&gt;
+                    &lt;span
+                      class=&quot;completed-time&quot;
+                    &gt;
+                      2024-04-25
+                    &lt;/span&gt;
+                  &lt;/p&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+    at Object.getElementError (/Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/config.js:37:19)
+    at /Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+    at /Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+    at /Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+    at getByTestId (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:490:35)
+    at call (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at Generator.tryCatch (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at Generator._invoke [as next] (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at asyncGeneratorStep (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at asyncGeneratorStep (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at runNextTicks (node:internal/process/task_queues:60:5)
+    at listOnTimeout (node:internal/timers:540:9)
+    at processTimers (node:internal/timers:514:7)</failure>
+    </testcase>
+    <testcase classname="Dashboard page removes a goal from ongoing goals when it is deleted" name="Dashboard page removes a goal from ongoing goals when it is deleted" time="0.021">
+      <failure>TestingLibraryElementError: Unable to find an element by: [data-testid=&quot;delete-button-256&quot;]
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      data-testid=&quot;layout&quot;
+    &gt;
+      &lt;div /&gt;
+      &lt;div
+        class=&quot;dashboard&quot;
+      &gt;
+        &lt;div
+          class=&quot;dashboard-container&quot;
+        &gt;
+          &lt;div
+            class=&quot;dashboard-left-container&quot;
+          &gt;
+            &lt;div
+              class=&quot;user-profile-container&quot;
+            &gt;
+              &lt;h1&gt;
+                Welcome to your dashboard
+              &lt;/h1&gt;
+              &lt;div
+                class=&quot;user-profile-card&quot;
+              &gt;
+                &lt;div
+                  class=&quot;user-profile&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;user-profile__basic&quot;
+                  &gt;
+                    &lt;div
+                      class=&quot;user-profile__image&quot;
+                    &gt;
+                      &lt;img
+                        alt=&quot;User Profile Image&quot;
+                        class=&quot;profile-image&quot;
+                        data-nimg=&quot;1&quot;
+                        decoding=&quot;async&quot;
+                        height=&quot;60&quot;
+                        loading=&quot;lazy&quot;
+                        src=&quot;/_next/image?url=%2Fimages%2Flearn.png&amp;w=128&amp;q=75&quot;
+                        srcset=&quot;/_next/image?url=%2Fimages%2Flearn.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Flearn.png&amp;w=128&amp;q=75 2x&quot;
+                        style=&quot;color: transparent;&quot;
+                        width=&quot;60&quot;
+                      /&gt;
+                    &lt;/div&gt;
+                    &lt;div
+                      class=&quot;user-profile__info&quot;
+                    &gt;
+                      &lt;div
+                        class=&quot;user-profile__title&quot;
+                      /&gt;
+                      &lt;div
+                        class=&quot;user-profile__name&quot;
+                      &gt;
+                        Sample User
+                      &lt;/div&gt;
+                      &lt;div
+                        class=&quot;user-profile__roulette&quot;
+                      &gt;
+                        &lt;a
+                          href=&quot;/edit-roulette-text&quot;
+                        &gt;
+                          ごほうびルーレット
+                        &lt;/a&gt;
+                      &lt;/div&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;user-profile__separator&quot;
+                  /&gt;
+                  &lt;div
+                    class=&quot;user-profile__rank&quot;
+                  &gt;
+                    &lt;h2&gt;
+                      Your EXP: 
+                      140
+                    &lt;/h2&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;user-profile__separator&quot;
+                  /&gt;
+                  &lt;div
+                    class=&quot;user-profile__exp&quot;
+                  &gt;
+                    &lt;h2&gt;
+                      Your Rank: 
+                      20
+                    &lt;/h2&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div
+              class=&quot;chart&quot;
+            &gt;
+              &lt;div&gt;
+                Mocked ExpLineChart
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div
+              class=&quot;dashboard-left-bottom-container&quot;
+            &gt;
+              &lt;div
+                class=&quot;button-container&quot;
+              &gt;
+                &lt;a
+                  href=&quot;/new-goal&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;btn btn-primary&quot;
+                  &gt;
+                    目標を設定する
+                  &lt;/div&gt;
+                &lt;/a&gt;
+                &lt;a
+                  href=&quot;/completed-goal&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;btn btn-primary&quot;
+                  &gt;
+                    達成した目標
+                  &lt;/div&gt;
+                &lt;/a&gt;
+              &lt;/div&gt;
+              &lt;div
+                class=&quot;small-goals&quot;
+              &gt;
+                &lt;h2&gt;
+                  進行中のSmall Goal
+                &lt;/h2&gt;
+                &lt;div
+                  class=&quot;c-card small-goals&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;small-goal__image-container&quot;
+                  &gt;
+                    &lt;img
+                      alt=&quot;Goal Image&quot;
+                      class=&quot;small-goal__image&quot;
+                      data-nimg=&quot;1&quot;
+                      decoding=&quot;async&quot;
+                      height=&quot;60&quot;
+                      loading=&quot;lazy&quot;
+                      src=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75&quot;
+                      srcset=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75 2x&quot;
+                      style=&quot;color: transparent;&quot;
+                      width=&quot;60&quot;
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__content-container&quot;
+                  &gt;
+                    &lt;p
+                      class=&quot;goal-title&quot;
+                    &gt;
+                      Sample Goal
+                    &lt;/p&gt;
+                     
+                    &lt;div
+                      class=&quot;small-goal__content&quot;
+                    &gt;
+                      &lt;p
+                        class=&quot;small-goal__title&quot;
+                      &gt;
+                        Sample Small Goal
+                      &lt;/p&gt;
+                      &lt;p
+                        class=&quot;small-goal__deadline&quot;
+                      &gt;
+                        Deadline: 
+                        2024-12-15
+                      &lt;/p&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__button-container&quot;
+                  &gt;
+                    &lt;a
+                      href=&quot;/goals/255&quot;
+                    &gt;
+                      &lt;button
+                        class=&quot;small-goal__confirm-button&quot;
+                      &gt;
+                        確認
+                      &lt;/button&gt;
+                    &lt;/a&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div
+                  class=&quot;c-card small-goals&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;small-goal__image-container&quot;
+                  &gt;
+                    &lt;img
+                      alt=&quot;Goal Image&quot;
+                      class=&quot;small-goal__image&quot;
+                      data-nimg=&quot;1&quot;
+                      decoding=&quot;async&quot;
+                      height=&quot;60&quot;
+                      loading=&quot;lazy&quot;
+                      src=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75&quot;
+                      srcset=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75 2x&quot;
+                      style=&quot;color: transparent;&quot;
+                      width=&quot;60&quot;
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__content-container&quot;
+                  &gt;
+                    &lt;p
+                      class=&quot;goal-title&quot;
+                    &gt;
+                      First Unmet Goal
+                    &lt;/p&gt;
+                     
+                    &lt;div
+                      class=&quot;small-goal__content&quot;
+                    &gt;
+                      &lt;p
+                        class=&quot;small-goal__title&quot;
+                      &gt;
+                        First Unmet Small Goal
+                      &lt;/p&gt;
+                      &lt;p
+                        class=&quot;small-goal__deadline&quot;
+                      &gt;
+                        Deadline: 
+                        2024-12-15
+                      &lt;/p&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__button-container&quot;
+                  &gt;
+                    &lt;a
+                      href=&quot;/goals/256&quot;
+                    &gt;
+                      &lt;button
+                        class=&quot;small-goal__confirm-button&quot;
+                      &gt;
+                        確認
+                      &lt;/button&gt;
+                    &lt;/a&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div
+                  class=&quot;c-card small-goals&quot;
+                &gt;
+                  &lt;div
+                    class=&quot;small-goal__image-container&quot;
+                  &gt;
+                    &lt;img
+                      alt=&quot;Goal Image&quot;
+                      class=&quot;small-goal__image&quot;
+                      data-nimg=&quot;1&quot;
+                      decoding=&quot;async&quot;
+                      height=&quot;60&quot;
+                      loading=&quot;lazy&quot;
+                      src=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75&quot;
+                      srcset=&quot;/_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=64&amp;q=75 1x, /_next/image?url=%2Fimages%2Fpen-memo4.png&amp;w=128&amp;q=75 2x&quot;
+                      style=&quot;color: transparent;&quot;
+                      width=&quot;60&quot;
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__content-container&quot;
+                  &gt;
+                    &lt;p
+                      class=&quot;goal-title&quot;
+                    &gt;
+                      Second Unmet Goal
+                    &lt;/p&gt;
+                     
+                    &lt;div
+                      class=&quot;small-goal__content&quot;
+                    &gt;
+                      &lt;p
+                        class=&quot;small-goal__title&quot;
+                      &gt;
+                        Second Unmet Small Goal
+                      &lt;/p&gt;
+                      &lt;p
+                        class=&quot;small-goal__deadline&quot;
+                      &gt;
+                        Deadline: 
+                        2024-12-15
+                      &lt;/p&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                  &lt;div
+                    class=&quot;small-goal__button-container&quot;
+                  &gt;
+                    &lt;a
+                      href=&quot;/goals/257&quot;
+                    &gt;
+                      &lt;button
+                        class=&quot;small-goal__confirm-button&quot;
+                      &gt;
+                        確認
+                      &lt;/button&gt;
+                    &lt;/a&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div
+            class=&quot;dashboard-right-container&quot;
+          &gt;
+            &lt;div
+              class=&quot;calendar&quot;
+            &gt;
+              &lt;div&gt;
+                Mocked ExpCalendar
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div
+              class=&quot;unmet-goals&quot;
+            &gt;
+              &lt;h3&gt;
+                進行中のGoal
+              &lt;/h3&gt;
+              &lt;ul&gt;
+                &lt;li
+                  class=&quot;unmet-goals-card&quot;
+                &gt;
+                  &lt;a
+                    class=&quot;unmet-goals&quot;
+                    href=&quot;/goals/255&quot;
+                  &gt;
+                    &lt;span
+                      data-testid=&quot;unmet-goal-title-255&quot;
+                    &gt;
+                      Sample Goal
+                    &lt;/span&gt;
+                  &lt;/a&gt;
+                  &lt;p
+                    class=&quot;goal-deadline&quot;
+                  &gt;
+                    Deadline: 
+                    2024-01-22
+                  &lt;/p&gt;
+                &lt;/li&gt;
+                &lt;li
+                  class=&quot;unmet-goals-card&quot;
+                &gt;
+                  &lt;a
+                    class=&quot;unmet-goals&quot;
+                    href=&quot;/goals/256&quot;
+                  &gt;
+                    &lt;span
+                      data-testid=&quot;unmet-goal-title-256&quot;
+                    &gt;
+                      First Unmet Goal
+                    &lt;/span&gt;
+                  &lt;/a&gt;
+                  &lt;p
+                    class=&quot;goal-deadline&quot;
+                  &gt;
+                    Deadline: 
+                    2024-12-25
+                  &lt;/p&gt;
+                &lt;/li&gt;
+                &lt;li
+                  class=&quot;unmet-goals-card&quot;
+                &gt;
+                  &lt;a
+                    class=&quot;unmet-goals&quot;
+                    href=&quot;/goals/257&quot;
+                  &gt;
+                    &lt;span
+                      data-testid=&quot;unmet-goal-title-257&quot;
+                    &gt;
+                      Second Unmet Goal
+                    &lt;/span&gt;
+                  &lt;/a&gt;
+                  &lt;p
+                    class=&quot;goal-deadline&quot;
+                  &gt;
+                    Deadline: 
+                    2024-12-31
+                  &lt;/p&gt;
+                &lt;/li&gt;
+              &lt;/ul&gt;
+              &lt;div
+                class=&quot;dashboard-right-container-bottom&quot;
+              &gt;
+                &lt;h3&gt;
+                  最近完了したSmall-Goal
+                &lt;/h3&gt;
+                &lt;div
+                  class=&quot;bottom-small-goal-card&quot;
+                &gt;
+                  &lt;p&gt;
+                    Completed Small Goal 1
+                  &lt;/p&gt;
+                  &lt;p&gt;
+                    &lt;span
+                      class=&quot;completed-text&quot;
+                    &gt;
+                      完了!
+                    &lt;/span&gt;
+                    &lt;span
+                      class=&quot;completed-time&quot;
+                    &gt;
+                      2024-04-24
+                    &lt;/span&gt;
+                  &lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div
+                  class=&quot;bottom-small-goal-card&quot;
+                &gt;
+                  &lt;p&gt;
+                    Completed Small Goal 2
+                  &lt;/p&gt;
+                  &lt;p&gt;
+                    &lt;span
+                      class=&quot;completed-text&quot;
+                    &gt;
+                      完了!
+                    &lt;/span&gt;
+                    &lt;span
+                      class=&quot;completed-time&quot;
+                    &gt;
+                      2024-04-25
+                    &lt;/span&gt;
+                  &lt;/p&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+    at Object.getElementError (/Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/config.js:37:19)
+    at /Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+    at /Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+    at /Users/naaariii/projects/roulettepopup/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+    at getByTestId (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:559:33)
+    at call (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at Generator.tryCatch (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at Generator._invoke [as next] (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at asyncGeneratorStep (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at asyncGeneratorStep (/Users/naaariii/projects/roulettepopup/src/__tests__/dashboard.test.js:2:1)
+    at runNextTicks (node:internal/process/task_queues:60:5)
+    at listOnTimeout (node:internal/timers:540:9)
+    at processTimers (node:internal/timers:514:7)</failure>
+    </testcase>
+  </testsuite>
+</testsuites>
