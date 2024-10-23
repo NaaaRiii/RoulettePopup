@@ -291,7 +291,7 @@ function Dashboard() {
                         <div className='small-goal__content-container'>
                           <p className='goal-title'>{goal.title}</p> {/* Goalのタイトルは各small-goalに表示されます */}
                           <div className='small-goal__content'>
-                            <p className='small-goal__title'>{smallGoal.title}</p>
+                          <p className='small-goal__title' data-testid='small-goal-title'>{smallGoal.title}</p>
                             <p className='small-goal__deadline'>Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
                           </div>
                         </div>

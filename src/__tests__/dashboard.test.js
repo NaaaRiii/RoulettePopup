@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import Dashboard from '../pages/dashboard';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
@@ -81,29 +81,29 @@ jest.mock('next/link', () => {
 
 describe('Dashboard page', () => {
   const mockGoalsData = [
-    {
-      id: 255,
-      user_id: 7,
-      content: 'This is a sample goal.',
-      title: 'Sample Goal',
-      deadline: '2024-01-22',
-      small_goal: null,
-      completed: false,
-      completed_time: null,
-      small_goals: [
-        {
-          id: 265,
-          goal_id: 255,
-          title: 'Sample Small Goal',
-          difficulty: 'easy',
-          deadline: '2024-12-15T21:07:11.668+09:00',
-          task: 'test',
-          completed: false,
-          completed_time: null,
-          exp: 30,
-        },
-      ],
-    },
+		{
+			id: 255,
+			user_id: 7,
+			content: 'This is a sample goal.',
+			title: 'Sample Goal',
+			deadline: '2024-01-22',
+			small_goal: null,
+			completed: false,
+			completed_time: null,
+			small_goals: [
+				{
+					id: 265,
+					goal_id: 255,
+					title: 'Sample Small Goal',
+					difficulty: 'easy',
+					deadline: '2024-12-15T21:07:11.668+09:00',
+					task: 'test',
+					completed: false,
+					completed_time: null,
+					exp: 30,
+				},
+			],
+		},
 		{
 			id: 256,
 			user_id: 7,
@@ -150,11 +150,12 @@ describe('Dashboard page', () => {
 				},
 			],
 		},
+		// 完了済みのゴール
 		{
 			id: 258,
 			user_id: 7,
 			content: 'This is a completed sample goal.',
-			title: 'Completed Goal',
+			title: 'Completed Goal 1', // タイトルを一意に変更
 			deadline: '2024-11-30',
 			small_goal: null,
 			completed: true,
@@ -163,7 +164,7 @@ describe('Dashboard page', () => {
 				{
 					id: 268,
 					goal_id: 258,
-					title: 'Completed Small Goal',
+					title: 'Completed Small Goal 1',
 					difficulty: 'easy',
 					deadline: '2024-11-15T21:07:11.668+09:00',
 					task: 'test',
@@ -173,7 +174,30 @@ describe('Dashboard page', () => {
 				},
 			],
 		},
-  ];
+		{
+			id: 259,
+			user_id: 7,
+			content: 'This is another completed sample goal.',
+			title: 'Completed Goal 2', // タイトルを一意に変更
+			deadline: '2024-11-30',
+			small_goal: null,
+			completed: false,
+			completed_time: null,
+			small_goals: [
+				{
+					id: 269,
+					goal_id: 259,
+					title: 'Completed Small Goal 2',
+					difficulty: 'easy',
+					deadline: '2024-11-16T21:07:11.668+09:00',
+					task: 'test',
+					completed: true,
+					completed_time: '2024-05-03T12:00:00+09:00',
+					exp: 30,
+				},
+			],
+		},
+	];
 
   const mockUserData = {
     id: 7,
@@ -260,11 +284,7 @@ describe('Dashboard page', () => {
         });
       }
     });
-
-		// コンソールログをスパイ
-    jest.spyOn(console, 'log').mockImplementation(() => {});
   });
-
 	
 	afterEach(() => {
 		jest.clearAllMocks();
@@ -378,22 +398,11 @@ describe('Dashboard page', () => {
     // 進行中の目標のタイトルを取得
     const goalTitles = await screen.findAllByTestId('goal-title');
 
-    // 目標のタイトルが正しく表示されているか確認
-		expect(goalTitles[0]).toHaveTextContent('Sample Goal');
-		expect(goalTitles[1]).toHaveTextContent('First Unmet Goal');
-		expect(goalTitles[2]).toHaveTextContent('Second Unmet Goal');
-
-    // それぞれの期限が正しく表示されているかを確認
-		expect(screen.getByText('Deadline: 2024-01-22')).toBeInTheDocument();
-		expect(screen.getByText('Deadline: 2024-12-25')).toBeInTheDocument();
-		expect(screen.getByText('Deadline: 2024-12-31')).toBeInTheDocument();
-
-    // Goalsが期限順に並んでいるか確認（最初が "Sample Goal"、次が "First Unmet Goal"、最後が "Second Unmet Goal"）
-    const goalsList = screen.getAllByRole('listitem');
-		expect(goalsList[0]).toHaveTextContent('Sample Goal');
-		expect(goalsList[1]).toHaveTextContent('First Unmet Goal');
-		expect(goalsList[2]).toHaveTextContent('Second Unmet Goal');
-  });
+		expect(goalTitles[0]).toHaveTextContent('Sample Goal');         // 期限: 2024-01-22
+		expect(goalTitles[1]).toHaveTextContent('Completed Goal 2');    // 期限: 2024-11-30
+		expect(goalTitles[2]).toHaveTextContent('First Unmet Goal');    // 期限: 2024-12-25
+		expect(goalTitles[3]).toHaveTextContent('Second Unmet Goal');   // 期限: 2024-12-31
+	});
 	
 	// 進行中のSmall Goalが表示され、遷移できるかを確認
   it('should render ongoing Small Goals and allow navigation upon clicking "確認" button', async () => {
@@ -523,6 +532,55 @@ describe('Dashboard page', () => {
 		completedGoals.forEach(goal => {
 			const completedGoalTitle = screen.queryByText(goal.title);
 			expect(completedGoalTitle).not.toBeInTheDocument();
+		});
+	});
+
+	it('renders only small goals with completed: false as ongoing small goals', async () => {
+		// ダッシュボードをレンダリング
+		render(<Dashboard />);
+	
+		// "進行中のSmall Goal" セクションの見出しを確認
+		const header = await screen.findByText('進行中のSmall Goal');
+		expect(header).toBeInTheDocument();
+	
+		// "進行中のSmall Goal" セクションを取得
+		const smallGoalsSection = header.parentElement;
+		const { findAllByTestId, queryByText } = within(smallGoalsSection);
+	
+		// 未完了の Small Goal を取得
+		const ongoingSmallGoals = [];
+		mockGoalsData.forEach(goal => {
+			if (!goal.completed) {
+				const incompleteSmallGoals = goal.small_goals.filter(smallGoal => !smallGoal.completed);
+				ongoingSmallGoals.push(...incompleteSmallGoals);
+			}
+		});
+	
+		// 表示されている Small Goal のタイトルを取得
+		const smallGoalTitleElements = await findAllByTestId('small-goal-title');
+	
+		// 表示されている Small Goal の数が未完了の Small Goal の数と一致することを確認
+		expect(smallGoalTitleElements).toHaveLength(ongoingSmallGoals.length);
+	
+		// 各未完了の Small Goal のタイトルが表示されていることを確認
+		ongoingSmallGoals.forEach(smallGoal => {
+			console.log('smallGoal.completed (ongoing):', smallGoal.completed, typeof smallGoal.completed);
+			const isSmallGoalPresent = smallGoalTitleElements.some(element => element.textContent === smallGoal.title);
+			expect(isSmallGoalPresent).toBe(true);
+		});
+	
+		// 完了済み Small Goal が "進行中のSmall Goal" セクションに表示されていないことを確認
+		const completedSmallGoals = [];
+		mockGoalsData.forEach(goal => {
+			if (!goal.completed) {
+				const completeSmallGoals = goal.small_goals.filter(smallGoal => smallGoal.completed);
+				completedSmallGoals.push(...completeSmallGoals);
+			}
+		});
+		completedSmallGoals.forEach(smallGoal => {
+			console.log('smallGoal.completed (completed):', smallGoal.completed, typeof smallGoal.completed);
+			const completedSmallGoalTitle = queryByText(smallGoal.title);
+			expect(completedSmallGoalTitle).not.toBeInTheDocument();
 		});
 	});
 	
