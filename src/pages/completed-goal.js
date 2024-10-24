@@ -40,37 +40,37 @@ fetchGoals();
 
   return (
     <Layout>
-<div className="completed-goals-container">
-  <h1>These are your Completed Goals!</h1>
-  <div className="completed-goals-grid">
-    {goalsState.map((goal) => {
-      console.log('Goal Data:', goal);  // goal オブジェクト全体を出力
-      return (
-        <div key={goal.id} className="c-card goal-card">
-          <div className="goal-content">
-            <Link href={`/goals/${goal.id}`}>
-              <h3 className="goal-title">{goal.title}</h3>
-            </Link>
-            {goal.completed_time && (
-              <p className="goal-date">
-                達成日: {new Date(goal.completed_time).toLocaleDateString()}
-              </p>
-            )}
-          </div>
-          <div className="goal-image">
-            <Image
-              src='/images/trophy.png'
-              alt='Trophy'
-              width={100}
-              height={100}
-              className='trophy-icon'
-            />
-          </div>
+      <div className="completed-goals-container">
+        <h1>These are your Completed Goals!</h1>
+        <div className="completed-goals-grid">
+          {goalsState.map((goal) => {
+            console.log('Goal Data:', goal);  // goal オブジェクト全体を出力
+            return (
+              <div key={goal.id} className="c-card goal-card">
+                <div className="completed-goal-content">
+                  <Link href={`/goals/${goal.id}`}>
+                    <h3 className="goal-title">{goal.title}</h3>
+                  </Link>
+                  {goal.completed_time && (
+                    <p className="goal-date">
+                      達成日: {new Date(goal.completed_time).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+                <div className="goal-image">
+                  <Image
+                    src='/images/trophy.png'
+                    alt='Trophy'
+                    width={100}
+                    height={100}
+                    className='trophy-icon'
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
-      );
-    })}
-  </div>
-</div>
+      </div>
 
 
     </Layout>
