@@ -150,12 +150,11 @@ describe('Dashboard page', () => {
 				},
 			],
 		},
-		// 完了済みのゴール
 		{
 			id: 258,
 			user_id: 7,
 			content: 'This is a completed sample goal.',
-			title: 'Completed Goal 1', // タイトルを一意に変更
+			title: 'Completed Goal 1',
 			deadline: '2024-11-30',
 			small_goal: null,
 			completed: true,
@@ -178,7 +177,7 @@ describe('Dashboard page', () => {
 			id: 259,
 			user_id: 7,
 			content: 'This is another completed sample goal.',
-			title: 'Completed Goal 2', // タイトルを一意に変更
+			title: 'Completed Goal 2',
 			deadline: '2024-11-30',
 			small_goal: null,
 			completed: false,
@@ -286,6 +285,9 @@ describe('Dashboard page', () => {
     });
   });
 	
+	// console.log の出力を抑制できるコード
+	jest.spyOn(console, 'log').mockImplementation(() => {});
+
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
@@ -584,4 +586,88 @@ describe('Dashboard page', () => {
 		});
 	});
 	
+	it('removes a small goal from ongoing Small Goals when it is deleted', async () => {
+		// 初期のモックデータを設定
+		const initialMockGoalsData = [...mockGoalsData];
+	
+		// fetch のモックを設定
+		global.fetch = jest.fn((url, options) => {
+			if (url.endsWith('/api/goals')) {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(initialMockGoalsData),
+				});
+			} else if (url.endsWith('/api/current_user')) {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(mockUserData),
+				});
+			} else if (url.includes('/update_rank')) {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({ success: true }),
+				});
+			} else {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({}),
+				});
+			}
+		});
+	
+		// コンポーネントをレンダリング
+		const { unmount } = render(<Dashboard />);
+	
+		// Small Goal が表示されていることを確認
+		const initialSmallGoal = await screen.findByText('Sample Small Goal');
+		expect(initialSmallGoal).toBeInTheDocument();
+	
+		// モックデータを更新して Small Goal を削除
+		const updatedMockGoalsData = initialMockGoalsData.map(goal => {
+			if (goal.id === 255) {
+				return {
+					...goal,
+					small_goals: goal.small_goals.filter(smallGoal => smallGoal.id !== 265),
+				};
+			}
+			return goal;
+		});
+	
+		// fetch のモックを更新
+		global.fetch.mockImplementation((url, options) => {
+			if (url.endsWith('/api/goals')) {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(updatedMockGoalsData),
+				});
+			} else if (url.endsWith('/api/current_user')) {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(mockUserData),
+				});
+			} else if (url.includes('/update_rank')) {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({ success: true }),
+				});
+			} else {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({}),
+				});
+			}
+		});
+	
+		// コンポーネントをアンマウント
+		unmount();
+	
+		// コンポーネントを再レンダリング（再マウント）
+		render(<Dashboard />);
+	
+		// Small Goal が表示されなくなったことを確認
+		await waitFor(() => {
+			expect(screen.queryByText('Sample Small Goal')).not.toBeInTheDocument();
+		});
+	});
+
 });
