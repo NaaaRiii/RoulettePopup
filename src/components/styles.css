@@ -702,7 +702,8 @@ label {
 .goal-content-bottom-bottom {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  
+  /*justify-content: flex-start;*/
 }
 
 .c-card.goalid-small-goal {
@@ -713,6 +714,7 @@ label {
   display: flex;
   flex-direction: column;
   padding: 15px;
+  margin-right: 20px;
   flex: 0 1 calc(25% - 20px);
   box-sizing: border-box;
 }
