@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGoals } from '../contexts/GoalsContext';
 import Link from 'next/link';
 import Layout from '../components/Layout';
