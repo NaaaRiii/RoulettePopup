@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { useRouter } from 'next/router';
 import { useGoals } from '../../contexts/GoalsContext';
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
 import ExpCalendar from '../../components/Calendar';
@@ -11,13 +11,13 @@ import EditSmallGoalModal from '../../components/EditSmallGoal';
 import '../../components/styles.css';
 
 function GoalPage() {
-  const { goalsState, setGoalsState } = useGoals();
+  const { goalsState, setGoalsState, refreshGoals } = useGoals();
   const router = useRouter();
   const { goalId } = router.query;
-  const [goal, setGoal] = useState({ small_goals: [] });
+  const [goal, setGoal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
-  const { refreshGoals } = useGoals();
+  const [smallGoalsError, setSmallGoalsError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
   const [isEditSmallGoalModalOpen, setIsEditSmallGoalModalOpen] = useState(false);
@@ -80,14 +80,41 @@ function GoalPage() {
           credentials: 'include'
         })
       ]);
-
-      if (!goalDetailsResponse.ok || !smallGoalsResponse.ok) {
-        throw new Error('Unauthorized');
+  
+      if (!goalDetailsResponse.ok) {
+        throw new Error('Failed to fetch goal details');
       }
-
+  
+      // goalDetails を取得
       const goalDetails = await goalDetailsResponse.json();
+      console.log('Fetched goalDetails:', goalDetails);
+  
+      if (!goalDetails) {
+        // Goal not found
+        setGoal(null);
+        setLoading(false);
+        return;
+      }
+  
+      // small_goals を取得
       const smallGoalsData = await smallGoalsResponse.json();
-
+      console.log('Fetched smallGoalsData:', smallGoalsData);
+  
+      // small_goals が配列でない場合をチェック
+      if (!Array.isArray(smallGoalsData)) {
+        console.error('Invalid data format for small_goals:', smallGoalsData);
+        setSmallGoalsError('Invalid data format for small goals.');
+        
+        // small_goals を空の配列として設定
+        setGoal({
+          ...goalDetails,
+          small_goals: []
+        });
+        
+        setLoading(false);
+        return;
+      }
+  
       setGoal({
         ...goalDetails,
         small_goals: smallGoalsData.map(smallGoal => ({
@@ -95,9 +122,12 @@ function GoalPage() {
           tasks: smallGoal.tasks
         }))
       });
+      setSmallGoalsError(null); // エラーが解消された場合
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch goal data', error);
+      setGoal(null); // エラーハンドリングとして goal を null に設定
+      setLoading(false);
     }
   }, [goalId]);
 
@@ -157,7 +187,7 @@ function GoalPage() {
 
             // 最新の目標データを取得して更新
             refreshGoals();
-  
+
             // アラートのOKボタンを押した後にdashboardに遷移
             router.push('/dashboard');
           } else {
@@ -250,7 +280,6 @@ function GoalPage() {
   const handleSmallGoalUpdated = async (updatedSmallGoal) => {
     await fetchGoalData();
   };
-  
 
   useEffect(() => {
     console.log("Goal state updated:", goal);
@@ -261,31 +290,39 @@ function GoalPage() {
   };
 
   if (loading) return <p>Loading...</p>;
-  if (!goal) return <p>Goal not found</p>;
+  if (!goal) {
+    return (
+      <>
+        {smallGoalsError && <p className="error-message">{smallGoalsError}</p>}
+        <p>Goal not found</p>
+      </>
+    );
+  }
 
   return (
     <Layout>
       <div className='goal-page-container'>
         <div className='goal-content'>
-        {message && <p>{message}</p>}
+          {message && <p>{message}</p>}
+          {smallGoalsError && <p className="error-message">{smallGoalsError}</p>}
           <div className='goal-content-top'>
             <div className='goal-content-top-left-container'>
               <div className='goal-content-top-left-card'>
                 <h2>目標 : {goal.title}</h2>
-                  <div className='completed-goal-button-container'>
-                    {goal.completed ? (
-                      <p>このGoalは達成しました!</p>
-                    ) : (
-                      <>
-                        <p>このGoalを完了しますか?</p>
-                          {goal.small_goals?.some(sg => !sg.completed) ? (
-                            <button disabled className='completed-goal-button'>Completed Goal</button>
-                          ) : (
-                            <button onClick={completeGoal} className='button-completed-goal'>Completed Goal</button>
-                          )}
-                      </>
-                    )}
-                  </div>
+                <div className='completed-goal-button-container'>
+                  {goal.completed ? (
+                    <p>このGoalは達成しました!</p>
+                  ) : (
+                    <>
+                      <p>このGoalを完了しますか?</p>
+                      {goal.small_goals?.some(sg => !sg.completed) ? (
+                        <button disabled className='completed-goal-button'>Completed Goal</button>
+                      ) : (
+                        <button onClick={completeGoal} className='button-completed-goal'>Completed Goal</button>
+                      )}
+                    </>
+                  )}
+                </div>
 
                 <div className='goal-content-top-left-lower-part'>
                   <h2>内容 : {goal.content}</h2>
@@ -304,7 +341,6 @@ function GoalPage() {
                           goalId={goalId}
                           onGoalUpdated={handleGoalUpdated}
                         />
-
                       </>
                     )}
 
@@ -328,7 +364,6 @@ function GoalPage() {
                       Delete Goal
                     </div>
                   </Link>
-                  
                 </div>
               </div>
             </div>
@@ -341,7 +376,6 @@ function GoalPage() {
           </div>
 
           <div className="goal-content-bottom">
-
             {/* 未完了のSmall Goalsセクション */}
             <div className="goal-content-bottom-top">
               {goal.small_goals.filter(smallGoal => !smallGoal.completed).map(smallGoal => (
@@ -356,82 +390,82 @@ function GoalPage() {
                     </div>
                   </div>
 
-                    <div className="goalid-small-goal__bottom">
-                      <div className="goalid-small-goal__tasks">
-                        <ul>
-                          {smallGoal.tasks?.map(task => (
-                            <li key={task.id}>
-                              <label>
-                                <input
-                                  type="checkbox"
-                                  checked={task.completed}
-                                  onChange={() => handleTaskToggle(task.id, task.completed)}
-                                  className="input-checkbox"
-                                />
-                                {task.content}
-                              </label>
-                            </li>
-                          ))}
-                        </ul>
-                        {/* タスクが全て完了している場合に完了ボタンを表示 */}
-                        {!smallGoal.completed && smallGoal.tasks?.every(task => task.completed) && (
-                          <button className="btn btn-success" onClick={() => completeSmallGoal(smallGoal.id)}>
-                            完了
-                          </button>
-                        )}
-                      </div>
-
-                      <div className='goalid-small-goal__actions'>
-                        <Link href='#' onClick={(e) => { e.preventDefault(); openEditSmallGoalModal(smallGoal); }}>
-                          <div className='goalid-small-goal__edit-link'>Edit</div>
-                        </Link>
-                        <Link href='#' onClick={(e) => { e.preventDefault(); deleteSmallGoal(smallGoal.id); }}>
-                          <div className='goalid-small-goal__delete-link'>Delete</div>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <EditSmallGoalModal
-                isOpen={isEditSmallGoalModalOpen}
-                onClose={closeEditSmallGoalModal}
-                smallGoal={selectedSmallGoal}
-                goalId={goalId}
-                onSmallGoalUpdated={handleSmallGoalUpdated}
-              />
-
-              <div className="goal-content-bottom-bottom">
-                {goal.small_goals.filter(smallGoal => smallGoal.completed).map(smallGoal => (
-                  <div key={smallGoal.id} className="c-card goalid-small-goal">
-                    <div className={`goalid-small-goal__top goalid-small-goal__top--completed`}>
-                      <div className="goalid-small-goal__left">
-                        <h3 className="goalid-small-goal__title">{smallGoal.title}</h3>
-                      </div>
-                      <div className="goalid-small-goal__right">
-                        <p className="goalid-small-goal__deadline">Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
-                        <p className="goalid-small-goal__difficulty">Difficulty: {smallGoal.difficulty}</p>
-                      </div>
-                      <span className="completed-text"><strong>完了!</strong></span>
-                    </div>
-
-                    {/* タスクを「・」付きで表示 */}
-                    <div className="goalid-small-goal__tasks-completed">
+                  <div className="goalid-small-goal__bottom">
+                    <div className="goalid-small-goal__tasks">
                       <ul>
                         {smallGoal.tasks?.map(task => (
                           <li key={task.id}>
-                            ・{task.content} {/* チェックボックスの代わりに「・」を表示 */}
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={task.completed}
+                                onChange={() => handleTaskToggle(task.id, task.completed)}
+                                className="input-checkbox"
+                              />
+                              {task.content}
+                            </label>
                           </li>
                         ))}
                       </ul>
+                      {/* タスクが全て完了している場合に完了ボタンを表示 */}
+                      {!smallGoal.completed && smallGoal.tasks?.every(task => task.completed) && (
+                        <button className="btn btn-success" onClick={() => completeSmallGoal(smallGoal.id)}>
+                          完了
+                        </button>
+                      )}
+                    </div>
+
+                    <div className='goalid-small-goal__actions'>
+                      <Link href='#' onClick={(e) => { e.preventDefault(); openEditSmallGoalModal(smallGoal); }}>
+                        <div className='goalid-small-goal__edit-link'>Edit</div>
+                      </Link>
+                      <Link href='#' onClick={(e) => { e.preventDefault(); deleteSmallGoal(smallGoal.id); }}>
+                        <div className='goalid-small-goal__delete-link'>Delete</div>
+                      </Link>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
+            </div>
+
+            <EditSmallGoalModal
+              isOpen={isEditSmallGoalModalOpen}
+              onClose={closeEditSmallGoalModal}
+              smallGoal={selectedSmallGoal}
+              goalId={goalId}
+              onSmallGoalUpdated={handleSmallGoalUpdated}
+            />
+
+            <div className="goal-content-bottom-bottom">
+              {goal.small_goals.filter(smallGoal => smallGoal.completed).map(smallGoal => (
+                <div key={smallGoal.id} className="c-card goalid-small-goal">
+                  <div className={`goalid-small-goal__top goalid-small-goal__top--completed`}>
+                    <div className="goalid-small-goal__left">
+                      <h3 className="goalid-small-goal__title">{smallGoal.title}</h3>
+                    </div>
+                    <div className="goalid-small-goal__right">
+                      <p className="goalid-small-goal__deadline">Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
+                      <p className="goalid-small-goal__difficulty">Difficulty: {smallGoal.difficulty}</p>
+                    </div>
+                    <span className="completed-text"><strong>完了!</strong></span>
+                  </div>
+
+                  {/* タスクを「・」付きで表示 */}
+                  <div className="goalid-small-goal__tasks-completed">
+                    <ul>
+                      {smallGoal.tasks?.map(task => (
+                        <li key={task.id}>
+                          ・{task.content} {/* チェックボックスの代わりに「・」を表示 */}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+      </div>
     </Layout>
   );
 }
