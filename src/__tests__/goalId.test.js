@@ -21,40 +21,6 @@ global.ResizeObserver = class {
   disconnect() {}
 };
 
-// Calendar コンポーネントのモックを修正
-jest.mock('../components/Calendar', () => {
-  const MockedExpCalendar = () => <div data-testid="calendar">Mocked ExpCalendar</div>;
-  MockedExpCalendar.displayName = 'MockedExpCalendar';
-  return MockedExpCalendar;
-});
-
-// CreateSmallGoal コンポーネントのモックを追加
-jest.mock('../components/CreateSmallGoal', () => {
-  const MockedCreateSmallGoal = () => <div data-testid="create-small-goal">Mocked CreateSmallGoal</div>;
-  MockedCreateSmallGoal.displayName = 'MockedCreateSmallGoal';
-  return MockedCreateSmallGoal;
-});
-
-// EditGoalModal コンポーネントのモックを追加
-jest.mock('../components/EditGoal', () => {
-  const MockedEditGoalModal = () => <div data-testid="edit-goal-modal">Mocked EditGoalModal</div>;
-  MockedEditGoalModal.displayName = 'MockedEditGoalModal';
-  return MockedEditGoalModal;
-});
-
-// EditSmallGoalModal コンポーネントのモックを追加
-jest.mock('../components/EditSmallGoal', () => {
-  const MockedEditSmallGoalModal = () => <div data-testid="edit-small-goal-modal">Mocked EditSmallGoalModal</div>;
-  MockedEditSmallGoalModal.displayName = 'MockedEditSmallGoalModal';
-  return MockedEditSmallGoalModal;
-});
-
-jest.mock('../components/Layout', () => {
-  const MockedLayout = ({ children }) => <div data-testid="layout">{children}</div>;
-  MockedLayout.displayName = 'MockedLayout';
-  return MockedLayout;
-});
-
 // withAuth モックの修正
 jest.mock('../utils/withAuth', () => {
   const React = require('react');
@@ -296,15 +262,8 @@ describe('GoalPage Component', () => {
       smallGoal.tasks.forEach(task => {
         // 正規表現を使用して部分一致
         expect(screen.getByText(new RegExp(task.content))).toBeInTheDocument();
-        // またはカスタムマッチャーを使用
-        // expect(screen.getByText((content, element) => content.includes(task.content))).toBeInTheDocument();
       });
     });
-
-    // 子コンポーネントがモックされていることを確認
-    expect(screen.getByTestId('create-small-goal')).toBeInTheDocument();
-    expect(screen.getByTestId('edit-goal-modal')).toBeInTheDocument();
-    expect(screen.getByTestId('edit-small-goal-modal')).toBeInTheDocument();
   });
 
   it('renders the GoalPage component correctly with all elements for goalId:2 and "Completed Goal" button is disabled', async () => {
@@ -362,15 +321,8 @@ describe('GoalPage Component', () => {
       smallGoal.tasks.forEach(task => {
         // 正規表現を使用して部分一致
         expect(screen.getByText(new RegExp(task.content))).toBeInTheDocument();
-        // またはカスタムマッチャーを使用
-        // expect(screen.getByText((content, element) => content.includes(task.content))).toBeInTheDocument();
       });
     });
-
-    // 子コンポーネントがモックされていることを確認
-    expect(screen.getByTestId('create-small-goal')).toBeInTheDocument();
-    expect(screen.getByTestId('edit-goal-modal')).toBeInTheDocument();
-    expect(screen.getByTestId('edit-small-goal-modal')).toBeInTheDocument();
   });
 
   it('displays "Goal not found" when the goal data does not exist', async () => {
@@ -576,4 +528,31 @@ describe('GoalPage Component', () => {
 		consoleErrorSpy.mockRestore();
 	});
 
+	it('opens and closes the CreateSmallGoal modal, displaying form elements correctly', async () => {
+    render(<GoalPage />);
+
+    // ローディングメッセージの表示を確認
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
+
+    // 「Small Goalの作成」ボタンをクリック
+    fireEvent.click(screen.getByText('Small Goalの作成'));
+
+    // モーダル内の要素の確認
+    expect(await screen.findByText('Small Goalを設定しよう!')).toBeInTheDocument();
+    expect(screen.getByLabelText('Small Goalのタイトル')).toBeInTheDocument();
+    expect(screen.getByLabelText('期限')).toBeInTheDocument();
+    expect(screen.getByLabelText('難易度の設定')).toBeInTheDocument();
+
+    // タスクフィールドが存在することを確認
+    expect(screen.getByLabelText('Task')).toBeInTheDocument();
+
+    // Close ボタンをクリック
+    fireEvent.click(screen.getByText('Close'));
+
+    // モーダルが閉じていることを確認
+    await waitFor(() => {
+      expect(screen.queryByText('Small Goalを設定しよう!')).not.toBeInTheDocument();
+    });
+	});
 });

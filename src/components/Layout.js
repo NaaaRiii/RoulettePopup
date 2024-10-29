@@ -5,7 +5,7 @@ import Footer from './Footer';
 
 export default function Layout({ children }) {
   return (
-    <>
+    <div data-testid="layout">
       <Head>
         <title>Plus ONE</title>
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -24,6 +24,6 @@ export default function Layout({ children }) {
       </div>
       <Footer>
       </Footer>
-    </>
+    </div>
   );
 }

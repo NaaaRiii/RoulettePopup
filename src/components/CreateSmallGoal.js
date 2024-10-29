@@ -95,7 +95,7 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay}>
+    <div className={styles.modalOverlay} data-testid="create-small-goal">
       <div className={styles.modalContent}>
         <h2>Small Goalを設定しよう!</h2>
 

@@ -62,11 +62,13 @@ const ExpCalendar = () => {
   };
 
   return (
+    <div data-testid="calendar">
       <Calendar
         locale="en-US"
         calendarType="iso8601"
         tileClassName={tileClassName}
       />
+    </div>
   );
 };
 
