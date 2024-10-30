@@ -171,7 +171,10 @@ function GoalPage() {
     }
   };
 
-  const deleteGoal = () => {
+  const deleteGoal = (event) => {
+    event.preventDefault(); // デフォルトのリンク動作を防止
+    console.log('deleteGoal function called'); // デバッグ用ログ
+  
     if (window.confirm('Are you sure ?')) {
       fetch(`http://localhost:3000/api/goals/${goalId}`, {
         method: 'DELETE',
@@ -183,11 +186,11 @@ function GoalPage() {
         .then(response => {
           if (response.ok) {
             // goalが削除されたことを確認するアラートを表示
-            alert('goalが削除されました');
-
+            alert('Goalが削除されました。');
+  
             // 最新の目標データを取得して更新
             refreshGoals();
-
+  
             // アラートのOKボタンを押した後にdashboardに遷移
             router.push('/dashboard');
           } else {
@@ -359,11 +362,14 @@ function GoalPage() {
                     </div>
                   </div>
 
-                  <Link href={`#`} onClick={deleteGoal}>
-                    <div className='delete-goal-link'>
+                  {/*<Link href={`#`} onClick={(event) => deleteGoal(event)}>
+                    <div className='delete-goal-link' data-testid="delete-goal-link">
                       Delete Goal
                     </div>
-                  </Link>
+                  </Link>*/}
+                  <a href="#" onClick={deleteGoal} data-testid="delete-goal-link" className='delete-goal-link'>
+                    Delete Goal
+                  </a>
                 </div>
               </div>
             </div>
