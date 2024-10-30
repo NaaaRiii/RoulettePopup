@@ -25,7 +25,7 @@ global.ResizeObserver = class {
 jest.mock('../utils/withAuth', () => {
   const React = require('react');
   const { useAuth } = require('../contexts/AuthContext');
-  const { useRouter } = jest.requireActual('next/router'); // 修正ポイント
+  const { useRouter } = jest.requireActual('next/router');
 
   return {
     __esModule: true,
@@ -128,6 +128,36 @@ describe('GoalPage Component', () => {
         },
       ],
     },
+		{
+			id: 3,
+			title: 'Sample Goal 3',
+			content: 'This is the third sample goal content.',
+			deadline: '2024-10-31',
+			completed: false,
+			small_goals: [
+				{
+					id: 301,
+					title: 'Sample Small Goal 5',
+					completed: false,
+					deadline: '2024-10-15',
+					difficulty: 'Hard',
+					tasks: [
+						{ id: 3001, content: 'Task 7', completed: false },
+						{ id: 3002, content: 'Task 8', completed: false },
+					],
+				},
+				{
+					id: 302,
+					title: 'Sample Small Goal 6',
+					completed: false,
+					deadline: '2024-09-30',
+					difficulty: 'Easy',
+					tasks: [
+						{ id: 3003, content: 'Task 9', completed: false },
+					],
+				},
+			],
+		}
   ];
 
   const mockUserData = {
@@ -153,10 +183,12 @@ describe('GoalPage Component', () => {
       push: mockPush,
     });
 
-    useAuth.mockReturnValue({
-      isLoggedIn: true,
-      userRank: 20,
-    });
+		useAuth.mockReturnValue({
+			isLoggedIn: true,
+			userRank: 20,
+			setUserRank: jest.fn(),
+			setIsLoggedIn: jest.fn(),
+		});
 
     useGoals.mockReturnValue({
       goalsState: [],
@@ -168,46 +200,53 @@ describe('GoalPage Component', () => {
       console.log('Mock fetch called with URL:', url);
       console.log('Fetch options:', options);
   
-      // URLからgoalIdを抽出
-      const match = url.match(/\/goals\/(\d+)/);
-      const goalIdFromUrl = match ? match[1] : '1'; // デフォルトで'1'を使用
-  
-      if (url === `http://localhost:3000/api/goals/${goalIdFromUrl}`) {
-        console.log(`Mock fetch matched /api/goals/${goalIdFromUrl}`);
-        const goal = mockGoalData.find(g => g.id === parseInt(goalIdFromUrl));
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(goal),
-        });
-      } else if (url === `http://localhost:3000/api/goals/${goalIdFromUrl}/small_goals`) {
-        console.log(`Mock fetch matched /api/goals/${goalIdFromUrl}/small_goals`);
-        const goal = mockGoalData.find(g => g.id === parseInt(goalIdFromUrl));
-        const smallGoals = goal ? goal.small_goals : [];
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(smallGoals),
-        });
-      } else if (url === 'http://localhost:3000/api/current_user') {
-        console.log('Mock fetch matched /api/current_user');
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockUserData),
-        });
-      } else {
-        console.log('Mock fetch did not match any condition for URL:', url);
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({}),
-        });
-      }
-    });
+      const match = url.match(/\/goals\/(\d+)\/small_goals\/(\d+)/);
+			const goalIdFromUrl = match ? match[1] : '1';
+			const smallGoalIdFromUrl = match ? match[2] : '301';
 
-    // console.log の出力を抑制できるコード
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-  });
+			if (options && options.method === 'DELETE' && goalIdFromUrl === '3' && smallGoalIdFromUrl === '301') {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({ message: 'Small Goal deleted successfully.' }),
+				});
+			}
 
-  // console.log の出力を抑制できるコード
-  jest.spyOn(console, 'log').mockImplementation(() => {});
+			// GETリクエストの処理
+			const matchGet = url.match(/\/goals\/(\d+)/);
+			const goalIdGet = matchGet ? matchGet[1] : '1';
+
+			if (url === `http://localhost:3000/api/goals/${goalIdGet}`) {
+				const goal = mockGoalData.find(g => g.id === parseInt(goalIdGet));
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(goal),
+				});
+			} else if (url === `http://localhost:3000/api/goals/${goalIdGet}/small_goals`) {
+				const goal = mockGoalData.find(g => g.id === parseInt(goalIdGet));
+				const smallGoals = goal ? goal.small_goals : [];
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(smallGoals),
+				});
+			} else if (url === 'http://localhost:3000/api/current_user') {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(mockUserData),
+				});
+			} else {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({}),
+				});
+			}
+		});
+
+		// console.log の出力を抑制
+		jest.spyOn(console, 'log').mockImplementation(() => {});
+
+		// window.alertをモック
+		jest.spyOn(window, 'alert').mockImplementation(() => {});
+	});
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -555,4 +594,45 @@ describe('GoalPage Component', () => {
       expect(screen.queryByText('Small Goalを設定しよう!')).not.toBeInTheDocument();
     });
 	});
+	
+	it('deletes a Small Goal and removes it from the list', async () => {
+		// goalIdを'3'に設定（Sample Small Goal 5が属するGoal）
+		goalId = '3';
+	
+		// useRouterのモックを更新
+		useRouter.mockReturnValue({
+			query: { goalId, message: '' },
+			push: mockPush,
+		});
+	
+		render(<GoalPage />);
+	
+		// Small Goalが表示されるまで待機
+		await waitFor(() => expect(screen.getByText('Sample Small Goal 5')).toBeInTheDocument());
+	
+		// 特定のSmall GoalのDeleteリンクを取得
+		const deleteLink = screen.getByTestId('delete-small-goal-301'); // smallGoal.idが301の場合
+		expect(deleteLink).toBeInTheDocument();
+	
+		// 確認ダイアログをモックしてOKを選択
+		jest.spyOn(window, 'confirm').mockReturnValueOnce(true);
+	
+		// 「Delete」リンクをクリック
+		fireEvent.click(deleteLink);
+	
+		// DELETEリクエストが正しく呼び出されたことを確認
+		const deleteFetchCall = global.fetch.mock.calls.find(
+			([url, options]) =>
+				url === `http://localhost:3000/api/goals/${goalId}/small_goals/301` &&
+				options.method === 'DELETE'
+		);
+		expect(deleteFetchCall).toBeDefined();
+	
+		// Small Goalが削除されたことを確認
+		await waitFor(() => expect(screen.queryByText('Sample Small Goal 5')).not.toBeInTheDocument());
+	
+		// confirmモックの復元
+		window.confirm.mockRestore();
+	});
+	
 });

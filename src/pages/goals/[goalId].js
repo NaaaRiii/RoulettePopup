@@ -420,7 +420,9 @@ function GoalPage() {
                         <div className='goalid-small-goal__edit-link'>Edit</div>
                       </Link>
                       <Link href='#' onClick={(e) => { e.preventDefault(); deleteSmallGoal(smallGoal.id); }}>
-                        <div className='goalid-small-goal__delete-link'>Delete</div>
+                      <div className='goalid-small-goal__delete-link' data-testid={`delete-small-goal-${smallGoal.id}`}>
+                        Delete
+                      </div>
                       </Link>
                     </div>
                   </div>
