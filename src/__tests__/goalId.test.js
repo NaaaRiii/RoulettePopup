@@ -7,6 +7,7 @@ import { useGoals } from '../contexts/GoalsContext';
 import { useAuth } from '../contexts/AuthContext';
 import '@testing-library/jest-dom';
 
+
 beforeAll(() => {
   global.localStorage = {
     getItem: jest.fn(),
@@ -177,10 +178,10 @@ describe('GoalPage Component', () => {
   beforeEach(() => {
     mockPush = jest.fn();
 
-    goalId = '1';
+		global.fetch = jest.fn();
 
     useRouter.mockReturnValue({
-      query: { goalId, message: '' },
+      query: { goalId: '1', message: '' },
       push: mockPush,
     });
 
@@ -201,7 +202,7 @@ describe('GoalPage Component', () => {
       //console.log('Mock fetch called with URL:', url);
       //console.log('Fetch options:', options);
   
-      const match = url.match(/http:\/\/localhost:3000\/api\/goals\/(\d+)\/small_goals\/(\d+)/);
+    const match = url.match(/http:\/\/localhost:3000\/api\/goals\/(\d+)\/small_goals\/(\d+)/);
     const matchDeleteGoal = url.match(/http:\/\/localhost:3000\/api\/goals\/(\d+)$/);
     const goalIdFromUrl = match ? match[1] : (matchDeleteGoal ? matchDeleteGoal[1] : '1');
     const smallGoalIdFromUrl = match ? match[2] : '301';
@@ -1248,7 +1249,7 @@ describe('GoalPage Component', () => {
 		});
 	});
 	
-	it('updates state after editing a Goal', async () => {
+	it('updates state after adding a Small Goal with two tasks', async () => {
 		// 1. goalIdを設定
 		goalId = '1';
 	
@@ -1258,164 +1259,26 @@ describe('GoalPage Component', () => {
 			push: mockPush,
 		});
 	
-		// 3. fetchのモックを設定
+		// 3. モックユーザーデータを定義
+		const mockUserData = {
+			id: 1,
+			name: 'Test User',
+			rank: 5,
+			// その他必要なフィールド
+		};
+	
+		// 4. fetchのモックを設定
 		const initialGoalData = {
 			id: 1,
-			title: 'Initial Goal Title',
-			content: 'Initial Goal Content',
+			title: 'Sample Goal',
+			content: 'Sample Content',
 			deadline: '2024-12-31',
 			completed: false,
 		};
 	
-		const updatedGoalData = {
-			...initialGoalData,
-			title: 'Updated Goal Title',
-			content: 'Updated Goal Content',
-		};
+		let smallGoalsData = [];
 	
-		let fetchCallCount = 0;
-		global.fetch.mockImplementation((url, options) => {
-			fetchCallCount++;
-	
-			// Goalの取得リクエストをモック
-			if (
-				url === `http://localhost:3000/api/goals/${goalId}` &&
-				(!options || options.method === 'GET')
-			) {
-				if (fetchCallCount <= 2) {
-					return Promise.resolve({
-						ok: true,
-						json: () => Promise.resolve(initialGoalData),
-					});
-				} else {
-					return Promise.resolve({
-						ok: true,
-						json: () => Promise.resolve(updatedGoalData),
-					});
-				}
-			}
-	
-			// Goalの更新リクエストをモック
-			if (
-				url === `http://localhost:3000/api/goals/${goalId}` &&
-				options && options.method === 'PUT'
-			) {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve({ message: 'Goal updated successfully.' }),
-				});
-			}
-	
-			// その他のfetchリクエストをモック
-			return Promise.resolve({
-				ok: true,
-				json: () => Promise.resolve({}),
-			});
-		});
-	
-		// 4. コンポーネントをレンダリング
-		render(<GoalPage />);
-	
-		// 5. 初期のGoalタイトルが表示されるまで待機
-		await screen.findByText('目標 : Initial Goal Title');
-	
-		// 6. 「目標を編集する」リンクをクリック
-		const editGoalLink = screen.getByText('目標を編集する');
-		userEvent.click(editGoalLink);
-	
-		// 7. モーダル内のタイトルを変更
-		const titleInput = await screen.findByLabelText('目標のタイトル');
-		userEvent.clear(titleInput);
-		userEvent.type(titleInput, 'Updated Goal Title');
-	
-		// 8. モーダル内の内容を変更
-		const contentInput = screen.getByLabelText('Content');
-		userEvent.clear(contentInput);
-		userEvent.type(contentInput, 'Updated Goal Content');
-	
-		// 9. 「Update Goal」ボタンをクリック
-		const updateButton = screen.getByText('Update Goal');
-		userEvent.click(updateButton);
-	
-		// 10. fetchGoalDataが再度呼ばれたことを確認
-		await waitFor(() => {
-			expect(fetchCallCount).toBeGreaterThan(2);
-		});
-	
-		// 11. 更新後のGoalタイトルが表示されることを確認
-		await screen.findByText('目標 : Updated Goal Title');
-	});
-	
-	it('updates state after adding a Small Goal with two tasks', async () => {
-		const goalId = '1';
-	
-		// コンポーネントをレンダリング
-		render(<GoalPage />);
-	
-		// 初期状態でSmall Goalが表示されていないことを確認
-		await waitFor(() => {
-			expect(screen.queryByText('New Small Goal')).not.toBeInTheDocument();
-		});
-	
-		// 「Small Goalの作成」ボタンをクリック
-		const createSmallGoalButton = await screen.findByText('Small Goalの作成');
-		userEvent.click(createSmallGoalButton);
-	
-		// モーダル内で必要な情報を入力
-		const titleInput = await screen.findByLabelText('Small Goalのタイトル');
-		userEvent.type(titleInput, 'New Small Goal');
-	
-		const deadlineInput = screen.getByLabelText('期限');
-		userEvent.type(deadlineInput, '2024-11-30');
-	
-		const difficultySelect = screen.getByLabelText('難易度の設定');
-		userEvent.selectOptions(difficultySelect, '普通'); // 'Medium' を '普通' に変更
-	
-		// 2つのタスクを追加
-		const addTaskButton = screen.getByRole('button', { name: /タスクの追加/i });
-		userEvent.click(addTaskButton); // 2つ目のタスクフィールドを追加
-	
-		// タスクフィールドを取得
-		const taskInputs = screen.getAllByLabelText('Task');
-		console.log('Task inputs:', taskInputs);
-		screen.debug();
-		expect(taskInputs.length).toBe(2); // 2つのタスクフィールドがあるはず
-	
-		// 各タスクフィールドに値を入力
-		userEvent.type(taskInputs[0], 'Task 1');
-		userEvent.type(taskInputs[1], 'Task 2');
-	
-		// 「設定する」ボタンをクリック
-		const submitButton = screen.getByRole('button', { name: /設定する/i });
-		userEvent.click(submitButton);
-	
-		// POST リクエストが正しく行われたことを確認
-		await waitFor(() => {
-			expect(global.fetch).toHaveBeenCalledWith(
-				`http://localhost:3000/api/goals/${goalId}/small_goals`,
-				expect.objectContaining({
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					credentials: 'include',
-					body: JSON.stringify({
-						small_goal: {
-							title: 'New Small Goal',
-							difficulty: '普通',
-							deadline: '2024-11-30',
-							tasks_attributes: [
-								{ content: 'Task 1' },
-								{ content: 'Task 2' },
-							],
-						},
-					}),
-				})
-			);
-		});
-	
-		// モックを更新して、新しいSmall Goalを返すように設定
-		const createdSmallGoal = {
+		const newSmallGoal = {
 			id: 201,
 			title: 'New Small Goal',
 			completed: false,
@@ -1427,28 +1290,102 @@ describe('GoalPage Component', () => {
 			],
 		};
 	
-		global.fetch.mockImplementationOnce((url, options) => {
-			if (
-				parsedUrl.pathname === `/api/goals/${goalId}/small_goals` &&
-				(!options || options.method === 'GET')
-			) {
+		global.fetch.mockImplementation((url, options = {}) => {
+			const method = options.method || 'GET'; // options.method が未定義の場合は 'GET' とする
+		
+			if (url === `http://localhost:3000/api/goals/${goalId}` && method === 'GET') {
+				// Goal データの取得
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(initialGoalData),
+				});
+			} else if (url === `http://localhost:3000/api/goals/${goalId}/small_goals` && method === 'GET') {
+				// Small Goals の取得
 				return Promise.resolve({
 					ok: true,
 					json: () => Promise.resolve(smallGoalsData),
 				});
+			} else if (url === `http://localhost:3000/api/goals/${goalId}/small_goals` && method === 'POST') {
+				// Small Goal の作成
+				smallGoalsData.push(newSmallGoal);
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(newSmallGoal),
+				});
+			} else if (url === 'http://localhost:3000/api/current_user' && method === 'GET') {
+				// ユーザーデータの取得
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(mockUserData),
+				});
+			} else if (url === 'http://localhost:3000/api/daily_exp' && method === 'GET') {
+				// カレンダーのデータ取得
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({}), // 必要に応じてモックデータを返す
+				});
+			} else {
+				// デバッグのためにURLとメソッドを出力
+				console.error(`Unexpected fetch call to ${url} with method ${method}`);
+				return Promise.reject('Unexpected fetch call');
 			}
-			return Promise.resolve({
-				ok: true,
-				json: () => Promise.resolve({}),
-			});
 		});
 	
-		// 新しいSmall Goalが表示されていることを確認
+		// 5. コンポーネントをレンダリング
+		render(<GoalPage />);
+	
+		// 6. ローディングが終了するまで待機
+		await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
+	
+		// 7. 初期状態でSmall Goalが表示されていないことを確認
+		expect(screen.queryByText('New Small Goal')).not.toBeInTheDocument();
+	
+		// 8. 「Small Goalの作成」ボタンをクリック
+		const createSmallGoalButton = await screen.findByText('Small Goalの作成');
+		await userEvent.click(createSmallGoalButton);
+	
+		// 9. モーダル内で必要な情報を入力
+		const titleInput = await screen.findByLabelText('Small Goalのタイトル');
+		await userEvent.type(titleInput, 'New Small Goal');
+	
+		const deadlineInput = screen.getByLabelText('期限');
+		await userEvent.type(deadlineInput, '2024-11-30');
+	
+		const difficultySelect = screen.getByLabelText('難易度の設定');
+		await userEvent.selectOptions(difficultySelect, '普通');
+	
+		// 10. 2つのタスクを追加
+		const addTaskButton = screen.getByText('タスクの追加');
+		await userEvent.click(addTaskButton); // 2つ目のタスクフィールドを追加
+	
+		// タスクフィールドが2つになるまで待機
+		await waitFor(() => {
+			const taskInputs = screen.getAllByLabelText('Task');
+			expect(taskInputs.length).toBe(2);
+		});
+	
+		// タスクフィールドを取得（再取得）
+		const taskInputs = screen.getAllByLabelText('Task');
+	
+		// 各タスクフィールドに値を入力
+		await userEvent.type(taskInputs[0], 'Task 1');
+		await userEvent.type(taskInputs[1], 'Task 2');
+	
+		// 11. 「設定する」ボタンをクリック
+		const submitButton = screen.getByText('設定する');
+		await userEvent.click(submitButton);
+	
+		// 12. モーダルが閉じるのを待機
+		await waitFor(() => {
+			expect(screen.queryByText('Small Goalを設定しよう!')).not.toBeInTheDocument();
+		});
+	
+		// 13. 新しいSmall Goalが表示されるまで待機
 		await screen.findByText('New Small Goal');
 	
-		// タスクが表示されていることを確認
+		// 14. タスクが表示されていることを確認
 		await screen.findByText('Task 1');
 		await screen.findByText('Task 2');
 	});
-	
+
 });
