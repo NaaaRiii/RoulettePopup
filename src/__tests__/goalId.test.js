@@ -178,8 +178,6 @@ describe('GoalPage Component', () => {
   beforeEach(() => {
     mockPush = jest.fn();
 
-		global.fetch = jest.fn();
-
     useRouter.mockReturnValue({
       query: { goalId: '1', message: '' },
       push: mockPush,
@@ -199,9 +197,10 @@ describe('GoalPage Component', () => {
     });
 
     global.fetch = jest.fn((url, options) => {
-      //console.log('Mock fetch called with URL:', url);
-      //console.log('Fetch options:', options);
-  
+		const method = options.method || 'GET';
+
+		console.log(`Mock fetch called with URL: ${url}, Method: ${method}`);
+
     const match = url.match(/http:\/\/localhost:3000\/api\/goals\/(\d+)\/small_goals\/(\d+)/);
     const matchDeleteGoal = url.match(/http:\/\/localhost:3000\/api\/goals\/(\d+)$/);
     const goalIdFromUrl = match ? match[1] : (matchDeleteGoal ? matchDeleteGoal[1] : '1');
@@ -243,10 +242,11 @@ describe('GoalPage Component', () => {
         json: () => Promise.resolve({}),
       });
     }
+		
   });
 
 		// console.log の出力を抑制
-		//jest.spyOn(console, 'log').mockImplementation(() => {});
+		jest.spyOn(console, 'log').mockImplementation(() => {});
 
 		// window.alertをモック
 		jest.spyOn(window, 'alert').mockImplementation(() => {});
@@ -1322,7 +1322,7 @@ describe('GoalPage Component', () => {
 				// カレンダーのデータ取得
 				return Promise.resolve({
 					ok: true,
-					json: () => Promise.resolve({}), // 必要に応じてモックデータを返す
+					json: () => Promise.resolve({}),
 				});
 			} else {
 				// デバッグのためにURLとメソッドを出力
@@ -1388,4 +1388,107 @@ describe('GoalPage Component', () => {
 		await screen.findByText('Task 2');
 	});
 
+	it('toggles task completion status when checkbox is clicked', async () => {
+		// 1. goalIdを設定
+		goalId = '1';
+	
+		// 2. useRouterのモックを設定
+		useRouter.mockReturnValue({
+			query: { goalId, message: '' },
+			push: mockPush,
+		});
+	
+		// 3. モックデータを定義
+		const initialGoalData = {
+			id: 1,
+			title: 'Sample Goal',
+			content: 'Sample Content',
+			deadline: '2024-12-31',
+			completed: false,
+		};
+	
+		const smallGoalsData = [
+			{
+				id: 201,
+				title: 'Test Small Goal',
+				completed: false,
+				deadline: '2024-11-30',
+				difficulty: '普通',
+				tasks: [
+					{ id: 3001, content: 'Task 1', completed: false },
+				],
+			},
+		];
+	
+		// 4. fetchのモックを設定
+		global.fetch.mockImplementation((url, options = {}) => {
+			const method = options.method || 'GET';
+
+			if (url.startsWith('http://localhost:3000/api/daily_exp') && method === 'GET') {
+        return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ '2024-12-31': 50 }),
+        });
+    }
+
+			if (url === `http://localhost:3000/api/goals/${goalId}` && method === 'GET') {
+				// Goal データの取得
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(initialGoalData),
+				});
+			} else if (url === `http://localhost:3000/api/goals/${goalId}/small_goals` && method === 'GET') {
+				// Small Goals の取得
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(smallGoalsData),
+				});
+			} else if (url.startsWith('http://localhost:3000/api/tasks/') && method === 'POST') {
+				// タスクの完了状態を更新するAPIエンドポイント
+				const taskId = url.split('/').pop();
+				const task = smallGoalsData[0].tasks.find((task) => task.id === parseInt(taskId, 10));
+				
+				if (task) {
+					task.completed = !task.completed; // 完了状態を切り替え
+				}
+		
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({ message: 'Task updated successfully.' }),
+				});
+			} else if (url === 'http://localhost:3000/api/current_user' && method === 'GET') {
+				// モックユーザーデータの取得
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(mockUserData),
+				});
+			} else {
+				console.error(`Unexpected fetch call to ${url} with method ${method}`);
+				return Promise.reject('Unexpected fetch call');
+			}
+		});
+	
+		// 5. コンポーネントをレンダリング
+		render(<GoalPage />);
+	
+		// 6. ローディングが終了するまで待機
+		await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
+	
+		// 7. タスクのチェックボックスが未完了状態であることを確認
+		const taskCheckbox = screen.getByLabelText('Task 1');
+		expect(taskCheckbox).not.toBeChecked();
+	
+		// 8. チェックボックスをクリックして完了状態に変更
+		await userEvent.click(taskCheckbox);
+	
+		// 9. タスクの状態が更新されているか確認
+		await waitFor(() => expect(taskCheckbox).toBeChecked());
+	
+		// 10. もう一度クリックして未完了状態に戻す
+		await userEvent.click(taskCheckbox);
+	
+		// 11. タスクの状態が未完了に戻っているか確認
+		await waitFor(() => expect(taskCheckbox).not.toBeChecked());
+	});
+	
 });
