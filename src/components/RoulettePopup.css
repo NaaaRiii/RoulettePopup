@@ -76,10 +76,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 9999;
 }
 
 .modal-content {
   background: white;
   padding: 20px;
   border-radius: 5px;
+  z-index: 10000;
 }

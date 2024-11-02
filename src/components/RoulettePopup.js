@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../components/RoulettePopup.css';
 import Modal from './Modal';
-import { fetchRouletteText } from './utils'; //src/components/utils.jsからルーレットのテキストを取得する
+import { fetchRouletteText } from './utils';
 
 const RoulettePopup = () => {
   const [rotation, setRotation] = useState(90);

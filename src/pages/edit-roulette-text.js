@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
 import Image from 'next/image';
