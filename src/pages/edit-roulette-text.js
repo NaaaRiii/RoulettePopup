@@ -6,12 +6,15 @@ import RoulettePopup from '../components/RoulettePopup';
 import '../components/styles.css';
 
 const EditRouletteText = () => {
-  const [tickets, setTickets] = useState(0);
+  //const [tickets, setTickets] = useState(0);
   const [rouletteNumber, setRouletteNumber] = useState('');
   const [rouletteTexts, setRouletteTexts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editedText, setEditedText] = useState('');
   const [flashMessage, setFlashMessage] = useState('');
+  const [playTickets, setPlayTickets] = useState(0);
+  const [editTickets, setEditTickets] = useState(0);
+
 
   useEffect(() => {
     fetch('http://localhost:3000/api/roulette_texts/tickets', {
@@ -19,7 +22,10 @@ const EditRouletteText = () => {
       credentials: 'include'
     })
       .then(response => response.json())
-      .then(data => setTickets(data.tickets))
+      .then(data => {
+        setPlayTickets(data.play_tickets);
+        setEditTickets(data.edit_tickets);
+      })
       .catch(error => console.error('Error:', error));
   }, []);
 
@@ -46,6 +52,11 @@ const EditRouletteText = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (editTickets <= 0) {
+      alert('編集チケットが不足しています');
+      return;
+    }
+
     if (!selectedRouletteTextId) {
       console.error('Roulette Text ID is undefined.');
       return;
@@ -66,18 +77,17 @@ const EditRouletteText = () => {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Network response was not ok:', errorText);
-        setFlashMessage('更新に失敗しました。');
+        const errorData = await response.json();
+        alert(errorData.error || '更新に失敗しました。');
         return;
-      }
+      }  
 
       const data = await response.json();
 
       if (data.roulette_text && typeof data.roulette_text === 'object' && 'number' in data.roulette_text) {
-        const { roulette_text: updatedRouletteText, tickets: updatedTickets } = data;
+        const { roulette_text: updatedRouletteText, edit_tickets: updatedEditTickets } = data;
         setRouletteTexts(rouletteTexts.map(text => text.number === updatedRouletteText.number ? updatedRouletteText : text));
-        setTickets(updatedTickets);
+        setEditTickets(updatedEditTickets); // 編集チケットの更新
         setShowForm(false);
         setFlashMessage(`Number: ${updatedRouletteText.number} を ${updatedRouletteText.text} に変更しました。`);
       } else {
@@ -96,11 +106,11 @@ const EditRouletteText = () => {
       <div className="edit-roulette-container">
         <div className="edit-roulette-left-container">
           <h2 className="page-title">ごほうびルーレット</h2>
-          <h3 className="ticket-info">チケットを『{tickets}』枚持っています。</h3>
-          <h3 className="roulette-edit-info">ルーレットの内容を『{tickets}』個、編集することができます。</h3>
+          <h3 className="ticket-info">プレイチケットを『{playTickets}』枚持っています。</h3>
+          <h3 className="roulette-edit-info">編集チケットを『{editTickets}』枚持っています。</h3>
 
           <div>
-            {tickets > 0 && !showForm && (
+            {editTickets > 0 && !showForm && (
               <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
                 ルーレットを編集する
               </button>
@@ -181,16 +191,15 @@ const EditRouletteText = () => {
           <div className="roulette">
             <RoulettePopup />
           </div>
-          {/*<div className="c-card">*/}
+
           <div className="roulette-description c-card">
             <ul>
-              <li>ルーレットはRankが10上がるごとに、1つ編集できるようになります。<br />
-                また、同時にルーレットを1回、回すことができるようになります。</li>
-              <li>ルーレットを回すことと内容を編集することは、任意のタイミングで別々に行うことができますが、回数に制限があります。</li>
-              <li>回数については左上を参照してください。</li>
+              <li>Rankが10上がるごとに、プレイチケットと編集チケットが付与されます。</li>
+              <li>ルーレットを回すには、プレイチケットを1枚使用する必要があります。</li>
+              <li>ルーレットの各テキストを編集するには、編集チケットを1枚使用する必要があります。</li>
+              <li>各チケットの枚数は、左上に表示されています。</li>
             </ul>
           </div>
-          {/*</div>*/}
 
         </div>
 

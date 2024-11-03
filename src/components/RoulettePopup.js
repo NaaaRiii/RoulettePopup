@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../components/RoulettePopup.css';
 import Modal from './Modal';
 import { fetchRouletteText } from './utils';
@@ -8,8 +8,59 @@ const RoulettePopup = () => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rouletteText, setRouletteText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [playTickets, setPlayTickets] = useState(0);
   //const [result, setResult] = useState('');
   //const [selectedSegment, setSelectedSegment] = useState(null);
+
+  // プレイチケットを取得する関数
+  const fetchPlayTickets = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/roulette_texts/tickets', {
+        method: 'GET',
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setPlayTickets(data.play_tickets);
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+    }
+  };
+
+  // 初回レンダリング時にプレイチケットを取得
+  useEffect(() => {
+    fetchPlayTickets();
+  }, []);
+
+  const startSpinningWithTicket = async () => {
+    if (playTickets <= 0) {
+      alert('プレイチケットが不足しています');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/api/roulette_texts/spin', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error);
+        return;
+      }
+
+      const data = await response.json();
+
+      setPlayTickets(data.play_tickets);
+      
+      startSpinning();
+    } catch (error) {
+      console.error('Error spinning the roulette:', error);
+    }
+  };
 
   // ルーレットのセグメントを定義（例: 12セグメント）
   const segmentAngles = 360 / 12;
@@ -82,6 +133,13 @@ const RoulettePopup = () => {
     }, 6000);
   };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setIsSpinning(false);
+    fetchPlayTickets();
+    //window.location.reload(); 
+  };
+
   return (
     <div className="roulette-container">
       <div className="roulette-pointer"></div>
@@ -94,14 +152,15 @@ const RoulettePopup = () => {
       >
         {segments}
       </div>
+
       <div className="start-button">
-        <button onClick={startSpinning} disabled={isSpinning}>Start
-        </button>
+        <button onClick={startSpinningWithTicket} disabled={isSpinning}>Start</button>
       </div>
       {/*{!isSpinning && selectedSegment && <div>Selected Segment: {selectedSegment}</div>}*/}
       {/*<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>*/}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div>Matched text is: {rouletteText}</div>
+          <p>Matched text is: {rouletteText}</p>
+          <button onClick={closeModal}>Close</button>
       </Modal>
     </div>
   );
