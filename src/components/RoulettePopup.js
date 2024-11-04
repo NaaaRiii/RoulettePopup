@@ -61,6 +61,8 @@ const RoulettePopup = () => {
       return;
     }
 
+    setIsSpinning(true);
+
     try {
       const response = await fetch('http://localhost:3000/api/roulette_texts/spin', {
         method: 'PATCH',
@@ -120,10 +122,10 @@ const RoulettePopup = () => {
   };
 
   const closeModal = () => {
+    console.log('Closing modal and fetching tickets');
     setIsModalOpen(false);
     setIsSpinning(false);
     fetchTickets();
-    //window.location.reload(); 
   };
 
   return (
@@ -140,7 +142,7 @@ const RoulettePopup = () => {
       </div>
 
       <div className="start-button">
-        <button onClick={startSpinningWithTicket} disabled={isSpinning}>Start</button>
+      <button onClick={startSpinningWithTicket} disabled={isSpinning || playTickets <= 0}>ルーレットを回す</button>
       </div>
       {/*{!isSpinning && selectedSegment && <div>Selected Segment: {selectedSegment}</div>}*/}
       {/*<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>*/}
