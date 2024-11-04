@@ -1,66 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import '../components/RoulettePopup.css';
 import Modal from './Modal';
 import { fetchRouletteText } from './utils';
+import { TicketsContext } from '../contexts/TicketsContext';
 
 const RoulettePopup = () => {
   const [rotation, setRotation] = useState(90);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rouletteText, setRouletteText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [playTickets, setPlayTickets] = useState(0);
-  //const [result, setResult] = useState('');
-  //const [selectedSegment, setSelectedSegment] = useState(null);
-
-  // プレイチケットを取得する関数
-  const fetchPlayTickets = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/roulette_texts/tickets', {
-        method: 'GET',
-        credentials: 'include'
-      });
-      const data = await response.json();
-      setPlayTickets(data.play_tickets);
-    } catch (error) {
-      console.error('Error fetching tickets:', error);
-    }
-  };
-
-  // 初回レンダリング時にプレイチケットを取得
-  useEffect(() => {
-    fetchPlayTickets();
-  }, []);
-
-  const startSpinningWithTicket = async () => {
-    if (playTickets <= 0) {
-      alert('プレイチケットが不足しています');
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:3000/api/roulette_texts/spin', {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.error);
-        return;
-      }
-
-      const data = await response.json();
-
-      setPlayTickets(data.play_tickets);
-      
-      startSpinning();
-    } catch (error) {
-      console.error('Error spinning the roulette:', error);
-    }
-  };
+  const { playTickets, setPlayTickets, fetchTickets } = useContext(TicketsContext);
 
   // ルーレットのセグメントを定義（例: 12セグメント）
   const segmentAngles = 360 / 12;
@@ -101,6 +50,43 @@ const RoulettePopup = () => {
     return !excludedRanges.some(range => angle >= range.min && angle <= range.max);
   }
 
+  const startSpinningWithTicket = async () => {
+    if (playTickets <= 0) {
+      alert('プレイチケットが不足しています');
+      return;
+    }
+
+    const confirmSpin = window.confirm('チケットを1枚消費して、ルーレットを回しますか？');
+    if (!confirmSpin) {
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/api/roulette_texts/spin', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error);
+        return;
+      }
+
+      const data = await response.json();
+      console.log('Spin Response:', data); // デバッグ用
+
+      setPlayTickets(data.play_tickets); // プレイチケットを更新
+
+      startSpinning();
+    } catch (error) {
+      console.error('Error spinning the roulette:', error);
+    }
+  };
+
   const startSpinning = () => {
     // ルーレットを最低5回転するように設定
     let baseRotation = 360 * 5;
@@ -136,7 +122,7 @@ const RoulettePopup = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setIsSpinning(false);
-    fetchPlayTickets();
+    fetchTickets();
     //window.location.reload(); 
   };
 

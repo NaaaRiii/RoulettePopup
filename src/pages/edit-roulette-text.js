@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { TicketsContext } from '../contexts/TicketsContext';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
 import Image from 'next/image';
@@ -12,40 +13,54 @@ const EditRouletteText = () => {
   const [showForm, setShowForm] = useState(false);
   const [editedText, setEditedText] = useState('');
   const [flashMessage, setFlashMessage] = useState('');
-  const [playTickets, setPlayTickets] = useState(0);
-  const [editTickets, setEditTickets] = useState(0);
-
+  const { playTickets, editTickets, fetchTickets } = useContext(TicketsContext);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/roulette_texts/tickets', {
-      method: 'GET',
-      credentials: 'include'
-    })
-      .then(response => response.json())
-      .then(data => {
-        setPlayTickets(data.play_tickets);
-        setEditTickets(data.edit_tickets);
-      })
-      .catch(error => console.error('Error:', error));
-  }, []);
+    if (rouletteNumber !== '') {
+      const fetchRouletteTexts = async () => {
+        try {
+          const response = await fetch('http://localhost:3000/api/roulette_texts', {
+            method: 'GET',
+            credentials: 'include'
+          });
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            setRouletteTexts(data);
+            const selectedText = data.find(text => text.number === parseInt(rouletteNumber));
+            setEditedText(selectedText ? selectedText.text : '');
+          } else {
+            console.error('Data is not an array:', data);
+          }
+        } catch (error) {
+          console.error('Error fetching roulette texts:', error);
+        }
+      };
+      
+      fetchRouletteTexts();
+    }
+  }, [rouletteNumber]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/roulette_texts', {
-      method: 'GET',
-      credentials: 'include'
-    })
-      .then(response => response.json())
-      .then(data => {
+    const fetchAllRouletteTexts = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/roulette_texts', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        console.log('Fetched roulette texts:', data); // デバッグ用
         if (Array.isArray(data)) {
           setRouletteTexts(data);
-          const selectedText = data.find(text => text.number === parseInt(rouletteNumber));
-          setEditedText(selectedText ? selectedText.text : '');
         } else {
           console.error('Data is not an array:', data);
         }
-      })
-      .catch(error => console.error('Error:', error));
-  }, [rouletteNumber]);
+      } catch (error) {
+        console.error('Error fetching roulette texts:', error);
+      }
+    };
+    
+    fetchAllRouletteTexts();
+  }, []);
 
   const selectedRouletteTextId = rouletteTexts.find(rt => rt.number === parseInt(rouletteNumber))?.id;
 
@@ -87,7 +102,8 @@ const EditRouletteText = () => {
       if (data.roulette_text && typeof data.roulette_text === 'object' && 'number' in data.roulette_text) {
         const { roulette_text: updatedRouletteText, edit_tickets: updatedEditTickets } = data;
         setRouletteTexts(rouletteTexts.map(text => text.number === updatedRouletteText.number ? updatedRouletteText : text));
-        setEditTickets(updatedEditTickets); // 編集チケットの更新
+        // 編集チケットはContextから管理されているので、fetchTicketsで再取得
+        fetchTickets(); 
         setShowForm(false);
         setFlashMessage(`Number: ${updatedRouletteText.number} を ${updatedRouletteText.text} に変更しました。`);
       } else {
