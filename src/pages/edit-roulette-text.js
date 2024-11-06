@@ -62,22 +62,25 @@ const EditRouletteText = () => {
     fetchAllRouletteTexts();
   }, []);
 
-  const selectedRouletteTextId = rouletteTexts.find(rt => rt.number === parseInt(rouletteNumber))?.id;
+  const selectedRouletteTextNumber = parseInt(rouletteNumber);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    console.log("Selected Roulette Text Number:", rouletteNumber);
+    console.log("Edited Text:", editedText);
 
     if (editTickets <= 0) {
       alert('編集チケットが不足しています');
       return;
     }
 
-    if (!selectedRouletteTextId) {
-      console.error('Roulette Text ID is undefined.');
+    if (!rouletteNumber) {
+      console.error('Roulette Number is undefined.');
       return;
     }
 
-    const apiUrl = `http://localhost:3000/api/roulette_texts/${selectedRouletteTextId}`;
+    const apiUrl = `http://localhost:3000/api/roulette_texts/${rouletteNumber}`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -91,18 +94,27 @@ const EditRouletteText = () => {
         }),
       });
 
+      console.log("Response Status:", response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
         alert(errorData.error || '更新に失敗しました。');
         return;
-      }  
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error Response Text:", errorText);
+        alert('更新に失敗しました。');
+        return;
+      }
 
       const data = await response.json();
+      console.log("Updated Data:", data);
 
       if (data.roulette_text && typeof data.roulette_text === 'object' && 'number' in data.roulette_text) {
-        const { roulette_text: updatedRouletteText, edit_tickets: updatedEditTickets } = data;
+        const { roulette_text: updatedRouletteText } = data;
         setRouletteTexts(rouletteTexts.map(text => text.number === updatedRouletteText.number ? updatedRouletteText : text));
-        // 編集チケットはContextから管理されているので、fetchTicketsで再取得
         fetchTickets(); 
         setShowForm(false);
         setFlashMessage(`Number: ${updatedRouletteText.number} を ${updatedRouletteText.text} に変更しました。`);
@@ -167,7 +179,7 @@ const EditRouletteText = () => {
                       className="btn btn-primary"
                       onClick={(e) => {
                         e.preventDefault();
-                        if (window.confirm("この内容で保存しますか？")) {
+                        if (window.confirm("チケットを1枚消費して、この内容でテキストを編集しますか？")) {
                           handleSubmit(e);
                         }
                       }}
