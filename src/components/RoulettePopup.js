@@ -55,14 +55,14 @@ const RoulettePopup = () => {
       alert('プレイチケットが不足しています');
       return;
     }
-
+  
     const confirmSpin = window.confirm('チケットを1枚消費して、ルーレットを回しますか？');
     if (!confirmSpin) {
       return;
     }
 
     setIsSpinning(true);
-
+  
     try {
       const response = await fetch('http://localhost:3000/api/roulette_texts/spin', {
         method: 'PATCH',
@@ -71,21 +71,22 @@ const RoulettePopup = () => {
           'Content-Type': 'application/json'
         }
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.error);
+        alert(errorData.error || 'ルーレットの回転に失敗しました。');
         return;
       }
-
+  
       const data = await response.json();
-      console.log('Spin Response:', data); // デバッグ用
-
-      setPlayTickets(data.play_tickets); // プレイチケットを更新
-
+      console.log('Spin Response:', data);
+  
+      setPlayTickets(data.play_tickets);
+  
       startSpinning();
     } catch (error) {
       console.error('Error spinning the roulette:', error);
+      alert('ルーレットの回転中にエラーが発生しました。');
     }
   };
 
@@ -98,8 +99,8 @@ const RoulettePopup = () => {
         randomAngle = Math.floor(Math.random() * 360);
     } while (!isValidAngle(randomAngle)); // 有効な角度が得られるまで繰り返す
 
-    // 最終的な回転角度にランダム角度を加算
-    const newRotation = 90 + randomAngle + baseRotation;
+    // 累積回転角度を計算
+    let newRotation = rotation + randomAngle + baseRotation;
 
     setRotation(newRotation);
     setIsSpinning(true);
