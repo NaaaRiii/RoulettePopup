@@ -603,10 +603,6 @@ describe('RoulettePopup Component', () => {
       expect(screen.queryByTestId('modal')).toBeInTheDocument();
     });
 
-    // 生成された角度を取得
-    // `rotation` の値を取得する必要があるため、`RoulettePopup` コンポーネントをテスト用に修正する必要があります
-    // 例えば、`rotation` を `useRef` で保持し、テスト中にアクセス可能にする
-
     // テスト終了後に `Math.random` を元に戻す
     Math.random = originalMathRandom;
   });
