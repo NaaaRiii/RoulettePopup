@@ -8,131 +8,13 @@ import RoulettePopup from '../components/RoulettePopup';
 import '../components/styles.css';
 
 const EditRouletteText = () => {
-  //const [tickets, setTickets] = useState(0);
   const [rouletteNumber, setRouletteNumber] = useState('');
-  //const [rouletteTexts, setRouletteTexts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editedText, setEditedText] = useState('');
   const [flashMessage, setFlashMessage] = useState('');
   const { playTickets, editTickets, fetchTickets } = useContext(TicketsContext);
   const { rouletteTexts, setRouletteTexts } = useFetchRouletteTexts();
 
-
-  //useEffect(() => {
-  //  if (rouletteNumber !== '') {
-  //    const fetchRouletteTexts = async () => {
-  //      try {
-  //        const response = await fetch('http://localhost:3000/api/roulette_texts', {
-  //          method: 'GET',
-  //          credentials: 'include'
-  //        });
-  //        const data = await response.json();
-  //        console.log('Fetched roulette texts:', data); 
-  //        if (Array.isArray(data)) {
-  //          setRouletteTexts(data);
-  //          const selectedText = data.find(text => text.number === parseInt(rouletteNumber));
-  //          setEditedText(selectedText ? selectedText.text : '');
-  //        } else {
-  //          console.error('Data is not an array:', data);
-  //        }
-  //      } catch (error) {
-  //        console.error('Error fetching roulette texts:', error);
-  //      }
-  //    };
-  //    fetchRouletteTexts();
-  //  }
-  //}, [rouletteNumber]);
-
-  //useEffect(() => {
-  //  const fetchAllRouletteTexts = async () => {
-  //    try {
-  //      const response = await fetch('http://localhost:3000/api/roulette_texts', {
-  //        method: 'GET',
-  //        credentials: 'include'
-  //      });
-  //      const data = await response.json();
-  //      console.log('Fetched roulette texts:', data); // デバッグ用
-  //      if (Array.isArray(data)) {
-  //        setRouletteTexts(data);
-  //      } else {
-  //        console.error('Data is not an array:', data);
-  //      }
-  //    } catch (error) {
-  //      console.error('Error fetching roulette texts:', error);
-  //    }
-  //  };
-    
-  //  fetchAllRouletteTexts();
-  //}, []);
-
-  //useEffect(() => {
-  //  let isMounted = true; // マウント状態を追跡するフラグ
-
-  //  const fetchAllRouletteTexts = async () => {
-  //    try {
-  //      const response = await fetch('http://localhost:3000/api/roulette_texts', {
-  //        method: 'GET',
-  //        credentials: 'include'
-  //      });
-  //      const data = await response.json();
-  //      console.log('Fetched roulette texts:', data); // デバッグ用
-  //      //if (Array.isArray(data)) {
-  //      //  if (isMounted) {
-  //      //    setRouletteTexts(data);
-  //      //  }
-  //      if (Array.isArray(data)) {
-  //        if (isMounted) {
-  //          console.log('Before setRouletteTexts');
-  //          setRouletteTexts(data);
-  //          console.log('After setRouletteTexts');
-  //        }
-  //      } else {
-  //        console.error('Data is not an array:', data);
-  //      }
-  //    } catch (error) {
-  //      console.error('Error fetching roulette texts:', error);
-  //    }
-  //  };
-    
-  //  fetchAllRouletteTexts();
-
-  //  return () => {
-  //    isMounted = false; // コンポーネントがアンマウントされたことを示す
-  //  };
-  //}, []);
-
-  //useEffect(() => {
-  //  if (rouletteNumber !== '') {
-  //    let isMounted = true; // マウント状態を追跡するフラグ
-
-  //    const fetchRouletteTexts = async () => {
-  //      try {
-  //        const response = await fetch('http://localhost:3000/api/roulette_texts', {
-  //          method: 'GET',
-  //          credentials: 'include'
-  //        });
-  //        const data = await response.json();
-  //        console.log('Fetched roulette texts:', data);
-  //        if (Array.isArray(data)) {
-  //          if (isMounted) {
-  //            setRouletteTexts(data);
-  //            const selectedText = data.find(text => text.number === parseInt(rouletteNumber));
-  //            setEditedText(selectedText ? selectedText.text : '');
-  //          }
-  //        } else {
-  //          console.error('Data is not an array:', data);
-  //        }
-  //      } catch (error) {
-  //        console.error('Error fetching roulette texts:', error);
-  //      }
-  //    };
-  //    fetchRouletteTexts();
-
-  //    return () => {
-  //      isMounted = false; // コンポーネントがアンマウントされたことを示す
-  //    };
-  //  }
-  //}, [rouletteNumber, setRouletteTexts]);
 
   useEffect(() => {
     if (rouletteNumber !== '') {
@@ -144,7 +26,7 @@ const EditRouletteText = () => {
           const response = await fetch('http://localhost:3000/api/roulette_texts', {
             method: 'GET',
             credentials: 'include',
-            signal: signal, // AbortControllerのsignalを渡す
+            signal: signal,
           });
           const data = await response.json();
           console.log('Fetched roulette texts:', data);
@@ -261,7 +143,7 @@ const EditRouletteText = () => {
             )}
 
             {showForm && (
-              <div id="edit-roulette-text-form" className="form-container visible">
+              <div id="edit-roulette-text-form" className="form-container visible" data-testid="edit-roulette-text-form">
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
                     <label htmlFor="rouletteNumber">編集したい数字を選んでください。</label>
