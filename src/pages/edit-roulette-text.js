@@ -74,6 +74,10 @@ const EditRouletteText = () => {
       return;
     }
 
+    if (!window.confirm("チケットを1枚消費して、この内容でテキストを編集しますか？")) {
+      return;
+    }
+
     const apiUrl = `http://localhost:3000/api/roulette_texts/${rouletteNumber}`;
 
     try {
@@ -175,12 +179,12 @@ const EditRouletteText = () => {
                     <button
                       type="submit"
                       className="btn btn-primary"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (window.confirm("チケットを1枚消費して、この内容でテキストを編集しますか？")) {
-                          handleSubmit(e);
-                        }
-                      }}
+                      //onClick={(e) => {
+                      //  e.preventDefault();
+                      //  if (window.confirm("チケットを1枚消費して、この内容でテキストを編集しますか？")) {
+                      //    handleSubmit(e);
+                      //  }
+                      //}}
                     >
                       内容を保存する
                     </button>
@@ -219,7 +223,7 @@ const EditRouletteText = () => {
           </div>
 
           <div className="roulette-description c-card">
-            <ul>
+            <ul data-testid="roulette-description-list">
               <li>Rankが10上がるごとに、プレイチケットと編集チケットが付与されます。</li>
               <li>ルーレットを回すには、プレイチケットを1枚使用する必要があります。</li>
               <li>ルーレットの各テキストを編集するには、編集チケットを1枚使用する必要があります。</li>

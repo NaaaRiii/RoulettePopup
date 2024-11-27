@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import EditRouletteText from '../pages/edit-roulette-text';
 import { TicketsContext } from '../contexts/TicketsContext';
@@ -22,10 +22,7 @@ jest.mock('../hooks/useFetchRouletteTexts', () => {
   const React = require('react');
   return {
     useFetchRouletteTexts: () => {
-      const [rouletteTexts, setRouletteTexts] = React.useState([
-        { id: 1, number: 1, text: 'Prize 1' },
-        { id: 2, number: 2, text: 'Prize 2' },
-      ]);
+      const [rouletteTexts, setRouletteTexts] = React.useState(mockRouletteTexts);
       return { rouletteTexts, setRouletteTexts };
     },
   };
@@ -35,6 +32,12 @@ jest.mock('../hooks/useFetchRouletteTexts', () => {
 jest.mock('../utils/withAuth', () => (Component) => Component);
 
 const fetchTicketsMock = jest.fn();
+
+const mockRouletteTexts = [
+  { id: 1, number: 1, text: 'Prize 1' },
+  { id: 2, number: 2, text: 'Prize 2' },
+];
+
 
 // `TestWrapper` コンポーネントを修正して `fetchTicketsMock` に実装を追加
 const TestWrapper = ({ children }) => {
@@ -248,6 +251,40 @@ describe('EditRouletteText Component', () => {
 
       expect(rouletteTextItem1).toHaveTextContent('Prize 1');
       expect(rouletteTextItem2).toHaveTextContent('Prize 2');
+    });
+
+    it('displays the correct image for each roulette text item', async () => {
+      render(
+        <TicketsContext.Provider value={mockTicketsContextValue}>
+          <EditRouletteText />
+        </TicketsContext.Provider>
+      );
+  
+      // ルーレットテキスト項目を取得
+      const rouletteTextItems = await screen.findAllByTestId(/roulette-text-item-\d+/);
+  
+      expect(rouletteTextItems).toHaveLength(2); // テストデータに合わせて調整
+  
+      // 各項目を検証
+      for (const item of rouletteTextItems) {
+        // data-testid から番号を取得
+        const testId = item.getAttribute('data-testid');
+        const match = testId.match(/roulette-text-item-(\d+)/);
+        const id = match ? parseInt(match[1], 10) : null;
+  
+        expect(id).not.toBeNull();
+  
+        // ルーレットテキストを取得して対応する番号を取得
+        const rouletteText = mockRouletteTexts.find(text => text.id === id);
+        const number = rouletteText.number;
+  
+        // 画像を取得
+        const image = within(item).getByAltText(`Roulette Image ${number}`);
+        expect(image).toBeInTheDocument();
+  
+        // src 属性を検証
+        expect(image).toHaveAttribute('src', `/images/${number}.jpeg`);
+      }
     });
   });
 
@@ -562,6 +599,207 @@ describe('EditRouletteText Component', () => {
 
     // window.confirm のモックを元に戻す
     window.confirm.mockRestore();
+  });
+
+  describe('Insufficient Edit Tickets', () => {
+    it('does not display the edit button when editTickets <= 0', async () => {
+      const mockTicketsContextValueZero = {
+        playTickets: 5,
+        editTickets: 0,
+        fetchTickets: jest.fn(),
+      };
+      
+      render(
+        <TicketsContext.Provider value={mockTicketsContextValueZero}>
+          <EditRouletteText />
+        </TicketsContext.Provider>
+      );
+      
+      // "ルーレットを編集する" ボタンが存在しないことを確認
+      const editButton = screen.queryByText('ルーレットを編集する');
+      expect(editButton).not.toBeInTheDocument();
+    });
+  });
+  
+  describe('Cancel Button Functionality', () => {
+    it('closes the edit form when the "Cancel" button is clicked', async () => {
+      // window.confirm をモックして常に true を返すように設定
+      jest.spyOn(window, 'confirm').mockImplementation(() => true);
+  
+      render(
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+  
+      // "ルーレットを編集する" ボタンをクリックしてフォームを表示
+      const editButton = await screen.findByText('ルーレットを編集する');
+      userEvent.click(editButton);
+  
+      // 編集フォームが表示されていることを確認
+      const editForm = await screen.findByTestId('edit-roulette-text-form');
+      expect(editForm).toBeInTheDocument();
+  
+      // 「キャンセル」ボタンを取得してクリック
+      const cancelButton = screen.getByText('キャンセル');
+      userEvent.click(cancelButton);
+  
+      // 編集フォームが閉じていることを確認
+      await waitFor(() => {
+        expect(screen.queryByTestId('edit-roulette-text-form')).not.toBeInTheDocument();
+      });
+  
+      // window.confirm のモックを元に戻す
+      window.confirm.mockRestore();
+    });
+  });
+  
+  describe('RoulettePopup Rendering within EditRouletteText', () => {
+    it('renders RoulettePopup component correctly within EditRouletteText', () => {
+      render(
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+
+      // RoulettePopup の主要な要素を確認
+      const rouletteContainer = screen.getByTestId('roulette-container');
+      expect(rouletteContainer).toBeInTheDocument();
+
+      const rouletteWheel = screen.getByTestId('roulette-wheel');
+      expect(rouletteWheel).toBeInTheDocument();
+
+      const startButton = screen.getByTestId('start-button');
+      expect(startButton).toBeInTheDocument();
+      expect(startButton).toBeEnabled();
+
+      // 12個のセグメントが存在することを確認
+      for (let i = 1; i <= 12; i++) {
+        const segment = screen.getByTestId(`segment-${i}`);
+        expect(segment).toBeInTheDocument();
+      }
+    });
+  });
+
+  describe('Roulette Description Section', () => {
+    it('displays the roulette description correctly in a list format', () => {
+      render(
+        <TicketsContext.Provider value={mockTicketsContextValue}>
+          <EditRouletteText />
+        </TicketsContext.Provider>
+      );
+
+      // ルーレット説明セクションの <ul> を取得
+      const descriptionList = screen.getByTestId('roulette-description-list');
+      expect(descriptionList).toBeInTheDocument();
+
+      // <ul> 内のすべての <li> 要素を取得
+      const listItems = descriptionList.querySelectorAll('li');
+      expect(listItems).toHaveLength(4);
+
+      // 各 <li> のテキストを確認
+      expect(listItems[0]).toHaveTextContent('Rankが10上がるごとに、プレイチケットと編集チケットが付与されます。');
+      expect(listItems[1]).toHaveTextContent('ルーレットを回すには、プレイチケットを1枚使用する必要があります。');
+      expect(listItems[2]).toHaveTextContent('ルーレットの各テキストを編集するには、編集チケットを1枚使用する必要があります。');
+      expect(listItems[3]).toHaveTextContent('各チケットの枚数は、左上に表示されています。');
+    });
+  });
+
+  describe('TicketsContext Data Usage', () => {
+    it('retrieves and displays playTickets and editTickets correctly', () => {
+      render(
+        <TestWrapper playTickets={5} editTickets={2}>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+
+      // playTickets の表示を確認
+      const playTicketsElement = screen.getByTestId('play-tickets');
+      expect(playTicketsElement).toBeInTheDocument();
+      expect(playTicketsElement).toHaveTextContent('プレイチケットを『5』枚持っています。');
+
+      // editTickets の表示を確認
+      const editTicketsElement = screen.getByTestId('edit-tickets');
+      expect(editTicketsElement).toBeInTheDocument();
+      expect(editTicketsElement).toHaveTextContent('編集チケットを『2』枚持っています。');
+    });
+
+    it('verifies that tickets are consumed correctly and the display is updated accordingly', async () => {
+      // TestWrapper を使用してコンポーネントをラップ
+      render(
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+  
+      // 初期表示を確認
+      const playTicketsElement = screen.getByTestId('play-tickets');
+      const editTicketsElement = screen.getByTestId('edit-tickets');
+      expect(playTicketsElement).toHaveTextContent('プレイチケットを『5』枚持っています。');
+      expect(editTicketsElement).toHaveTextContent('編集チケットを『2』枚持っています。');
+  
+      // 「ルーレットを編集する」ボタンをクリックして、フォームを表示
+      const editButton = screen.getByRole('button', { name: /ルーレットを編集する/i });
+      userEvent.click(editButton);
+  
+      // フォームが表示されるのを待つ
+      const form = await screen.findByTestId('edit-roulette-text-form');
+      expect(form).toBeInTheDocument();
+  
+      // フォーム内で rouletteNumber を選択
+      const rouletteNumberSelect = screen.getByLabelText('編集したい数字を選んでください。');
+      userEvent.selectOptions(rouletteNumberSelect, '1');
+  
+      // テキスト入力フィールドに初期値がセットされるのを待つ
+      const rouletteTextInput = screen.getByLabelText('Edit text');
+      await waitFor(() => expect(rouletteTextInput).toHaveValue('Prize 1'));
+
+      // 入力フィールドをクリアしてから新しい値を入力
+      await userEvent.clear(rouletteTextInput);
+      await userEvent.type(rouletteTextInput, 'New Prize 1');
+  
+      // window.confirm をモックして常に true を返す
+      jest.spyOn(window, 'confirm').mockImplementation(() => true);
+  
+      // 「内容を保存する」ボタンをクリック
+      const saveButton = screen.getByRole('button', { name: /内容を保存する/i });
+      userEvent.click(saveButton);
+  
+      // fetch が PATCH メソッドで '/api/roulette_texts/1' に呼び出されたことを確認
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenNthCalledWith(3, // 3回目の呼び出し
+          'http://localhost:3000/api/roulette_texts/1',
+          expect.objectContaining({
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              roulette_text: { text: 'New Prize 1' },
+            }),
+          })
+        );
+      });
+  
+      // fetchTicketsMock が呼び出されたことを確認
+      await waitFor(() => {
+        expect(fetchTicketsMock).toHaveBeenCalled();
+      });
+  
+      // editTickets が1減少していることを確認
+      await waitFor(() => {
+        expect(editTicketsElement).toHaveTextContent('編集チケットを『1』枚持っています。');
+      });
+  
+      // フォームが閉じられたことを確認
+      await waitFor(() => {
+        expect(screen.queryByTestId('edit-roulette-text-form')).not.toBeInTheDocument();
+      });
+  
+      // window.confirm のモックを元に戻す
+      window.confirm.mockRestore();
+    });
   });
 
 });
