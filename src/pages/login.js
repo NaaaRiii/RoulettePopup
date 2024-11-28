@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 //import Layout from '../components/Layout';
 import '../components/styles.css';
@@ -105,6 +106,11 @@ const LoginPage = () => {
 
               <button type="submit" className="button">Log in</button>
             </form>
+
+            {/* Google サインインボタンを追加 */}
+            <button className="button" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>
+              Sign In with Google
+            </button>
 
             <p className="sign-up-link">
               <span className="new-user-text">New user?</span> 

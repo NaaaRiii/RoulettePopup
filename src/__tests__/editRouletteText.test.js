@@ -52,7 +52,7 @@ const TestWrapper = ({ children }) => {
   }, []);
 
   return (
-    <TicketsContext.Provider value={{ playTickets, editTickets, fetchTickets: fetchTicketsMock }}>
+    <TicketsContext.Provider value={{ playTickets, setPlayTickets, editTickets, fetchTickets: fetchTicketsMock }}>
       {children}
     </TicketsContext.Provider>
   );
@@ -87,6 +87,16 @@ beforeEach(() => {
     setUserRank: jest.fn(),
     setIsLoggedIn: jest.fn(),
   }));
+});
+
+beforeAll(() => {
+  // window.alert をモック
+  jest.spyOn(window, 'alert').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  // モックを元に戻す
+  window.alert.mockRestore();
 });
 
 // `fetch` のモック設定
@@ -134,6 +144,16 @@ global.fetch = jest.fn((url, options) => {
     });
   }
 
+  if (parsedUrl.pathname === '/api/roulette_texts/spin' && options.method === 'PATCH') {
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({
+        play_tickets: 4, // プレイチケットの残数を適切に設定
+      }),
+    });
+  }
+
   // 他のエンドポイントが必要な場合はここに追加
   console.error('Unknown endpoint:', url);
   return Promise.reject(new Error('Unknown endpoint'));
@@ -143,6 +163,7 @@ global.fetch = jest.fn((url, options) => {
 describe('EditRouletteText Component', () => {
   const mockTicketsContextValue = {
     playTickets: 5,
+    setPlayTickets: jest.fn(),
     editTickets: 2,
     fetchTickets: jest.fn(),
   };
@@ -802,4 +823,209 @@ describe('EditRouletteText Component', () => {
     });
   });
 
+  describe('Form Input State Updates', () => {
+    it('updates state variables when select box and input field values change', async () => {
+      render(
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+  
+      // 編集フォームを表示
+      const editButton = await screen.findByText('ルーレットを編集する');
+      userEvent.click(editButton);
+  
+      // セレクトボックスと入力フィールドを取得
+      const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
+      const textInput = screen.getByLabelText('Edit text');
+  
+      // 初期状態の確認
+      expect(numberSelect).toHaveValue('');
+      expect(textInput).toHaveValue('');
+  
+      // セレクトボックスで数字「2」を選択
+      userEvent.selectOptions(numberSelect, '2');
+  
+      // `editedText` が対応するテキストに更新されるのを待つ
+      await waitFor(() => expect(textInput).toHaveValue('Prize 2'));
+  
+      // テキストフィールドに新しい値を入力
+      await userEvent.clear(textInput);
+      await userEvent.type(textInput, 'New Prize 2');
+  
+      // 入力フィールドの値が更新されたことを確認
+      expect(textInput).toHaveValue('New Prize 2');
+    });
+  });
+
+  describe('Button Click Events', () => {
+    it('shows the edit form when the "ルーレットを編集する" button is clicked', async () => {
+      render(
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+  
+      // 編集フォームが初期状態で表示されていないことを確認
+      expect(screen.queryByTestId('edit-roulette-text-form')).not.toBeInTheDocument();
+  
+      // 「ルーレットを編集する」ボタンをクリック
+      const editButton = screen.getByText('ルーレットを編集する');
+      userEvent.click(editButton);
+  
+      // 編集フォームが表示されていることを確認
+      expect(await screen.findByTestId('edit-roulette-text-form')).toBeInTheDocument();
+    });
+
+    it('hides the edit form when the "キャンセル" button is clicked', async () => {
+      render(
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+    
+      // 編集フォームを表示する
+      const editButton = screen.getByText('ルーレットを編集する');
+      userEvent.click(editButton);
+    
+      // 編集フォームが表示されていることを確認
+      expect(await screen.findByTestId('edit-roulette-text-form')).toBeInTheDocument();
+    
+      // 「キャンセル」ボタンをクリック
+      const cancelButton = screen.getByText('キャンセル');
+      userEvent.click(cancelButton);
+    
+      // 編集フォームが非表示になっていることを確認
+      await waitFor(() => {
+        expect(screen.queryByTestId('edit-roulette-text-form')).not.toBeInTheDocument();
+      });
+    });
+
+    it('calls handleSubmit and sends PATCH request when the "内容を保存する" button is clicked', async () => {
+      // window.confirm をモックして常に true を返す
+      jest.spyOn(window, 'confirm').mockImplementation(() => true);
+    
+      // fetch のモックをクリア
+      global.fetch.mockClear();
+    
+      render(
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+    
+      // 編集フォームを表示する
+      const editButton = screen.getByText('ルーレットを編集する');
+      userEvent.click(editButton);
+    
+      // 数字を選択
+      const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
+      userEvent.selectOptions(numberSelect, '1');
+    
+      // テキスト入力フィールドに初期値がセットされるのを待つ
+      const textInput = screen.getByLabelText('Edit text');
+      await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
+    
+      // 新しいテキストを入力
+      await userEvent.clear(textInput);
+      await userEvent.type(textInput, 'Updated Prize 1');
+    
+      // 「内容を保存する」ボタンをクリック
+      const saveButton = screen.getByText('内容を保存する');
+      userEvent.click(saveButton);
+    
+      // fetch が正しく呼び出されたことを確認
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          'http://localhost:3000/api/roulette_texts/1',
+          expect.objectContaining({
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              roulette_text: { text: 'Updated Prize 1' },
+            }),
+          })
+        );
+      });
+    
+      // window.confirm のモックを元に戻す
+      window.confirm.mockRestore();
+    });
+
+    it('calls fetchTickets after successful edit', async () => {
+      // window.confirm をモックして常に true を返す
+      jest.spyOn(window, 'confirm').mockImplementation(() => true);
+    
+      // fetchTicketsMock をクリア
+      fetchTicketsMock.mockClear();
+    
+      render(
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+    
+      // 編集フォームを表示し、編集操作を行う（前のテストと同様）
+    
+      // 「ルーレットを編集する」ボタンをクリック
+      const editButton = screen.getByText('ルーレットを編集する');
+      userEvent.click(editButton);
+    
+      // 数字を選択
+      const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
+      userEvent.selectOptions(numberSelect, '1');
+    
+      // テキスト入力フィールドに初期値がセットされるのを待つ
+      const textInput = screen.getByLabelText('Edit text');
+      await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
+    
+      // 新しいテキストを入力
+      await userEvent.clear(textInput);
+      await userEvent.type(textInput, 'Updated Prize 1');
+    
+      // 「内容を保存する」ボタンをクリック
+      const saveButton = screen.getByText('内容を保存する');
+      userEvent.click(saveButton);
+    
+      // fetchTickets が呼び出されたことを確認
+      await waitFor(() => {
+        expect(fetchTicketsMock).toHaveBeenCalled();
+      });
+    
+      // window.confirm のモックを元に戻す
+      window.confirm.mockRestore();
+    });
+    
+    it('starts the roulette when the "ルーレットを回す" button is clicked', async () => {
+      // window.confirm をモックして常に true を返す
+      jest.spyOn(window, 'confirm').mockImplementation(() => true);
+    
+      render(
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      );
+    
+      // 「ルーレットを回す」ボタンを取得
+      const startButton = screen.getByText('ルーレットを回す');
+    
+      // ボタンが有効であることを確認
+      expect(startButton).toBeEnabled();
+    
+      // ボタンをクリック
+      userEvent.click(startButton);
+    
+      // ボタンが無効化されるのを待つ
+      await waitFor(() => {
+        expect(startButton).toBeDisabled();
+      });
+    
+      // window.confirm のモックを元に戻す
+      window.confirm.mockRestore();
+    });
+  });
+  
 });
