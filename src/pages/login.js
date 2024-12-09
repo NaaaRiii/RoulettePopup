@@ -1,64 +1,88 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-//import Layout from '../components/Layout';
+import { useAuth } from '../contexts/AuthContext';
 import '../components/styles.css';
 
 
-const checkLoginStatus = async () => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/check_login`, {
-    method: 'GET',
-    credentials: 'include'
-  });
-  if (response.ok) {
-    const data = await response.json();
-    return data.logged_in;
-  }
-  return false;
-};
+//const checkLoginStatus = async () => {
+//  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/check_login`, {
+//    method: 'GET',
+//    credentials: 'include'
+//  });
+//  if (response.ok) {
+//    const data = await response.json();
+//    return data.logged_in;
+//  }
+//  return false;
+//};
 
 const LoginPage = () => {
+  const { user, signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
+  //useEffect(() => {
+  //  const checkLogin = async () => {
+  //    const isLoggedIn = await checkLoginStatus();
+  //    if (isLoggedIn) {
+  //      router.push('/dashboard');
+  //    }
+  //  };
+  //  checkLogin();
+  //  if (router.query.message) {
+  //    alert(decodeURIComponent(router.query.message));
+  //  }
+  //}, [router]);
+
   useEffect(() => {
-    const checkLogin = async () => {
-      const isLoggedIn = await checkLoginStatus();
-      if (isLoggedIn) {
-        router.push('/dashboard');
-      }
-    };
-    checkLogin();
+    if (user) {
+      router.push('/dashboard');
+    }
     if (router.query.message) {
       alert(decodeURIComponent(router.query.message));
     }
-  }, [router]);
+  }, [user, router]);
+
+  //const handleSubmit = async (event) => {
+  //  event.preventDefault();
+  //  console.log("Login request initiated");
+  //  setError('');
+    
+  //  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
+  //    method: 'POST',
+  //    headers: {
+  //      'Content-Type': 'application/json',
+  //    },
+  //    body: JSON.stringify({ email, password }),
+  //    credentials: 'include'
+  //  });
+  
+  //  if (response.ok) {
+  //    console.log("Login successful, redirecting to dashboard");
+  //    router.push('/dashboard');
+  //  } else {
+  //    const errorData = await response.json();
+  //    setError(errorData.error || 'Login failed, please try again.');
+  //    console.error('Login failed:', errorData);
+  //  }
+  //};
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Login request initiated");
+    console.log('Login request initiated');
     setError('');
-    
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-      credentials: 'include'
-    });
-  
-    if (response.ok) {
-      console.log("Login successful, redirecting to dashboard");
+
+    try {
+      await signIn(email, password); // `signIn` 関数を使用
+      console.log('Login successful, redirecting to dashboard');
       router.push('/dashboard');
-    } else {
-      const errorData = await response.json();
-      setError(errorData.error || 'Login failed, please try again.');
-      console.error('Login failed:', errorData);
+    } catch (error) {
+      setError(error.message || 'Login failed, please try again.');
+      console.error('Login failed:', error);
     }
   };
 
@@ -106,11 +130,6 @@ const LoginPage = () => {
 
               <button type="submit" className="button">Log in</button>
             </form>
-
-            {/* Google サインインボタンを追加 */}
-            <button className="button" onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>
-              Sign In with Google
-            </button>
 
             <p className="sign-up-link">
               <span className="new-user-text">New user?</span> 
