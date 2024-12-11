@@ -4,15 +4,19 @@ import { AuthProvider } from '../contexts/AuthContext';
 import { TicketsProvider } from '../contexts/TicketsContext';
 import '../components/styles.css';
 
+import { Authenticator } from "@aws-amplify/ui-react";
+
 function MyApp({ Component, pageProps }) {
   return (
-    <AuthProvider>
-      <GoalsProvider>
-        <TicketsProvider>
-          <Component {...pageProps} />
-        </TicketsProvider>
-      </GoalsProvider>
-    </AuthProvider>
+    <Authenticator>
+      <AuthProvider>
+        <GoalsProvider>
+          <TicketsProvider>
+            <Component {...pageProps} />
+          </TicketsProvider>
+        </GoalsProvider>
+      </AuthProvider>
+    </Authenticator>
   );
 }
 

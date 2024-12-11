@@ -1,17 +1,21 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAuth } from '../contexts/AuthContext';
+//import { useAuth } from '../contexts/AuthContext';
 import '../components/styles.css';
 
+import { useAuthenticator } from "@aws-amplify/ui-react";
 
 const LoginPage = () => {
-  const { user, signIn } = useAuth();
+  //const { user, signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+
+  const { user, signIn } = useAuthenticator();
+  //const { signOut } = useAuthenticator();
 
   useEffect(() => {
     if (user) {
