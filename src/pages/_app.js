@@ -5,11 +5,11 @@ import { TicketsProvider } from '../contexts/TicketsContext';
 import '../components/styles.css';
 
 import { Authenticator } from '@aws-amplify/ui-react';
-import { Amplify } from 'aws-amplify';
+//import { Amplify } from 'aws-amplify';
 import '@aws-amplify/ui-react/styles.css';
-import outputs from '../../amplify_outputs.json';
+//import outputs from '../../amplify_outputs.json';
 
-Amplify.configure(outputs);
+//Amplify.configure(outputs);
 
 function MyApp({ Component, pageProps }) {
   return (
