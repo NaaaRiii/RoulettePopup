@@ -1,16 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
-import Layout from '../components/Layout';
+//import Layout from '../components/Layout';
 import Link from 'next/link';
-import withAuth from '../utils/withAuth';
+//import withAuth from '../utils/withAuth';
 import ExpCalendar from '../components/Calendar';
 import ExpLineChart from '../components/ExpLineChart';
 import Image from 'next/image';
 import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
 
+
+import { Amplify } from 'aws-amplify';
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
+import outputs from '../../amplify_outputs.json';
+import { signOut } from "aws-amplify/auth"
+
+Amplify.configure(outputs);
+
 function Dashboard() {
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+    }
+  };
+  
   const [goalsState, setGoalsState] = useState([]);
   const [deletedGoalId, setDeletedGoalId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -191,7 +209,12 @@ function Dashboard() {
   //}, [userData.rank]);
 
   return (
-    <Layout>
+    <Authenticator>
+
+<button type="button" onClick={handleSignOut}>
+      Sign out
+    </button>
+    {/*<Layout>*/}
       {/*{isModalOpen && (
         <div id="modal" className="modal">
           <div className="modal-content">
@@ -352,8 +375,10 @@ function Dashboard() {
           </div>
         </div>
       </div>
-    </Layout>
+    {/*</Layout>*/}
+    </Authenticator>
   );
 }
 
-export default withAuth(Dashboard);
+//export default withAuth(Dashboard);
+export default Dashboard;

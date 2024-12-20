@@ -7,7 +7,7 @@ export default function Home() {
     //<Layout>
       <div className="background-image">
         <header className="header">
-          <h1>Plus ONE</h1> 
+          <h1>Plus ONE</h1>
         </header>
         <div className="content">
           <h1 className="welcome-text">Welcome to the Plus ONE</h1>
@@ -15,7 +15,7 @@ export default function Home() {
             <Link href="/signup">
               <button className="button">Sign Up</button>
             </Link>
-            <Link href="/login">
+            <Link href="/dashboard">
               <button className="button">Log In</button>
             </Link>
           </div>

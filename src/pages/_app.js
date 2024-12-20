@@ -1,57 +1,24 @@
 import React from 'react';
 import { GoalsProvider } from '../contexts/GoalsContext';
-import { AuthProvider } from '../contexts/AuthContext';
+//import { AuthProvider } from '../contexts/AuthContext';
 import { TicketsProvider } from '../contexts/TicketsContext';
 import '../components/styles.css';
 
-import { Authenticator } from '@aws-amplify/ui-react';
-import { Amplify } from 'aws-amplify';
-import '@aws-amplify/ui-react/styles.css';
-import outputs from '../../amplify_outputs.json';
+//import { Amplify } from 'aws-amplify';
+////import { Authenticator } from '@aws-amplify/ui-react';
+//import '@aws-amplify/ui-react/styles.css';
+//import outputs from '../../amplify_outputs.json';
 
-Amplify.configure(outputs);
+//Amplify.configure(outputs);
 
 function MyApp({ Component, pageProps }) {
   return (
-    <Authenticator>
-      <AuthProvider>
         <GoalsProvider>
           <TicketsProvider>
             <Component {...pageProps} />
           </TicketsProvider>
         </GoalsProvider>
-      </AuthProvider>
-    </Authenticator>
   );
 }
 
 export default MyApp;
-
-
-//import React from 'react';
-//import { Amplify } from 'aws-amplify';
-////import awsconfig from '../aws-exports';
-//import outputs from '../amplify_outputs.json';
-//import { GoalsProvider } from '../contexts/GoalsContext';
-//import { AuthProvider } from '../contexts/AuthContext';
-//import { TicketsProvider } from '../contexts/TicketsContext';
-//import '../components/styles.css';
-//import '@aws-amplify/ui-react/styles.css'; // Authenticator 用のスタイル
-
-//// Amplify の設定
-////Amplify.configure(awsconfig);
-//Amplify.configure(outputs);
-
-//function MyApp({ Component, pageProps }) {
-//  return (
-//    <AuthProvider>
-//      <GoalsProvider>
-//        <TicketsProvider>
-//          <Component {...pageProps} />
-//        </TicketsProvider>
-//      </GoalsProvider>
-//    </AuthProvider>
-//  );
-//}
-
-//export default MyApp;
