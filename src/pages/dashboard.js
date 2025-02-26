@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
-//import Layout from '../components/Layout';
 import Link from 'next/link';
-//import withAuth from '../utils/withAuth';
 import ExpCalendar from '../components/Calendar';
 import ExpLineChart from '../components/ExpLineChart';
 import Image from 'next/image';
 import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
 
+import { Auth } from 'aws-amplify';
 
 import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -77,10 +76,10 @@ function Dashboard() {
       })
         .then((response) => {
           if (response.ok) {
-            setDeletedGoalId(goalId);  // 削除されたgoalIdを保存
+            setDeletedGoalId(goalId);
             setGoalsState((prevGoals) =>
               prevGoals.filter((goal) => goal.id !== goalId)
-            );  // 削除されたgoalをgoalsStateから除外
+            );
             router.push('/dashboard');
           } else {
             alert('Failed to delete the goal.');
@@ -92,10 +91,21 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchGoals = async () => {
+      // Cognitoの認証ユーザー情報を取得
+      const user = await Auth.currentAuthenticatedUser();
+      const token = user.signInUserSession.idToken.jwtToken;
+
       try {
-        const response = await fetch('http://localhost:3000/api/goals', {
+        //const response = await fetch('http://localhost:3000/api/goals', {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals`, {
           method: 'GET',
           credentials: 'include',
+        //追加部分
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+        //追加部分
         });
     
         if (!response.ok) {
@@ -120,8 +130,19 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch('http://localhost:3000/api/current_user', {
-        credentials: 'include',
+      try {
+        const user = await Auth.currentAuthenticatedUser();
+        const token = user.signInUserSession.idToken.jwtToken;
+        
+      //const response = await fetch('http://localhost:3000/api/current_user', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`, {
+          method: 'GET',
+          credentials: 'include', 
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+        
       });
       if (response.ok) {
         const data = await response.json();
@@ -140,6 +161,9 @@ function Dashboard() {
         console.log('Formatted data:', formattedData);
       } else {
         console.error('Failed to fetch user data');
+      }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
       }
     };
   
@@ -208,13 +232,12 @@ function Dashboard() {
   //  }
   //}, [userData.rank]);
 
-  return (
-    <Authenticator>
+return (
+  <Authenticator>
 
 <button type="button" onClick={handleSignOut}>
       Sign out
     </button>
-    {/*<Layout>*/}
       {/*{isModalOpen && (
         <div id="modal" className="modal">
           <div className="modal-content">
@@ -375,10 +398,8 @@ function Dashboard() {
           </div>
         </div>
       </div>
-    {/*</Layout>*/}
     </Authenticator>
   );
 }
 
-//export default withAuth(Dashboard);
 export default Dashboard;

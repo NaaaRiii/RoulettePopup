@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+
+  env: {
+    NEXT_PUBLIC_RAILS_API_URL: 'https://rails-alb-296511138.ap-northeast-1.elb.amazonaws.com',
+  },
+
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals = config.externals || [];
