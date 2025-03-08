@@ -22,7 +22,7 @@
 
 
 // src/components/utils.js
-import { fetchWithAuth } from '../../utils/fetchWithAuth'; 
+import { fetchWithAuth } from '../utils/fetchWithAuth'; 
 // ↑ fetchWithAuth.js が src/utils/ フォルダにある場合のパス例
 
 export const fetchRouletteText = async (number) => {

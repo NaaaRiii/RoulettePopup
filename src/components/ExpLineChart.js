@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, subDays, addDays } from 'date-fns';
 
-import { fetchWithAuth } from '../../utils/fetchWithAuth';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const ExpLineChart = () => {
   const [data, setData] = useState([]);
