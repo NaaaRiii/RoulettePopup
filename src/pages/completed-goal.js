@@ -6,6 +6,14 @@ import withAuth from '../utils/withAuth';
 import Image from 'next/image';
 import '../components/styles.css';
 
+import { Amplify } from 'aws-amplify';
+import { Authenticator } from '@aws-amplify/ui-react';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
+import '@aws-amplify/ui-react/styles.css';
+import outputs from '../../amplify_outputs.json';
+
+Amplify.configure(outputs);
+
 function CompletedGoal() {
   const [goalsState, setGoalsState] = useState([]);
   const { refresh } = useGoals();
@@ -13,32 +21,33 @@ function CompletedGoal() {
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/goals', {
-        method: 'GET',
-        credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch data');
-    }
+        const response = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals`,
+          { method: 'GET' }
+        );
 
-    const data = await response.json();
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
 
-    if (!Array.isArray(data)) {
-      throw new Error('Data is not an array');
-    }
+        const data = await response.json();
 
-    // 達成済みのgoalのみをセット
-    setGoalsState(data.filter(goal => goal.completed));
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-};
+        if (!Array.isArray(data)) {
+          throw new Error('Data is not an array');
+        }
 
-fetchGoals();
-}, [refresh]);
+        // 達成済みの goal のみをセット
+        setGoalsState(data.filter((goal) => goal.completed));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchGoals();
+  }, [refresh]);
 
   return (
+    <Authenticator>
     <Layout>
       <div className="completed-goals-container">
         <h1>These are your Completed Goals!</h1>
@@ -74,6 +83,7 @@ fetchGoals();
 
 
     </Layout>
+    </Authenticator>
   );
 }
 

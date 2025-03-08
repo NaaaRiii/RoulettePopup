@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import Link from 'next/link';
 
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+
 const Header = () => {
   const { isLoggedIn, userRank, setIsLoggedIn, setUserRank } = useAuth();
   const router = useRouter();
@@ -12,10 +14,9 @@ const Header = () => {
     e.preventDefault();
   
     try {
-      const response = await fetch('http://localhost:3000/api/logout', {
-        method: 'DELETE',
-        credentials: 'include'
-      });
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/logout`, 
+        { method: 'DELETE' }
+      );
 
       if (response.ok) {
         setIsLoggedIn(false);
@@ -34,11 +35,10 @@ const Header = () => {
 
   const fetchUserRank = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/current_user', {
-        method: 'GET',
-        credentials: 'include'
-      });
-  
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`,
+        { method: 'GET' }
+      );
+
       if (response.ok) {
         const data = await response.json();
         setIsLoggedIn(true);

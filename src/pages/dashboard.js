@@ -8,10 +8,9 @@ import Image from 'next/image';
 import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
 
-import { Auth } from 'aws-amplify';
-
 import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import '@aws-amplify/ui-react/styles.css';
 import outputs from '../../amplify_outputs.json';
 import { signOut } from "aws-amplify/auth"
@@ -65,48 +64,36 @@ function Dashboard() {
     setIsModalOpen(false);
   };
 
-  const deleteGoal = () => {
+  const deleteGoal = async (goalId) => {
     if (window.confirm('Are you sure?')) {
-      fetch(`http://localhost:3000/api/goals/${goalId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-        .then((response) => {
-          if (response.ok) {
-            setDeletedGoalId(goalId);
-            setGoalsState((prevGoals) =>
-              prevGoals.filter((goal) => goal.id !== goalId)
-            );
-            router.push('/dashboard');
-          } else {
-            alert('Failed to delete the goal.');
-          }
-        })
-        .catch(() => alert('Communication has failed.'));
+      try {
+        const response = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}`,
+          { method: 'DELETE' }
+        );
+        if (response.ok) {
+          setDeletedGoalId(goalId);
+          setGoalsState((prevGoals) =>
+            prevGoals.filter((goal) => goal.id !== goalId)
+          );
+          router.push('/dashboard');
+        } else {
+          alert('Failed to delete the goal.');
+        }
+      } catch (error) {
+        alert('Communication has failed.');
+        console.error(error);
+      }
     }
   };
 
   useEffect(() => {
     const fetchGoals = async () => {
-      // Cognitoの認証ユーザー情報を取得
-      const user = await Auth.currentAuthenticatedUser();
-      const token = user.signInUserSession.idToken.jwtToken;
-
       try {
-        //const response = await fetch('http://localhost:3000/api/goals', {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals`, {
-          method: 'GET',
-          credentials: 'include',
-        //追加部分
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-        //追加部分
-        });
+        const response = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals`,
+          { method: 'GET' }
+        );
     
         if (!response.ok) {
           throw new Error(`Failed to fetch data, status code: ${response.status}`);
@@ -131,19 +118,10 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = await Auth.currentAuthenticatedUser();
-        const token = user.signInUserSession.idToken.jwtToken;
-        
-      //const response = await fetch('http://localhost:3000/api/current_user', {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`, {
-          method: 'GET',
-          credentials: 'include', 
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-        
-      });
+        const response = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`,
+          { method: 'GET' }
+        );
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched user data:', data);
@@ -190,14 +168,14 @@ function Dashboard() {
 
     console.log("Attempting to update last roulette rank for user ID:", userId);
 
-    const response = await fetch(`http://localhost:3000/api/current_users/${userId}/update_rank`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({ lastRouletteRank: newRank })
-    });
+    try {
+      const response = await fetchWithAuth(
+        `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_users/${userId}/update_rank`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ lastRouletteRank: newRank })
+        }
+      );
 
     if (response.ok) {
       const resData = await response.json();
@@ -222,6 +200,9 @@ function Dashboard() {
     } else {
       console.error("Failed to update last roulette rank due to network error");
     }
+    } catch (error) {
+      console.error('Error updating last roulette rank:', error);
+    }
   };
 
 
@@ -235,7 +216,7 @@ function Dashboard() {
 return (
   <Authenticator>
 
-<button type="button" onClick={handleSignOut}>
+    <button type="button" onClick={handleSignOut}>
       Sign out
     </button>
       {/*{isModalOpen && (

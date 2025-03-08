@@ -7,6 +7,14 @@ import Image from 'next/image';
 import RoulettePopup from '../components/RoulettePopup';
 import '../components/styles.css';
 
+import { Amplify } from 'aws-amplify';
+import { Authenticator } from '@aws-amplify/ui-react';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
+import '@aws-amplify/ui-react/styles.css';
+import outputs from '../../amplify_outputs.json';
+
+Amplify.configure(outputs);
+
 const EditRouletteText = () => {
   const [rouletteNumber, setRouletteNumber] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -15,7 +23,6 @@ const EditRouletteText = () => {
   const { playTickets, editTickets, fetchTickets } = useContext(TicketsContext);
   const { rouletteTexts, setRouletteTexts } = useFetchRouletteTexts();
 
-
   useEffect(() => {
     if (rouletteNumber !== '') {
       const controller = new AbortController();
@@ -23,13 +30,21 @@ const EditRouletteText = () => {
   
       const fetchRouletteTexts = async () => {
         try {
-          const response = await fetch('http://localhost:3000/api/roulette_texts', {
-            method: 'GET',
-            credentials: 'include',
-            signal: signal,
-          });
+          const response = await fetchWithAuth(
+            `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/roulette_texts`,
+            {
+              method: 'GET',
+              signal,
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Error fetching data. Status: ${response.status}`);
+          }
+
           const data = await response.json();
           console.log('Fetched roulette texts:', data);
+
           if (Array.isArray(data)) {
             setRouletteTexts(data);
             const selectedText = data.find(text => text.number === parseInt(rouletteNumber));
@@ -46,10 +61,9 @@ const EditRouletteText = () => {
           }
         }
       };
+
       fetchRouletteTexts();
-  
       return () => {
-        // コンポーネントのアンマウント時にフェッチを中止
         controller.abort();
       };
     }
@@ -78,15 +92,10 @@ const EditRouletteText = () => {
       return;
     }
 
-    const apiUrl = `http://localhost:3000/api/roulette_texts/${rouletteNumber}`;
-
     try {
-      const response = await fetch(apiUrl, {
+      const apiUrl = `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/roulette_texts/${rouletteNumber}`;
+      const response = await fetchWithAuth(apiUrl, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
         body: JSON.stringify({
           roulette_text: { text: editedText },
         }),
@@ -127,6 +136,7 @@ const EditRouletteText = () => {
   };
 
   return (
+    <Authenticator>
     <Layout>
       {flashMessage && <div className="flash-message">{flashMessage}</div>}
       <div className="edit-roulette-container">
@@ -235,6 +245,7 @@ const EditRouletteText = () => {
 
       </div>
     </Layout>
+    </Authenticator>
   );
 };
 

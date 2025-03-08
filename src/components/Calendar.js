@@ -3,6 +3,8 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import '../components/calendar.css';
 
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+
 const ExpCalendar = () => {
   const [activities, setActivities] = useState({});
 
@@ -12,9 +14,9 @@ const ExpCalendar = () => {
 
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/daily_exp', {
-          credentials: 'include',
-        });
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/daily_exp`, 
+          { method: 'GET', }
+        );
 
         if (!response.ok) {
           throw new Error('Network response was not ok');

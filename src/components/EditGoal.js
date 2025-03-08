@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import styles from '../components/CreateGoal.module.css';
 
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+
 export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
   const router = useRouter();
   const [title, setTitle] = useState('');
@@ -17,10 +19,9 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
 
   useEffect(() => {
     if (goalId && isOpen) {
-      fetch(`http://localhost:3000/api/goals/${goalId}`, {
-        method: 'GET',
-        credentials: 'include',
-      })
+      fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}`,
+        { method: 'GET'}
+      )
         .then((response) => response.json())
         .then((data) => {
           setTitle(data.title);
@@ -40,12 +41,8 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
     };
 
     try {
-      const response = await fetch(`http://localhost:3000/api/goals/${goalId}`, {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
         body: JSON.stringify(updatedGoal),
       });
 

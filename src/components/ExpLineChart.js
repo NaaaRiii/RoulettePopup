@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, subDays, addDays } from 'date-fns';
 
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
+
 const ExpLineChart = () => {
   const [data, setData] = useState([]);
 
@@ -22,10 +24,9 @@ const ExpLineChart = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/weekly_exp', {
-          method: 'GET',
-          credentials: 'include',
-        });
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/weekly_exp`,
+          { method: 'GET' }
+        );
 
         if (!response.ok) {
           throw new Error('Failed to fetch data');
