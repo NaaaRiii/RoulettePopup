@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+
 export const TicketsContext = createContext();
 
 export const TicketsProvider = ({ children }) => {
@@ -8,10 +10,9 @@ export const TicketsProvider = ({ children }) => {
 
   const fetchTickets = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/roulette_texts/tickets', {
-        method: 'GET',
-        credentials: 'include',
-      });
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/roulette_texts/tickets`,
+        { method: 'GET' }
+      );
       const data = await response.json();
       setPlayTickets(data.play_tickets);
       setEditTickets(data.edit_tickets);
