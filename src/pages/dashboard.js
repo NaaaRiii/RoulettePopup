@@ -8,14 +8,14 @@ import Image from 'next/image';
 import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
 
-import { Amplify } from 'aws-amplify';
+//import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@aws-amplify/ui-react/styles.css';
-import outputs from '../../amplify_outputs.json';
+//import outputs from '../../amplify_outputs.json';
 import { signOut } from "aws-amplify/auth"
 
-Amplify.configure(outputs);
+//Amplify.configure(outputs);
 
 function Dashboard() {
   const handleSignOut = async () => {
