@@ -10,12 +10,10 @@ import EditGoalModal from '../../components/EditGoal';
 import EditSmallGoalModal from '../../components/EditSmallGoal';
 import '../../components/styles.css';
 
-import { Amplify, Auth } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
-import outputs from '../../../amplify_outputs.json';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import '@aws-amplify/ui-react/styles.css';
 
-Amplify.configure(outputs);
 
 function GoalPage() {
   const { goalsState, setGoalsState, refreshGoals } = useGoals();
@@ -29,31 +27,6 @@ function GoalPage() {
   const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
   const [isEditSmallGoalModalOpen, setIsEditSmallGoalModalOpen] = useState(false);
   const [selectedSmallGoal, setSelectedSmallGoal] = useState(null);
-
-  const fetchWithAuth = async (url, options = {}) => {
-    try {
-      const user = await Auth.currentAuthenticatedUser();
-      const token = user.signInUserSession.idToken.jwtToken;
-
-      // デフォルトのヘッダー
-      const defaultHeaders = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      };
-
-      return await fetch(url, {
-        ...options,
-        credentials: 'include',
-        headers: {
-          ...defaultHeaders,
-          ...(options.headers || {})
-        }
-      });
-    } catch (error) {
-      console.error('Error in fetchWithAuth:', error);
-      throw error;
-    }
-  };
 
   const openModal = () => {
     setIsModalOpen(true);
