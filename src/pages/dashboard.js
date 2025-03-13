@@ -125,7 +125,6 @@ function Dashboard() {
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched user data:', data);
-        console.log(process.env.NEXT_PUBLIC_RAILS_API_URL);
   
         // 必要なデータをセット
         setUserRank(data.rank);
@@ -151,6 +150,7 @@ function Dashboard() {
   
   useEffect(() => {
     console.log("Current rank:", userData.rank, "Last roulette rank:", userData.lastRouletteRank);
+    console.log(process.env.NEXT_PUBLIC_RAILS_API_URL);
     if (userData.rank >= 10 && Math.floor(userData.rank / 10) > Math.floor(userData.lastRouletteRank / 10)) {
       //console.log("Modal should open now.");
       //setIsModalOpen(true);
