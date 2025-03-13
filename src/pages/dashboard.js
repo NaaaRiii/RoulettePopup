@@ -125,6 +125,7 @@ function Dashboard() {
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched user data:', data);
+        console.log(process.env.NEXT_PUBLIC_RAILS_API_URL);
   
         // 必要なデータをセット
         setUserRank(data.rank);
