@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
 
   env: {
     NEXT_PUBLIC_RAILS_API_URL: 'https://rails-alb-703098351.ap-northeast-1.elb.amazonaws.com',
