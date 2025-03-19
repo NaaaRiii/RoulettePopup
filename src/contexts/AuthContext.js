@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const AuthContext = createContext();
 
@@ -8,10 +9,10 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserRank = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/current_user', {
-        method: 'GET',
-        credentials: 'include'
-      });
+      const response = await fetchWithAuth(
+        `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`,
+        { method: 'GET',}
+      );
   
       if (response.ok) {
         const data = await response.json();
