@@ -1,7 +1,7 @@
-import { Amplify, Auth } from 'aws-amplify';
-import outputs from '../../amplify_outputs.json';
+import { Auth } from 'aws-amplify';
+//import outputs from '../../amplify_outputs.json';
 
-Amplify.configure(outputs);
+//Amplify.configure(outputs);
 
 export const fetchWithAuth = async (url, options = {}) => {
   try {

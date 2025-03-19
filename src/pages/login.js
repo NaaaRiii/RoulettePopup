@@ -1,10 +1,10 @@
 import React from 'react';
-import { Amplify } from 'aws-amplify';
+//import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { useRouter } from 'next/router';
-import outputs from '../../amplify_outputs.json';
+//import outputs from '../../amplify_outputs.json';
 
-Amplify.configure(outputs);
+//Amplify.configure(outputs);
 
 export default function LoginPage() {
   const router = useRouter();
