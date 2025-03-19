@@ -1,4 +1,5 @@
-import { Auth } from 'aws-amplify';
+import { Auth } from '@aws-amplify/auth';
+//import { Auth } from 'aws-amplify';
 //import outputs from '../../amplify_outputs.json';
 
 //Amplify.configure(outputs);
