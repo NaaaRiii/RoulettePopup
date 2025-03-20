@@ -4,7 +4,7 @@ import { TicketsProvider } from '../contexts/TicketsContext';
 import '../components/styles.css';
 
 import { Amplify } from 'aws-amplify';
-import outputs from '../../amplify_outputs.json';
+import outputs from '/amplify_outputs.json';
 
 function MyApp({ Component, pageProps }) {
   
