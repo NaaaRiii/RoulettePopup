@@ -39,5 +39,5 @@ node_modules
 
 # amplify
 .amplify
-amplify_outputs*
 amplifyconfiguration*
+amplify_outputs(backup).json
