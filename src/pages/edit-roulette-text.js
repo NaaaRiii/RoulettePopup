@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { TicketsContext } from '../contexts/TicketsContext';
 import { useFetchRouletteTexts } from '../hooks/useFetchRouletteTexts';
 import Layout from '../components/Layout';
-import withAuth from '../utils/withAuth';
+//import withAuth from '../utils/withAuth';
 import Image from 'next/image';
 import RoulettePopup from '../components/RoulettePopup';
 import '../components/styles.css';

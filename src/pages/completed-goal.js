@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useGoals } from '../contexts/GoalsContext';
 import Link from 'next/link';
 import Layout from '../components/Layout';
-import withAuth from '../utils/withAuth';
+//import withAuth from '../utils/withAuth';
 import Image from 'next/image';
 import '../components/styles.css';
 
