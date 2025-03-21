@@ -87,4 +87,4 @@ function CompletedGoal() {
   );
 }
 
-export default withAuth(CompletedGoal);
+export default CompletedGoal;
