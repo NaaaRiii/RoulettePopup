@@ -249,4 +249,4 @@ const EditRouletteText = () => {
   );
 };
 
-export default withAuth(EditRouletteText);
+export default EditRouletteText;
