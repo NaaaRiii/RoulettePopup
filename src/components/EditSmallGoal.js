@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import styles from '../components/CreateGoal.module.css';
 
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+//import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId, onSmallGoalUpdated }) {
   const [title, setTitle] = useState('');
@@ -72,7 +72,7 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
     };
 
     try {
-      const response = await fetchWithAuth(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}/small_goals/${smallGoal.id}`,
         {
           method: 'PUT',

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import styles from '../components/CreateGoal.module.css';
 
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+//import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAdded }) {
   const router = useRouter();
@@ -69,7 +69,7 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
     });
 
     try {
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}/small_goals`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}/small_goals`, {
         method: 'POST',
         body
       });

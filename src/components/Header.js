@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import Link from 'next/link';
 
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+//import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const Header = () => {
   const { isLoggedIn, userRank, setIsLoggedIn, setUserRank } = useAuth();
@@ -14,7 +14,7 @@ const Header = () => {
     e.preventDefault();
   
     try {
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/logout`, 
+      const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/logout`, 
         { method: 'DELETE' }
       );
 
@@ -35,7 +35,7 @@ const Header = () => {
 
   const fetchUserRank = async () => {
     try {
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`,
+      const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`,
         { method: 'GET' }
       );
 

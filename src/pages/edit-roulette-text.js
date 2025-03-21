@@ -9,7 +9,7 @@ import '../components/styles.css';
 
 //import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+//import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@aws-amplify/ui-react/styles.css';
 //import outputs from '../../amplify_outputs.json';
 
@@ -30,7 +30,7 @@ const EditRouletteText = () => {
   
       const fetchRouletteTexts = async () => {
         try {
-          const response = await fetchWithAuth(
+          const response = await fetch(
             `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/roulette_texts`,
             {
               method: 'GET',
@@ -94,7 +94,7 @@ const EditRouletteText = () => {
 
     try {
       const apiUrl = `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/roulette_texts/${rouletteNumber}`;
-      const response = await fetchWithAuth(apiUrl, {
+      const response = await fetch(apiUrl, {
         method: 'PATCH',
         body: JSON.stringify({
           roulette_text: { text: editedText },

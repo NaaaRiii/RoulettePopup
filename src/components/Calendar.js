@@ -3,7 +3,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import '../components/calendar.css';
 
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+//import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const ExpCalendar = () => {
   const [activities, setActivities] = useState({});
@@ -14,7 +14,7 @@ const ExpCalendar = () => {
 
     const fetchData = async () => {
       try {
-        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/daily_exp`, 
+        const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/daily_exp`, 
           { method: 'GET', }
         );
 

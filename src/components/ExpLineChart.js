@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, subDays, addDays } from 'date-fns';
 
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+//import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const ExpLineChart = () => {
   const [data, setData] = useState([]);
@@ -24,7 +24,7 @@ const ExpLineChart = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/weekly_exp`,
+        const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/weekly_exp`,
           { method: 'GET' }
         );
 

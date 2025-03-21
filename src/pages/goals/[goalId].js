@@ -11,7 +11,7 @@ import EditSmallGoalModal from '../../components/EditSmallGoal';
 import '../../components/styles.css';
 
 import { Authenticator } from '@aws-amplify/ui-react';
-import { fetchWithAuth } from '../../utils/fetchWithAuth';
+//import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import '@aws-amplify/ui-react/styles.css';
 
 
@@ -82,7 +82,7 @@ function GoalPage() {
 
     try {
       // goalDetails
-      const goalDetailsResponse = await fetchWithAuth(
+      const goalDetailsResponse = await fetch(
         `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}`
       );
       if (!goalDetailsResponse.ok) {
@@ -96,7 +96,7 @@ function GoalPage() {
       }
 
       // small_goals
-      const smallGoalsResponse = await fetchWithAuth(
+      const smallGoalsResponse = await fetch(
         `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}/small_goals`
       );
       if (!smallGoalsResponse.ok) {
@@ -141,7 +141,7 @@ function GoalPage() {
   const handleTaskToggle = async (taskId, currentStatus) => {
     const newCompleted = !currentStatus;
     try {
-      const response = await fetchWithAuth(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/tasks/${taskId}/complete`,
         {
           method: 'POST',
@@ -173,7 +173,7 @@ function GoalPage() {
     console.log('deleteGoal function called'); // デバッグ用ログ
   
     if (window.confirm('Are you sure ?')) {
-      fetchWithAuth(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}`, {
+      fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}`, {
         method: 'DELETE'
       })
         .then(response => {
@@ -200,7 +200,7 @@ function GoalPage() {
 
   const deleteSmallGoal = (smallGoalId) => {
     if (window.confirm('Are you sure?')) {
-      fetchWithAuth(
+      fetch(
         `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}/small_goals/${smallGoalId}`,
         {
           method: 'DELETE'
@@ -222,7 +222,7 @@ function GoalPage() {
   };
 
   const completeGoal = async () => {
-    const response = await fetchWithAuth(
+    const response = await fetch(
       `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}/complete`,
       { method: 'POST' }
     );
@@ -240,7 +240,7 @@ function GoalPage() {
 
   const completeSmallGoal = async (smallGoalId) => {
     try {
-      const response = await fetchWithAuth(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}/small_goals/${smallGoalId}/complete`,
         { method: 'POST' }
       );
