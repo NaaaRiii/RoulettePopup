@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+//import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const AuthContext = createContext();
 
@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserRank = async () => {
     try {
-      const response = await fetchWithAuth(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`,
         { method: 'GET',}
       );
