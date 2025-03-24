@@ -1,36 +1,29 @@
 import React from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useAuth } from '../contexts/AuthContext';
+//import { useAuth } from '../contexts/AuthContext';
 import Link from 'next/link';
 
-//import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { useAuthenticator } from '@aws-amplify/ui-react'; 
 
 const Header = () => {
-  const { isLoggedIn, userRank, setIsLoggedIn, setUserRank } = useAuth();
+  //const { isLoggedIn, userRank, setIsLoggedIn, setUserRank } = useAuth();
   const router = useRouter();
 
+  const { route, user, signOut } = useAuthenticator((context) => [
+    context.route, 
+    context.user, 
+    context.signOut
+  ]);
+
+  // Amplify的にログインしているかどうか
+  const isLoggedIn = (route === 'authenticated');
+
+  // Amplifyでのログアウト
   const handleLogout = async (e) => {
     e.preventDefault();
-  
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/logout`, 
-        { method: 'DELETE' }
-      );
-
-      if (response.ok) {
-        setIsLoggedIn(false);
-        setUserRank(0);
-        alert('Logged out successfully');
-        router.push('/');
-      } else {
-        console.error('Failed to log out');
-        alert('Failed to log out. Please try again.');
-      }
-    } catch (error) {
-      console.error('Logout failed', error);
-      alert('Logout failed. Please try again.');
-    }
+    signOut();      // Amplify 側の認証情報をクリア
+    router.push('/'); // ログアウト後の画面へ遷移
   };
 
   const fetchUserRank = async () => {

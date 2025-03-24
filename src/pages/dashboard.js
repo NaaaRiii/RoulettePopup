@@ -8,16 +8,18 @@ import Image from 'next/image';
 import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
 
-//import { Amplify } from 'aws-amplify';
-import { Authenticator } from '@aws-amplify/ui-react';
-//import { fetchWithAuth } from '../utils/fetchWithAuth';
-import '@aws-amplify/ui-react/styles.css';
-//import outputs from '../../amplify_outputs.json';
-import { signOut } from "aws-amplify/auth"
 
-//Amplify.configure(outputs);
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
+import { signOut } from "aws-amplify/auth"
+import { useAuthenticator } from '@aws-amplify/ui-react';
+
 
 function Dashboard() {
+  const { route, user } = useAuthenticator(context => [context.route, context.user]);
+  const isLoggedIn = (route === 'authenticated');
+  
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -45,6 +47,7 @@ function Dashboard() {
   const [latestCompletedGoals, setLatestCompletedGoals] = useState([]);
   const router = useRouter();
   const message = router.query.message ? decodeURIComponent(router.query.message) : '';
+  
   
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -206,13 +209,9 @@ function Dashboard() {
     }
   };
 
-
-
-  //useEffect(() => {
-  //  if (userData.rank >= 121) {
-  //    setIsRank121ModalOpen(true);
-  //  }
-  //}, [userData.rank]);
+  if (!isLoggedIn) {
+    return <p>Not logged in. Redirect or show message...</p>;
+  }
 
 return (
   <Authenticator>
