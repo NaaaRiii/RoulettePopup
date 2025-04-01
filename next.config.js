@@ -6,7 +6,7 @@ const nextConfig = {
   },
 
   env: {
-    NEXT_PUBLIC_RAILS_API_URL: 'https://rails-alb-2146908755.ap-northeast-1.elb.amazonaws.com',
+    NEXT_PUBLIC_RAILS_API_URL: 'https://rails-alb-1391554731.ap-northeast-1.elb.amazonaws.com',
   },
 
   webpack: (config, { isServer }) => {
