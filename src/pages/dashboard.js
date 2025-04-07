@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
+
+import { FaPen } from 'react-icons/fa';
+import EditUserNameModal from '../components/EditUserNameModal';
+
 import Link from 'next/link';
 import ExpCalendar from '../components/Calendar';
 import ExpLineChart from '../components/ExpLineChart';
@@ -48,7 +52,6 @@ function Dashboard() {
   const router = useRouter();
   const message = router.query.message ? decodeURIComponent(router.query.message) : '';
   
-  
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return format(date, 'yyyy-MM-dd');
@@ -65,6 +68,15 @@ function Dashboard() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const [isEditNameOpen, setIsEditNameOpen] = useState(false);
+  const openEditName = (e) => {
+    e.preventDefault();
+    setIsEditNameOpen(true);
+  };
+  const closeEditName = () => {
+    setIsEditNameOpen(false);
   };
 
   const deleteGoal = async (goalId) => {
@@ -255,9 +267,18 @@ return (
                       <div className='user-profile__title'>
                         {userData?.currentTitle}
                       </div>
+                      {/*<div className='user-profile__name'>
+                        {userData?.name}
+                      </div>*/}
                       <div className='user-profile__name'>
                         {userData?.name}
+                        {/* ペンアイコンを表示してクリックでモーダルを開く */}
+                        <Link href="/edit-name" onClick={openEditName}>
+                          <FaPen />
+                        </Link>
                       </div>
+                      <EditUserNameModal isOpen={isEditNameOpen} onClose={closeEditName}/>
+                      
                       <div className='user-profile__roulette'>
                         {userRank > 10 && <Link href={`/edit-roulette-text/`}>ごほうびルーレット</Link>}
                       </div>

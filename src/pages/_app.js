@@ -9,17 +9,17 @@ import { Amplify } from 'aws-amplify';
 import outputs from '/amplify_outputs.json';
 
 function MyApp({ Component, pageProps }) {
-  
+
   Amplify.configure(outputs);
 
   return (
-        <Authenticator>
-          <GoalsProvider>
-            <TicketsProvider>
-              <Component {...pageProps} />
-            </TicketsProvider>
-          </GoalsProvider>
-        </Authenticator>
+    <Authenticator>
+      <GoalsProvider>
+        <TicketsProvider>
+          <Component {...pageProps} />
+        </TicketsProvider>
+      </GoalsProvider>
+    </Authenticator>
   );
 }
 

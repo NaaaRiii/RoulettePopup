@@ -3,8 +3,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import styles from '../components/CreateGoal.module.css';
 
-//import { fetchWithAuth } from '../utils/fetchWithAuth';
-
 export default function NewGoalModal({ isOpen, onClose }) {
   const router = useRouter();
   const [title, setTitle] = useState('');
