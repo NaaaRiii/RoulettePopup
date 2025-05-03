@@ -8,19 +8,52 @@ import '@aws-amplify/ui-react/styles.css';
 import { Amplify } from 'aws-amplify';
 import outputs from '/amplify_outputs.json';
 
-function MyApp({ Component, pageProps }) {
+import { useRouter } from 'next/router';
 
+function MyApp({ Component, pageProps }) {
+  const router = useRouter();
   Amplify.configure(outputs);
 
+  // 認証不要ページのパスを定義
+  const publicPaths = ['/', '/login']; 
+  const isPublicPage = publicPaths.includes(router.pathname);
+
+  // 認証不要なら <Authenticator> をスキップ
+  const content = (
+    <GoalsProvider>
+      <TicketsProvider>
+        <Component {...pageProps} />
+      </TicketsProvider>
+    </GoalsProvider>
+  );
+
+  if (isPublicPage) {
+    return content;
+  }
+
+  // 認証必須ページはラップ
   return (
     <Authenticator>
-      <GoalsProvider>
-        <TicketsProvider>
-          <Component {...pageProps} />
-        </TicketsProvider>
-      </GoalsProvider>
+      {content}
     </Authenticator>
   );
 }
 
 export default MyApp;
+
+//function MyApp({ Component, pageProps }) {
+
+//  Amplify.configure(outputs);
+
+//  return (
+//    <Authenticator>
+//      <GoalsProvider>
+//        <TicketsProvider>
+//          <Component {...pageProps} />
+//        </TicketsProvider>
+//      </GoalsProvider>
+//    </Authenticator>
+//  );
+//}
+
+//export default MyApp;
