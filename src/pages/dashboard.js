@@ -12,6 +12,7 @@ import Image from 'next/image';
 import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
 
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
@@ -39,7 +40,6 @@ function Dashboard() {
   const [userRank, setUserRank] = useState(0);
   const [userData, setUserData] = useState({
     name: '',
-    //currentTitle: '',
     totalExp: 0,
     rank: 0,
     lastRouletteRank: 0,
@@ -82,10 +82,9 @@ function Dashboard() {
   const deleteGoal = async (goalId) => {
     if (window.confirm('Are you sure?')) {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}`,
-          { method: 'DELETE' }
-        );
+        const response = await fetchWithAuth(`/api/goals/${goalId}`, {
+          method: 'DELETE'
+        });
         if (response.ok) {
           setDeletedGoalId(goalId);
           setGoalsState((prevGoals) =>
@@ -105,10 +104,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals`,
-          { method: 'GET' }
-        );
+        const response = await fetchWithAuth('/api/goals');
     
         if (!response.ok) {
           throw new Error(`Failed to fetch data, status code: ${response.status}`);
@@ -133,10 +129,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`,
-          { method: 'GET' }
-        );
+        const response = await fetchWithAuth('/api/current_user');
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched user data:', data);
@@ -185,12 +178,9 @@ function Dashboard() {
     console.log("Attempting to update last roulette rank for user ID:", userId);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_users/${userId}/update_rank`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ lastRouletteRank: newRank })
-        }
+      const response = await fetchWithAuth(
+        `/api/current_users/${userId}/update_rank`,
+        { method: 'POST', body: JSON.stringify({ lastRouletteRank: newRank }) }
       );
 
     if (response.ok) {
