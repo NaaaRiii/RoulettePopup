@@ -7,8 +7,6 @@ import '../components/styles.css';
 
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
-//import { Amplify } from 'aws-amplify';
-//import outputs from '/amplify_outputs.json';
 
 import { useRouter } from 'next/router';
 
@@ -42,20 +40,3 @@ function MyApp({ Component, pageProps }) {
 }
 
 export default MyApp;
-
-//function MyApp({ Component, pageProps }) {
-
-//  Amplify.configure(outputs);
-
-//  return (
-//    <Authenticator>
-//      <GoalsProvider>
-//        <TicketsProvider>
-//          <Component {...pageProps} />
-//        </TicketsProvider>
-//      </GoalsProvider>
-//    </Authenticator>
-//  );
-//}
-
-//export default MyApp;
