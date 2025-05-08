@@ -12,7 +12,6 @@ import { useRouter } from 'next/router';
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
-  Amplify.configure(outputs);
 
   // 認証不要ページのパスを定義
   const publicPaths = ['/', '/login']; 
