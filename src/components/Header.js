@@ -28,7 +28,7 @@ const Header = () => {
 
   const fetchUserRank = async () => {
     try {
-      const response = await fetchWithAuth('/api/current_user');
+      await fetchWithAuth('/api/current_user', { credentials:'include' });
 
       if (response.ok) {
         const data = await response.json();

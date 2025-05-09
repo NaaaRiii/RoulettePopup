@@ -129,7 +129,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetchWithAuth('/api/current_user');
+        const response = await fetchWithAuth('/api/current_user', { credentials:'include' });
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched user data:', data);
