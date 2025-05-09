@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useGoals } from '../contexts/GoalsContext';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 import Link from 'next/link';
 import Layout from '../components/Layout';
-//import withAuth from '../utils/withAuth';
 import Image from 'next/image';
 import '../components/styles.css';
 
-//import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
-//import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@aws-amplify/ui-react/styles.css';
-//import outputs from '../../amplify_outputs.json';
 
-//Amplify.configure(outputs);
 
 function CompletedGoal() {
   const [goalsState, setGoalsState] = useState([]);
@@ -21,10 +17,7 @@ function CompletedGoal() {
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals`,
-          { method: 'GET' }
-        );
+        const response = await fetchWithAuth('/api/goals');
 
         if (!response.ok) {
           throw new Error('Failed to fetch data');

@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import styles from '../components/CreateGoal.module.css';
 
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+
 export default function NewGoalModal({ isOpen, onClose }) {
   const router = useRouter();
   const [title, setTitle] = useState('');
@@ -14,9 +16,9 @@ export default function NewGoalModal({ isOpen, onClose }) {
     const body = JSON.stringify({ title, content, deadline });
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals`, {
+      const response = await fetchWithAuth('/api/goals', {
         method: 'POST',
-        body
+        body,
       });
 
       if (response.ok) {

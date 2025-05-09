@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-//import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 export const useFetchRouletteTexts = () => {
   const [rouletteTexts, setRouletteTexts] = useState([]);
@@ -10,9 +10,7 @@ export const useFetchRouletteTexts = () => {
 
     const fetchAllRouletteTexts = async () => {
       try {
-        const response = await await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/roulette_texts`,
-          { method: 'GET' }
-        );
+        const response = await fetchWithAuth('/api/roulette_texts');
         const data = await response.json();
         if (isMounted) {
           setRouletteTexts(data);

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import styles from '../components/CreateGoal.module.css';
 
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+
 export default function EditUserNameModal({ isOpen, onClose, currentName }) {
   const router = useRouter();
 
@@ -17,11 +19,10 @@ export default function EditUserNameModal({ isOpen, onClose, currentName }) {
     });
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body
-      });
+      const response = await fetchWithAuth(
+        '/api/current_user',
+        { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body }
+      );
 
       if (response.ok) {
         // 更新に成功したら、レスポンスを取得

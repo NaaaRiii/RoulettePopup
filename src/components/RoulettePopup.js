@@ -3,7 +3,7 @@ import '../components/RoulettePopup.css';
 import Modal from './Modal';
 import { fetchRouletteText } from './utils';
 import { TicketsContext } from '../contexts/TicketsContext';
-//import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 export const isValidAngle = (angle) => {
   const excludedRanges = [
@@ -76,10 +76,7 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
     setIsSpinning(true);
   
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/roulette_texts/spin`,
-        { method: 'PATCH' }
-      );
+      const response = await fetchWithAuth('/api/roulette_texts/spin', { method: 'PATCH' });
   
       if (!response.ok) {
         const errorData = await response.json();

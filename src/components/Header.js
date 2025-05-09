@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-//import { useAuth } from '../contexts/AuthContext';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 import Link from 'next/link';
 
 import { useAuthenticator } from '@aws-amplify/ui-react'; 
@@ -28,9 +28,7 @@ const Header = () => {
 
   const fetchUserRank = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/current_user`,
-        { method: 'GET' }
-      );
+      const response = await fetchWithAuth('/api/current_user');
 
       if (response.ok) {
         const data = await response.json();

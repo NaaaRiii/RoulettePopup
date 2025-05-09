@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import styles from '../components/CreateGoal.module.css';
 
-//import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
   const router = useRouter();
@@ -41,10 +41,10 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
     };
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}`, {
-        method: 'PUT',
-        body: JSON.stringify(updatedGoal),
-      });
+      const response = await fetchWithAuth(
+        `/api/goals/${goalId}`,
+        { method: 'PUT', body: JSON.stringify(updatedGoal) }
+      );
 
       if (response.ok) {
         setMessage('Goalを編集しました');

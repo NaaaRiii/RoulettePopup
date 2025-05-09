@@ -1,19 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { TicketsContext } from '../contexts/TicketsContext';
 import { useFetchRouletteTexts } from '../hooks/useFetchRouletteTexts';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 import Layout from '../components/Layout';
-//import withAuth from '../utils/withAuth';
 import Image from 'next/image';
 import RoulettePopup from '../components/RoulettePopup';
 import '../components/styles.css';
 
-//import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
-//import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@aws-amplify/ui-react/styles.css';
-//import outputs from '../../amplify_outputs.json';
-
-//Amplify.configure(outputs);
 
 const EditRouletteText = () => {
   const [rouletteNumber, setRouletteNumber] = useState('');
@@ -30,13 +25,7 @@ const EditRouletteText = () => {
   
       const fetchRouletteTexts = async () => {
         try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/roulette_texts`,
-            {
-              method: 'GET',
-              signal,
-            }
-          );
+          const response = await fetchWithAuth('/api/roulette_texts', { signal });
 
           if (!response.ok) {
             throw new Error(`Error fetching data. Status: ${response.status}`);
@@ -93,13 +82,13 @@ const EditRouletteText = () => {
     }
 
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/roulette_texts/${rouletteNumber}`;
-      const response = await fetch(apiUrl, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          roulette_text: { text: editedText },
-        }),
-      });
+      const response = await fetchWithAuth(
+        `/api/roulette_texts/${rouletteNumber}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ roulette_text: { text: editedText } }),
+        }
+      );
 
       console.log("Response Status:", response.status);
 
