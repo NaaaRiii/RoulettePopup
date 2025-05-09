@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { format } from 'date-fns';
 import { useRouter } from 'next/router';
 import { useGoals } from '../../contexts/GoalsContext';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
 import ExpCalendar from '../../components/Calendar';
