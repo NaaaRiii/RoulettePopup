@@ -71,7 +71,7 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
     try {
       const response = await fetchWithAuth(
         `/api/goals/${goalId}/small_goals`,
-        { method: 'POST', body }   // 認証付き POST
+        { method: 'POST', body }
       );
 
       if (response.ok) {
