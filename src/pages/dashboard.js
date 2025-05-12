@@ -102,24 +102,18 @@ function Dashboard() {
   };
 
   useEffect(() => {
+    console.debug('[useEffect] Dashboard mounting on client – about to fetch goals');
     const fetchGoals = async () => {
+      console.debug('[fetchGoals] start');             // ← ここでフェッチ関数に入ったことを確認
       try {
         const response = await fetchWithAuth('/api/goals');
-    
-        if (!response.ok) {
-          throw new Error(`Failed to fetch data, status code: ${response.status}`);
-        }
-    
+        console.debug('[fetchGoals] got response', response);
+        if (!response.ok) throw new Error(response.statusText);
         const data = await response.json();
-        
-        if (!Array.isArray(data)) {
-          throw new Error('Expected an array but got invalid data format');
-        }
-    
+        console.debug('[fetchGoals] parsed json', data);
         setGoalsState(data);
-        console.log('Fetched goalsState:', data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      } catch (err) {
+        console.error('[fetchGoals] error', err);
       }
     };
   
