@@ -102,7 +102,8 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    console.debug('[useEffect] Dashboard mounting on client – about to fetch goals');
+    console.debug('[useEffect] client side, fetching goals');
+    console.debug('[useEffect] Dashboard mounting on client - about to fetch goals');
     const fetchGoals = async () => {
       console.debug('[fetchGoals] start');             // ← ここでフェッチ関数に入ったことを確認
       try {
