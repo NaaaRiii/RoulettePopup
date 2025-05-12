@@ -1,36 +1,58 @@
-import '../lib/amplifyClient';
+//import '../lib/amplifyClient';
 
+//import React from 'react';
+//import { GoalsProvider } from '../contexts/GoalsContext';
+//import { TicketsProvider } from '../contexts/TicketsContext';
+//import '../components/styles.css';
+
+//import { Authenticator } from '@aws-amplify/ui-react';
+//import '@aws-amplify/ui-react/styles.css';
+
+//import { useRouter } from 'next/router';
+
+//function MyApp({ Component, pageProps }) {
+//  const router = useRouter();
+
+//  const publicPaths = ['/', '/login']; 
+//  const isPublicPage = publicPaths.includes(router.pathname);
+
+//  const content = (
+//    <GoalsProvider>
+//      <TicketsProvider>
+//        <Component {...pageProps} />
+//      </TicketsProvider>
+//    </GoalsProvider>
+//  );
+
+//  if (isPublicPage) {
+//    return content;
+//  }
+
+//  return (
+//    <Authenticator>
+//      {content}
+//    </Authenticator>
+//  );
+//}
+
+//export default MyApp;
+
+// src/pages/_app.js
+import '../lib/amplifyClient';   // ← これだけで OK
 import React from 'react';
 import { GoalsProvider } from '../contexts/GoalsContext';
 import { TicketsProvider } from '../contexts/TicketsContext';
 import '../components/styles.css';
-
 import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
-
-import { useRouter } from 'next/router';
 
 function MyApp({ Component, pageProps }) {
-  const router = useRouter();
-
-  const publicPaths = ['/', '/login']; 
-  const isPublicPage = publicPaths.includes(router.pathname);
-
-  const content = (
-    <GoalsProvider>
-      <TicketsProvider>
-        <Component {...pageProps} />
-      </TicketsProvider>
-    </GoalsProvider>
-  );
-
-  if (isPublicPage) {
-    return content;
-  }
-
   return (
     <Authenticator>
-      {content}
+      <GoalsProvider>
+        <TicketsProvider>
+          <Component {...pageProps} />
+        </TicketsProvider>
+      </GoalsProvider>
     </Authenticator>
   );
 }
