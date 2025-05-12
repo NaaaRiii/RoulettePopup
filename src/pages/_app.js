@@ -13,11 +13,9 @@ import { useRouter } from 'next/router';
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
 
-  // 認証不要ページのパスを定義
   const publicPaths = ['/', '/login']; 
   const isPublicPage = publicPaths.includes(router.pathname);
 
-  // 認証不要なら <Authenticator> をスキップ
   const content = (
     <GoalsProvider>
       <TicketsProvider>
@@ -30,7 +28,6 @@ function MyApp({ Component, pageProps }) {
     return content;
   }
 
-  // 認証必須ページはラップ
   return (
     <Authenticator>
       {content}
