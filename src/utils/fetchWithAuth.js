@@ -2,10 +2,11 @@ import '../lib/amplifyClient';
 import { Auth } from 'aws-amplify';
 
 export async function fetchWithAuth(path, options = {}) {
-  const base = process.env.NEXT_PUBLIC_RAILS_API_URL;
-  const url  = `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+  console.debug('[fetchWithAuth] start', path, options); 
+  const session = await Auth.currentSession();
+  const token   = session.getIdToken().getJwtToken();
 
-  console.debug('[fetchWithAuth] path →', path, 'options →', options);
+  console.debug('[fetchWithAuth] got token?', !!token);
 
   // SSR／Node.js 環境かどうかをまず判定
   if (typeof window === 'undefined' || typeof Auth?.currentSession !== 'function') {
