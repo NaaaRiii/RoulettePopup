@@ -1,19 +1,18 @@
 import { Amplify } from 'aws-amplify';
-import awsconfig from '../aws-exports';   
-import { Auth } from '@aws-amplify/auth';
-import { API } from '@aws-amplify/api-rest';
+import awsExports from '../amplify_outputs.json';
 
 Amplify.configure({
-  ...awsconfig,
+  ...awsExports,
   API: {
     endpoints: [
       {
         name: 'plusOneApi',
         endpoint: process.env.NEXT_PUBLIC_RAILS_API_URL,
-        region: awsconfig.aws_project_region,
+        region: awsExports.aws_cognito_region,              // 例: 'ap-northeast-1'
         custom_header: async () => {
-          const session = await Auth.currentSession();
-          return { Authorization: `Bearer ${session.getIdToken().getJwtToken()}` };
+          // もし API 認証を UserPool でやるなら、ヘッダーに Authorization を付与
+          const session = await Amplify.Auth.currentSession();
+          return { Authorization: session.getIdToken().getJwtToken() };
         }
       }
     ]
