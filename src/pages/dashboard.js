@@ -22,6 +22,7 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 function Dashboard() {
   const { route, user } = useAuthenticator();
   const isLoggedIn = (route === 'authenticated');
+  console.debug('[fetchWithAuth] after attach', config.headers);
 
   useEffect(() => {
     if (route === 'authenticated') {
