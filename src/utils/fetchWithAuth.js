@@ -1,4 +1,5 @@
 import { Auth } from 'aws-amplify';
+import { getAccessToken } from './getAccessToken';
 
 export async function fetchWithAuth(path, options = {}) {
   const base = process.env.NEXT_PUBLIC_RAILS_API_URL.replace(/\/$/, '');
@@ -16,16 +17,16 @@ export async function fetchWithAuth(path, options = {}) {
   console.debug('[fetchWithAuth] →', url, options, 'headers:', config.headers);
 
   try {
-    if (typeof window !== 'undefined' && Auth?.currentSession) {
-      const session = await Auth.currentSession();
-      // ※ Rails 側で aud 検証をしているなら ACCESS トークン
-      const token   = session.getAccessToken().getJwtToken();
-      config.headers.Authorization = `Bearer ${session.getAccessToken().getJwtToken()}`;
+    const token = await getAccessToken();            // ← ここだけ変更
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('[fetchWithAuth] token なし(anonymous request)');
     }
   } catch (e) {
-    console.warn('[fetchWithAuth] no session', e);
+    console.error('[fetchWithAuth] token 取得失敗', e);
   }
 
-  console.debug('[fetchWithAuth]', url, config.headers);
+  console.debug('[fetchWithAuth]', url, config.headers); // デバッグ用
   return fetch(url, config);
 }
