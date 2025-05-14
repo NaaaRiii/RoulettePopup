@@ -1,5 +1,5 @@
-import { Auth } from 'aws-amplify';
-import { getAccessToken } from './getAccessToken';
+//import { Auth } from 'aws-amplify';
+import { getAccessToken } from  '../utils/accessToken.ts';
 
 export async function fetchWithAuth(path, options = {}) {
   const base = process.env.NEXT_PUBLIC_RAILS_API_URL.replace(/\/$/, '');
