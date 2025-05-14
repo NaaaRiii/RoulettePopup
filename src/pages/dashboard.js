@@ -14,16 +14,22 @@ import '../components/styles.css';
 
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
-import { Auth } from 'aws-amplify';
-import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { signOut } from "aws-amplify/auth"
 import { useAuthenticator } from '@aws-amplify/ui-react';
 
 
 function Dashboard() {
-  const { route, user } = useAuthenticator(context => [context.route, context.user]);
+  const { route, user } = useAuthenticator();
   const isLoggedIn = (route === 'authenticated');
+
+  useEffect(() => {
+    if (route === 'authenticated') {
+      console.info('✅ authenticated:', user);
+    } else {
+      console.warn('🚪 not authenticated (route:', route, ')');
+    }
+  }, [route, user]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
