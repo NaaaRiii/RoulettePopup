@@ -14,6 +14,8 @@ export async function fetchWithAuth(path, options = {}) {
     ...options,
   };
 
+  console.debug('[fetchWithAuth] →', url, options, 'headers:', config.headers);
+
   // SSR 環境や Auth が未初期化時はそのままフェッチ
   if (typeof window === 'undefined' || !Auth?.currentSession) {
     return fetch(url, config);
