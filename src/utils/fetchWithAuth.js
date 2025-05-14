@@ -20,7 +20,7 @@ export async function fetchWithAuth(path, options = {}) {
       const session = await Auth.currentSession();
       // ※ Rails 側で aud 検証をしているなら ACCESS トークン
       const token   = session.getAccessToken().getJwtToken();
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${session.getAccessToken().getJwtToken()}`;
     }
   } catch (e) {
     console.warn('[fetchWithAuth] no session', e);

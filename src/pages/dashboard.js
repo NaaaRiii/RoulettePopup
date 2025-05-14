@@ -14,6 +14,7 @@ import '../components/styles.css';
 
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
+import { Auth } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { signOut } from "aws-amplify/auth"
@@ -23,7 +24,25 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 function Dashboard() {
   const { route, user } = useAuthenticator(context => [context.route, context.user]);
   const isLoggedIn = (route === 'authenticated');
-  
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const fetchGoals = async () => {
+      const res = await fetchWithAuth('/api/goals');
+      if (res.ok) setGoalsState(await res.json());
+    };
+    fetchGoals();
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const fetchUser = async () => {
+      const res = await fetchWithAuth('/api/current_user');
+      if (res.ok) setUserData(await res.json());
+    };
+    fetchUser();
+  }, [isLoggedIn]);
 
   const handleSignOut = async () => {
     try {
@@ -100,6 +119,8 @@ function Dashboard() {
       }
     }
   };
+  
+
 
   useEffect(() => {
     console.debug('[useEffect] client side, fetching goals');
@@ -124,7 +145,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetchWithAuth('/api/current_user', { credentials:'include' });
+        const response = await fetchWithAuth('/api/current_user');
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched user data:', data);
@@ -206,12 +227,10 @@ function Dashboard() {
     }
   };
 
-  if (!isLoggedIn) {
-    return <p>Not logged in. Redirect or show message...</p>;
-  }
+  if (!isLoggedIn) return <p>Loading...（または /login へ誘導）</p>;
 
 return (
-  <Authenticator>
+  <>
 
     <button type="button" onClick={handleSignOut}>
       Sign out
@@ -385,7 +404,7 @@ return (
           </div>
         </div>
       </div>
-    </Authenticator>
+    </>
   );
 }
 
