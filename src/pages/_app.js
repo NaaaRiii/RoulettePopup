@@ -4,7 +4,7 @@ import React from 'react';
 import { GoalsProvider } from '../contexts/GoalsContext';
 import { TicketsProvider } from '../contexts/TicketsContext';
 import '../../styles/globals.css'; 
-//import '../components/styles.css';
+import '../components/styles.css';
 
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';

@@ -366,6 +366,7 @@ return (
                     <li
                     key={goal.id}
                     className="unmet-goals-card  cursor-pointer"
+                    style={{ cursor: 'pointer' }} 
                     onClick={() => router.push(`/goals/${goal.id}`)}
                     >
                     <span data-testid="goal-title">{goal.title}</span>
