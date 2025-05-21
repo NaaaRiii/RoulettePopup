@@ -15,7 +15,9 @@ import '../components/styles.css';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 
-function Dashboard() {  
+function Dashboard() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [goalsState, setGoalsState] = useState([]);
   const [deletedGoalId, setDeletedGoalId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -189,7 +191,28 @@ function Dashboard() {
     }
   };
 
-  if (!isLoggedIn) return <p>Loading...（または /login へ誘導）</p>;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetchWithAuth('/api/current_user');
+        if (res.ok) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+          router.replace('/login');
+        }
+      } catch {
+        setIsLoggedIn(false);
+        router.replace('/login');
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+    checkAuth();
+  }, [router]);
+  
+  if (authLoading) return <p>Loading...</p>;
+  if (!isLoggedIn)  return null;
 
 return (
   <Layout>
