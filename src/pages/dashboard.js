@@ -365,8 +365,8 @@ return (
                     //</li>
                     <li
                     key={goal.id}
-                    className="unmet-goals-card"                  // ← 修正: ポインターカーソル表示
-                    onClick={() => router.push(`/goals/${goal.id}`)}            // ← 修正: クリックで詳細ページへ遷移
+                    className="unmet-goals-card  cursor-pointer"
+                    onClick={() => router.push(`/goals/${goal.id}`)}
                     >
                     <span data-testid="goal-title">{goal.title}</span>
                     <p className="goal-deadline">
