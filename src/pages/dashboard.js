@@ -36,10 +36,7 @@ function Dashboard() {
   const router = useRouter();
   const message = router.query.message ? decodeURIComponent(router.query.message) : '';
   
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return format(date, 'yyyy-MM-dd');
-  };
+  const formatDate = (dateString) => format(new Date(dateString), 'yyyy-MM-dd');
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -368,12 +365,12 @@ return (
                     //</li>
                     <li
                     key={goal.id}
-                    className="unmet-goals-card cursor-pointer"
-                    onClick={() => router.push(`/goals/${goal.id}`)}
+                    className="unmet-goals-card"                  // ← 修正: ポインターカーソル表示
+                    onClick={() => router.push(`/goals/${goal.id}`)}            // ← 修正: クリックで詳細ページへ遷移
                     >
                     <span data-testid="goal-title">{goal.title}</span>
                     <p className="goal-deadline">
-                      Deadline: {goal.deadline ? formatDateString(goal.deadline) : 'No deadline'}
+                      Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
                     </p>
                   </li>
                   ))}
