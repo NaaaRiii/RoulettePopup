@@ -348,7 +348,7 @@ return (
             </div>
 
             <div className='unmet-goals'>
-              <h3>進行中のGoal</h3>
+              <h3>進行中の目標</h3>
               <ul>
                 {goalsState
                   .filter((goal) => !goal.completed)
@@ -358,14 +358,24 @@ return (
                     return dateA - dateB;
                   })
                   .map((goal) => (
-                    <li key={goal.id} className="unmet-goals-card">
-                      <Link href={`/goals/${goal.id}`} className="unmet-goals">
-                        <span data-testid="goal-title">{goal.title}</span> 
-                      </Link>
-                      <p className="goal-deadline">
-                        Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
-                      </p>
-                    </li>
+                    //<li key={goal.id} className="unmet-goals-card">
+                    //  <Link href={`/goals/${goal.id}`} className="unmet-goals">
+                    //    <span data-testid="goal-title">{goal.title}</span> 
+                    //  </Link>
+                    //  <p className="goal-deadline">
+                    //    Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
+                    //  </p>
+                    //</li>
+                    <li
+                    key={goal.id}
+                    className="unmet-goals-card cursor-pointer"
+                    onClick={() => router.push(`/goals/${goal.id}`)}
+                    >
+                    <span data-testid="goal-title">{goal.title}</span>
+                    <p className="goal-deadline">
+                      Deadline: {goal.deadline ? formatDateString(goal.deadline) : 'No deadline'}
+                    </p>
+                  </li>
                   ))}
               </ul>
 
