@@ -81,7 +81,7 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
             cols={50}
           />
 
-          <label htmlFor="content">Content</label>
+          <label htmlFor="content">詳細</label>
           <textarea
             id="content"
             name="content"
@@ -105,7 +105,7 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
             className={styles.deadlineField}
           />
 
-          <button type="submit" className="btn btn-primary">Update Goal</button>
+          <button type="submit" className="btn btn-primary">目標を更新する</button>
         </form>
         <button onClick={onClose} className={styles.closeButton}>Close</button>
       </div>

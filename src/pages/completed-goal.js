@@ -6,9 +6,6 @@ import Layout from '../components/Layout';
 import Image from 'next/image';
 import '../components/styles.css';
 
-import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
-
 
 function CompletedGoal() {
   const [goalsState, setGoalsState] = useState([]);
@@ -40,7 +37,6 @@ function CompletedGoal() {
   }, [refresh]);
 
   return (
-    <Authenticator>
     <Layout>
       <div className="completed-goals-container">
         <h1>These are your Completed Goals!</h1>
@@ -73,10 +69,7 @@ function CompletedGoal() {
           })}
         </div>
       </div>
-
-
     </Layout>
-    </Authenticator>
   );
 }
 

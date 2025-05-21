@@ -6,6 +6,7 @@ import { FaPen } from 'react-icons/fa';
 import EditUserNameModal from '../components/EditUserNameModal';
 
 import Link from 'next/link';
+import Layout from '../components/Layout';
 import ExpCalendar from '../components/Calendar';
 import ExpLineChart from '../components/ExpLineChart';
 import Image from 'next/image';
@@ -14,7 +15,6 @@ import '../components/styles.css';
 
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
-import '@aws-amplify/ui-react/styles.css';
 import { signOut } from "aws-amplify/auth"
 import { useAuthenticator } from '@aws-amplify/ui-react';
 
@@ -236,7 +236,7 @@ function Dashboard() {
   if (!isLoggedIn) return <p>Loading...（または /login へ誘導）</p>;
 
 return (
-  <>
+  <Layout>
 
     <button type="button" onClick={handleSignOut}>
       Sign out
@@ -410,7 +410,7 @@ return (
           </div>
         </div>
       </div>
-    </>
+    </Layout>
   );
 }
 

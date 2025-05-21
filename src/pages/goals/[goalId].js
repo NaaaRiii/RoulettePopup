@@ -11,9 +11,6 @@ import EditGoalModal from '../../components/EditGoal';
 import EditSmallGoalModal from '../../components/EditSmallGoal';
 import '../../components/styles.css';
 
-import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
-
 
 function GoalPage() {
   const { goalsState, setGoalsState, refreshGoals } = useGoals();
@@ -285,7 +282,6 @@ function GoalPage() {
   }
 
   return (
-    <Authenticator>
     <Layout>
       <div className='goal-page-container'>
         <div className='goal-content'>
@@ -458,7 +454,6 @@ function GoalPage() {
         </div>
       </div>
     </Layout>
-    </Authenticator>
   );
 }
 

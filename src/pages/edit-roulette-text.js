@@ -7,8 +7,6 @@ import Image from 'next/image';
 import RoulettePopup from '../components/RoulettePopup';
 import '../components/styles.css';
 
-import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
 
 const EditRouletteText = () => {
   const [rouletteNumber, setRouletteNumber] = useState('');
@@ -125,7 +123,6 @@ const EditRouletteText = () => {
   };
 
   return (
-    <Authenticator>
     <Layout>
       {flashMessage && <div className="flash-message">{flashMessage}</div>}
       <div className="edit-roulette-container">
@@ -234,7 +231,6 @@ const EditRouletteText = () => {
 
       </div>
     </Layout>
-    </Authenticator>
   );
 };
 
