@@ -12,53 +12,10 @@ import ExpLineChart from '../components/ExpLineChart';
 import Image from 'next/image';
 import NewGoalModal from '../components/CreateGoal';
 import '../components/styles.css';
-
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
-import { signOut } from "aws-amplify/auth"
-import { useAuthenticator } from '@aws-amplify/ui-react';
 
-
-function Dashboard() {
-  const { route, user } = useAuthenticator();
-  const isLoggedIn = (route === 'authenticated');
-
-  useEffect(() => {
-    if (route === 'authenticated') {
-      console.info('✅ authenticated:', user);
-    } else {
-      console.warn('🚪 not authenticated (route:', route, ')');
-    }
-  }, [route, user]);
-
-  useEffect(() => {
-    if (!isLoggedIn) return;
-
-    const fetchGoals = async () => {
-      const res = await fetchWithAuth('/api/goals');
-      if (res.ok) setGoalsState(await res.json());
-    };
-    fetchGoals();
-  }, [isLoggedIn]);
-
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    const fetchUser = async () => {
-      const res = await fetchWithAuth('/api/current_user');
-      if (res.ok) setUserData(await res.json());
-    };
-    fetchUser();
-  }, [isLoggedIn]);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.push('/');
-    } catch (error) {
-      console.error('Failed to sign out:', error);
-    }
-  };
-  
+function Dashboard() {  
   const [goalsState, setGoalsState] = useState([]);
   const [deletedGoalId, setDeletedGoalId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -127,12 +84,11 @@ function Dashboard() {
   };
   
 
-
   useEffect(() => {
     console.debug('[useEffect] client side, fetching goals');
     console.debug('[useEffect] Dashboard mounting on client - about to fetch goals');
     const fetchGoals = async () => {
-      console.debug('[fetchGoals] start');             // ← ここでフェッチ関数に入ったことを確認
+      console.debug('[fetchGoals] start');
       try {
         const response = await fetchWithAuth('/api/goals');
         console.debug('[fetchGoals] got response', response);
@@ -237,10 +193,6 @@ function Dashboard() {
 
 return (
   <Layout>
-
-    <button type="button" onClick={handleSignOut}>
-      Sign out
-    </button>
       {/*{isModalOpen && (
         <div id="modal" className="modal">
           <div className="modal-content">

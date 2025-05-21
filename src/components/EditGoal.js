@@ -51,6 +51,7 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
         if (onGoalUpdated) {
           onGoalUpdated(updatedGoal);
         }
+        onClose();
       } else {
         const errorData = await response.json();
         console.error("Error updating goal:", errorData);
