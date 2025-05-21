@@ -3,7 +3,7 @@ import '../lib/amplifyClient';
 import React from 'react';
 import { GoalsProvider } from '../contexts/GoalsContext';
 import { TicketsProvider } from '../contexts/TicketsContext';
-import '../styles/globals.css'; 
+import '../styles/globals.css';
 import '../components/styles.css';
 
 import { Authenticator } from '@aws-amplify/ui-react';
