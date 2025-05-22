@@ -10,10 +10,8 @@ module.exports = {
   },
 
   transform: {
-    // .ts / .tsx → ts-jest
-    '^.+\\.(ts|tsx)$': 'ts-jest',
-    // .js / .jsx → babel-jest  ★追加
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.tsx?$': 'ts-jest',   // TS 系を ts-jest
+    '^.+\\.jsx?$': 'babel-jest' // JS 系を babel-jest
   },
 
   // 扱う拡張子
