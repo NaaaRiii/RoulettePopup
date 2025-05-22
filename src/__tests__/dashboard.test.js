@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
-
+import Dashboard from '../pages/dashboard';
 import { useRouter } from 'next/router';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@testing-library/jest-dom';
@@ -222,10 +222,28 @@ describe('Dashboard page', () => {
 			replace: jest.fn(),
     });
 
-    fetchWithAuth.mockReturnValue({
-      isLoggedIn: true,
-      userRank: 20,
-    });
+		fetchWithAuth.mockImplementation(async (path) => {
+			switch (path) {
+				case '/api/goals':
+					return {
+						ok: true,
+						json: async () => mockGoalsData,
+					};
+	
+				case '/api/current_user':
+					return {
+						ok: true,
+						json: async () => mockUserData,
+					};
+	
+				/* rank 更新など */
+				default:
+					return {
+						ok: true,
+						json: async () => ({ success: true }),
+					};
+			}
+		});
 
     global.fetch = jest.fn((url, options) => {
       console.log('Mock fetch called with URL:', url);
@@ -415,12 +433,13 @@ describe('Dashboard page', () => {
 	});
 	
 	it('should render the Layout component correctly', async () => {
-		const Dashboard = require('../pages/dashboard').default;
-	
 		render(<Dashboard />);
-	
-		const layoutElement = await screen.findByTestId('layout');
-		expect(layoutElement).toBeInTheDocument();
+		console.log(document.body.innerHTML);
+
+		await screen.findByText('Sample User');
+
+		const layout = screen.getByTestId('layout');
+		expect(layout).toBeInTheDocument();
 	});
 	
 	//userRank が 10 を超える場合、「ごほうびルーレット」リンクが表示されることを確認するテスト
