@@ -84,16 +84,11 @@ function Dashboard() {
   
 
   useEffect(() => {
-    console.debug('[useEffect] client side, fetching goals');
-    console.debug('[useEffect] Dashboard mounting on client - about to fetch goals');
     const fetchGoals = async () => {
-      console.debug('[fetchGoals] start');
       try {
         const response = await fetchWithAuth('/api/goals');
-        console.debug('[fetchGoals] got response', response);
         if (!response.ok) throw new Error(response.statusText);
         const data = await response.json();
-        console.debug('[fetchGoals] parsed json', data);
         setGoalsState(data);
       } catch (err) {
         console.error('[fetchGoals] error', err);
@@ -135,7 +130,6 @@ function Dashboard() {
   
   useEffect(() => {
     console.log("Current rank:", userData.rank, "Last roulette rank:", userData.lastRouletteRank);
-    console.log(process.env.NEXT_PUBLIC_RAILS_API_URL);
     if (userData.rank >= 10 && Math.floor(userData.rank / 10) > Math.floor(userData.lastRouletteRank / 10)) {
       //console.log("Modal should open now.");
       //setIsModalOpen(true);
@@ -262,7 +256,7 @@ return (
                       <EditUserNameModal isOpen={isEditNameOpen} onClose={closeEditName}/>
                       
                       <div className='user-profile__roulette'>
-                        {userRank > 10 && <Link href={`/edit-roulette-text/`}>ごほうびルーレット</Link>}
+                        {userRank >= 10 && <Link href="/edit-roulette-text">ごほうびルーレット</Link>}
                       </div>
                     </div>
                   </div>
@@ -333,7 +327,7 @@ return (
                       </div>
                     ));
                   })}
-            </div>
+              </div>
 
           </div>
 
@@ -345,7 +339,7 @@ return (
             </div>
 
             <div className='unmet-goals'>
-              <h3>進行中の目標</h3>
+              <h3>進行中のGoal</h3>
               <ul>
                 {goalsState
                   .filter((goal) => !goal.completed)

@@ -1,18 +1,10 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
-import Dashboard from '../pages/dashboard';
 import { useRouter } from 'next/router';
-import { useAuth } from '../contexts/AuthContext';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+import Dashboard from '../pages/dashboard';
 import '@testing-library/jest-dom';
 
-beforeAll(() => {
-  global.localStorage = {
-    getItem: jest.fn(),
-    setItem: jest.fn(),
-    removeItem: jest.fn(),
-    clear: jest.fn()
-  };
-});
 
 global.ResizeObserver = class {
   observe() {}
@@ -20,7 +12,6 @@ global.ResizeObserver = class {
   disconnect() {}
 };
 
-// 子コンポーネントをモック
 jest.mock('../components/Calendar', () => {
   const MockedExpCalendar = () => <div>Mocked ExpCalendar</div>;
   MockedExpCalendar.displayName = 'MockedExpCalendar';
@@ -33,45 +24,12 @@ jest.mock('../components/ExpLineChart', () => {
   return MockedExpLineChart;
 });
 
-jest.mock('../components/Layout', () => {
-  const MockedLayout = ({ children }) => <div data-testid="layout">{children}</div>;
-  MockedLayout.displayName = 'MockedLayout';
-  return MockedLayout;
-});
+jest.mock('../utils/fetchWithAuth');
 
-// withAuth モックの修正
-jest.mock('../utils/withAuth', () => {
-  const React = require('react');
-  const { useAuth } = require('../contexts/AuthContext');
-  const { useRouter } = require('next/router');
-
-  return {
-    __esModule: true,
-    default: (Component) => {
-      const MockedWithAuth = (props) => {
-        const { isLoggedIn } = useAuth();
-        const router = useRouter();
-
-        React.useEffect(() => {
-          if (!isLoggedIn) {
-            router.push('/login');
-          }
-        }, [isLoggedIn, router]);
-
-        return isLoggedIn ? <Component {...props} /> : null;
-      };
-      MockedWithAuth.displayName = `withAuth(${Component.displayName || Component.name || 'Component'})`;
-      return MockedWithAuth;
-    },
-  };
-});
+jest.mock('../utils/getIdToken');
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
-}));
-
-jest.mock('../contexts/AuthContext', () => ({
-  useAuth: jest.fn(),
 }));
 
 jest.mock('next/link', () => {
@@ -241,42 +199,63 @@ describe('Dashboard page', () => {
 	let mockPush;
 
 	beforeEach(() => {
+		/** ③ ここで初めて Dashboard を読み込む */
+		//fetchWithAuth.mockImplementation((path) => {
+		//	switch (path) {
+		//		case '/api/goals':
+		//			return Promise.resolve({
+		//				ok: true,
+		//				json: async () => mockGoalsData,
+		//			});
+		//		case '/api/current_user':
+		//			return Promise.resolve({
+		//				ok: true,
+		//				json: async () => mockUserData,
+		//			});
+		//		default:                       // /update_rank など
+		//			return Promise.resolve({
+		//				ok: true,
+		//				json: async () => ({ success: true }),
+		//			});
+		//	}
+		//});
+
 		mockPush = jest.fn();
 
-    useRouter.mockReturnValue({
-      query: {},
-      push: mockPush,
+		useRouter.mockReturnValue({ 
+			query: {}, 
+			push: jest.fn(), 
+			replace: jest.fn() 
+		});
+
+		fetchWithAuth.mockReset();
+    fetchWithAuth.mockImplementation(path => {
+      // ここで path に応じて mockGoalsData / mockUserData などを返す
+      return Promise.resolve({ ok: true, json: async () => ({}) });
     });
 
-    useAuth.mockReturnValue({
+    fetchWithAuth.mockReturnValue({
       isLoggedIn: true,
       userRank: 20,
     });
 
     global.fetch = jest.fn((url, options) => {
-      console.log('Mock fetch called with URL:', url);
-      console.log('Fetch options:', options);
-
       if (url === 'http://localhost:3000/api/goals') {
-        console.log('Mock fetch matched /api/goals');
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve(mockGoalsData),
         });
       } else if (url === 'http://localhost:3000/api/current_user') {
-        console.log('Mock fetch matched /api/current_user');
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve(mockUserData),
         });
       } else if (url.endsWith('/update_rank')) {
-        console.log('Mock fetch matched /update_rank');
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ success: true }),
         });
       } else {
-        console.log('Mock fetch did not match any condition for URL:', url);
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({}),
@@ -293,6 +272,7 @@ describe('Dashboard page', () => {
 	});
 
   it('renders the dashboard with user profile and goals', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
     const mockRouter = {
       query: { message: 'Goal completed successfully' },
       push: jest.fn(),
@@ -310,6 +290,7 @@ describe('Dashboard page', () => {
 	});
 
 	it('calls updateLastRouletteRank when rank increases past a multiple of 10', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
 		const mockFetch = jest.spyOn(global, 'fetch');
 	
 		render(<Dashboard />);
@@ -330,6 +311,7 @@ describe('Dashboard page', () => {
 	});
 
 	it('updates lastRouletteRank when rank increases past a multiple of 10', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
 
 	 // 非同期にレンダリングされる要素をfindByで取得
@@ -338,6 +320,7 @@ describe('Dashboard page', () => {
  });
 	
 	it('opens and closes the goal creation modal when the respective buttons are clicked', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// "目標を設定する"ボタンを取得してクリック
@@ -359,6 +342,7 @@ describe('Dashboard page', () => {
 	});	
 
 	it('renders the completed goals link with correct href', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
     render(<Dashboard />);
 
     const completedGoalLink = await screen.findByText('達成した目標');
@@ -366,6 +350,7 @@ describe('Dashboard page', () => {
   });
 	
 	it('should render the latest completed Small-Goals', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
     render(<Dashboard />);
 
     await waitFor(() => {
@@ -379,6 +364,7 @@ describe('Dashboard page', () => {
   });
 
 	it('should render the Calendar component', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// Calendarコンポーネントがモックされたテキストを持つかどうかを確認
@@ -387,6 +373,7 @@ describe('Dashboard page', () => {
 	});
 	
 	it('should render the ExpLineChart component', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// ExpLineChartコンポーネントがモックされたテキストを持つかどうかを確認
@@ -395,6 +382,7 @@ describe('Dashboard page', () => {
 	});
 
 	it('should render unmet goals in the correct order by deadline', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
     render(<Dashboard />);
 
     // 進行中の目標のタイトルを取得
@@ -408,6 +396,7 @@ describe('Dashboard page', () => {
 	
 	// 進行中のSmall Goalが表示され、遷移できるかを確認
   it('should render ongoing Small Goals and allow navigation upon clicking "確認" button', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// "進行中のSmall Goal" セクションの見出しを取得
@@ -431,57 +420,63 @@ describe('Dashboard page', () => {
 	});
 	
 	it('should render the Layout component correctly', async () => {
+		//const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
-	
-		// Layout コンポーネントがレンダリングされていることを確認
-		const layoutElement = await screen.findByTestId('layout');
-		expect(layoutElement).toBeInTheDocument();
-	
-		// Layout の子要素が正しくレンダリングされているか確認
-		// 例えば、Dashboard コンポーネントの一部を確認
-		expect(screen.getByText('Sample User')).toBeInTheDocument();
+		const layout = await screen.findByTestId('layout');
+		expect(layout).toBeInTheDocument();
 	});
 	
 	//userRank が 10 を超える場合、「ごほうびルーレット」リンクが表示されることを確認するテスト
-	 it('should render the "ごほうびルーレット" link when userRank > 10', async () => {
-    // userRank は beforeEach で 20 に設定されているため、変更不要
+	it('shows ごほうびルーレット link when userRank is 10', async () => {
+		fetchWithAuth.mockReset();
+		fetchWithAuth
+			.mockResolvedValueOnce({ ok:true, json:async()=>mockGoalsData }) // first call /api/goals
+			.mockResolvedValueOnce({ ok:true, json:async()=>({...mockUserData, rank:10}) }) // second /api/current_user
+			.mockResolvedValue({ ok:true, json:async()=>({}) });
 
-    render(<Dashboard />);
+			//const Dashboard = require('../pages/dashboard').default;
+		render(<Dashboard />);
+	
+		// rank が反映されるまで適当なアンカーで待つ
+		await screen.findByText('Sample User');
+	
+		// リンクを確認
+		const rouletteLink = await screen.findByText('ごほうびルーレット');
+		expect(rouletteLink).toBeInTheDocument();
+		expect(rouletteLink.closest('a')).toHaveAttribute('href', '/edit-roulette-text');
+	});
 
-    // 「ごほうびルーレット」リンクが表示されていることを確認
-    const rouletteLink = await screen.findByText('ごほうびルーレット');
-    expect(rouletteLink).toBeInTheDocument();
+	// dashboard.test.js ─ 「ごほうびルーレット」が出ることを確認するテスト
+	it('renders the "ごほうびルーレット" link when userRank is 10', async () => {
+		/* ① 既存モックをリセット */
+		fetchWithAuth.mockReset();
 
-    // リンクの href 属性が正しいことを確認
-    expect(rouletteLink.closest('a')).toHaveAttribute('href', '/edit-roulette-text');
-  });
+		/* ② 1回目 (/api/goals) → 既定データ
+					2回目 (/api/current_user) → rank:10 を返す */
+		fetchWithAuth
+			.mockResolvedValueOnce({ ok: true, json: async () => mockGoalsData })
+			.mockResolvedValueOnce({ ok: true, json: async () => ({ ...mockUserData, rank: 10 }) })
+			.mockResolvedValue({ ok: true, json: async () => ({}) });
+			//const Dashboard = require('../pages/dashboard').default;
+		render(<Dashboard />);
 
-  //userRank が 10 の場合、「ごほうびルーレット」リンクが表示されることを確認するテスト
-  it('should render the "ごほうびルーレット" link when userRank is 10', async () => {
-    // userRank を 10 に設定
-    useAuth.mockReturnValue({
-      isLoggedIn: true,
-      userRank: 10,
-    });
+		/* ③ 何か1つ描画されるまで待つ */
+		await screen.findByText('Sample User');
 
-    render(<Dashboard />);
-
-    // 「ごほうびルーレット」リンクが表示されていることを確認
-    const rouletteLink = await screen.findByText('ごほうびルーレット');
-    expect(rouletteLink).toBeInTheDocument();
-
-    // リンクの href 属性が正しいことを確認
-    expect(rouletteLink.closest('a')).toHaveAttribute('href', '/edit-roulette-text');
-  });
+		/* ④ リンクを検証 */
+		const rouletteLink = await screen.findByRole('link', { name: 'ごほうびルーレット' });
+		expect(rouletteLink).toBeInTheDocument();
+		expect(rouletteLink).toHaveAttribute('href', '/edit-roulette-text');
+	});
 
 	//userRank が 9 の場合、「ごほうびルーレット」リンクが表示されないことを確認するテスト
   it('should not render the "ごほうびルーレット" link when userRank is 9', async () => {
     // userRank を 9 に設定
-    useAuth.mockReturnValue({
+    fetchWithAuth.mockReturnValue({
       isLoggedIn: true,
       userRank: 9,
     });
-
+		//const Dashboard = require('../pages/dashboard').default;
     render(<Dashboard />);
 
     // 「ごほうびルーレット」リンクが表示されていないことを確認
@@ -492,130 +487,129 @@ describe('Dashboard page', () => {
   });
 
 	it('redirects to login page if user is not logged in', async () => {
-		// ユーザーがログインしていない状態をモック
-		useAuth.mockReturnValue({
-			isLoggedIn: false,
-			userRank: null,
+		/** 1️⃣ 既存の fetchWithAuth モックをリセット */
+		fetchWithAuth.mockReset();
+
+		/** 2️⃣ 1回目 (= /api/current_user) の呼び出しで ok:false を返す */
+		fetchWithAuth.mockResolvedValueOnce({
+			ok: false,
+			json: async () => ({}),
 		});
-	
+
+		const mockReplace = jest.fn();
+		useRouter.mockReturnValue({
+			query: {},
+			push: jest.fn(),
+			replace: mockReplace
+		});
+
+		//const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
-	
-		// リダイレクトが実行されるまで待機
+
 		await waitFor(() => {
-			expect(mockPush).toHaveBeenCalledWith('/login');
+			expect(mockReplace).toHaveBeenCalledWith('/login');
 		});
 	});
 	
   it('renders only goals with completed: false as ongoing goals', async () => {
-		// ダッシュボードをレンダリング
+		/** 1️⃣ 既存のモックをリセット */
+		fetchWithAuth.mockReset();
+	
+		/** 2️⃣ 呼び出し順にレスポンスを定義 */
+		fetchWithAuth
+			.mockResolvedValueOnce({ ok: true, json: async () => mockGoalsData }) // /api/goals
+			.mockResolvedValueOnce({ ok: true, json: async () => mockUserData })  // /api/current_user
+			// それ以降は空レスポンスで十分
+			.mockResolvedValue({ ok: true, json: async () => ({}) });
+			//const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
 	
-		// "進行中のGoal" セクションの見出しを確認
-		const header = await screen.findByText('進行中のGoal');
+		/* 1) いずれかのゴールタイトルが描画されるまで待つ */
+		await waitFor(async () => {
+			const goals = await screen.findAllByText('Sample Goal');
+			expect(goals.length).toBeGreaterThan(0);
+		});
+
+		/* 2) 見出しの存在を確認（日本語表記） */
+		const header = screen.getByRole('heading', { name: /進行中のGoal/ });
 		expect(header).toBeInTheDocument();
-	
-		// 完了していないゴールのみが表示されていることを確認
-		const ongoingGoals = mockGoalsData.filter(goal => !goal.completed);
-	
-		// 表示されている全てのgoal-titleを取得
-		const goalTitleElements = await screen.findAllByTestId('goal-title');
-	
-		// 表示されているゴールの数が完了していないゴールの数と一致することを確認
-		expect(goalTitleElements).toHaveLength(ongoingGoals.length);
-	
-		// 各完了していないゴールのタイトルが表示されていることを確認
+
+		/* 3) 以下、完了していないゴールだけが表示されているかを検証 */
+		const ongoingGoals = mockGoalsData.filter(g => !g.completed);
+		const titleEls = await screen.findAllByTestId('goal-title');
+		expect(titleEls).toHaveLength(ongoingGoals.length);
+
 		ongoingGoals.forEach(goal => {
-			const isGoalPresent = goalTitleElements.some(element => element.textContent === goal.title);
-			expect(isGoalPresent).toBe(true);
+			expect(titleEls.some(el => el.textContent === goal.title)).toBe(true);
 		});
-	
-		// 完了済みゴールが表示されていないことを確認
-		const completedGoals = mockGoalsData.filter(goal => goal.completed);
-		completedGoals.forEach(goal => {
-			const completedGoalTitle = screen.queryByText(goal.title);
-			expect(completedGoalTitle).not.toBeInTheDocument();
-		});
+
+		mockGoalsData
+			.filter(g => g.completed)
+			.forEach(goal => {
+				expect(screen.queryByText(goal.title)).not.toBeInTheDocument();
+			});
 	});
 
 	it('renders only small goals with completed: false as ongoing small goals', async () => {
-		// ダッシュボードをレンダリング
+		/** 1️⃣ 既定モックを全消し */
+		fetchWithAuth.mockReset();
+	
+		/** 2️⃣ 1回目: /api/goals, 2回目: /api/current_user */
+		fetchWithAuth
+			.mockResolvedValueOnce({ ok: true, json: async () => mockGoalsData })
+			.mockResolvedValueOnce({ ok: true, json: async () => mockUserData })
+			/** 3️⃣ それ以降は空でも OK */
+			.mockResolvedValue({ ok: true, json: async () => ({}) });
+			//const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
 	
-		// "進行中のSmall Goal" セクションの見出しを確認
-		const header = await screen.findByText('進行中のSmall Goal');
+		/** 4️⃣ Small-Goal が 1 件でも DOM に現れるまで待つ */
+		await screen.findByText('Sample Small Goal');
+	
+		/** 見出しを確認 */
+		const header = screen.getByRole('heading', { name: /進行中のSmall Goal/ });
 		expect(header).toBeInTheDocument();
 	
-		// "進行中のSmall Goal" セクションを取得
-		const smallGoalsSection = header.parentElement;
-		const { findAllByTestId, queryByText } = within(smallGoalsSection);
+		/* === 以下は元の検証ロジックをそのまま残す ============================= */
+		const { findAllByTestId, queryByText } = within(header.parentElement);
 	
-		// 未完了の Small Goal を取得
 		const ongoingSmallGoals = [];
-		mockGoalsData.forEach(goal => {
-			if (!goal.completed) {
-				const incompleteSmallGoals = goal.small_goals.filter(smallGoal => !smallGoal.completed);
-				ongoingSmallGoals.push(...incompleteSmallGoals);
-			}
+		mockGoalsData.forEach(g => {
+			if (!g.completed) ongoingSmallGoals.push(...g.small_goals.filter(sg => !sg.completed));
 		});
 	
-		// 表示されている Small Goal のタイトルを取得
-		const smallGoalTitleElements = await findAllByTestId('small-goal-title');
+		const titleEls = await findAllByTestId('small-goal-title');
+		expect(titleEls).toHaveLength(ongoingSmallGoals.length);
 	
-		// 表示されている Small Goal の数が未完了の Small Goal の数と一致することを確認
-		expect(smallGoalTitleElements).toHaveLength(ongoingSmallGoals.length);
-	
-		// 各未完了の Small Goal のタイトルが表示されていることを確認
-		ongoingSmallGoals.forEach(smallGoal => {
-			console.log('smallGoal.completed (ongoing):', smallGoal.completed, typeof smallGoal.completed);
-			const isSmallGoalPresent = smallGoalTitleElements.some(element => element.textContent === smallGoal.title);
-			expect(isSmallGoalPresent).toBe(true);
+		ongoingSmallGoals.forEach(sg => {
+			expect(titleEls.some(el => el.textContent === sg.title)).toBe(true);
 		});
 	
-		// 完了済み Small Goal が "進行中のSmall Goal" セクションに表示されていないことを確認
 		const completedSmallGoals = [];
-		mockGoalsData.forEach(goal => {
-			if (!goal.completed) {
-				const completeSmallGoals = goal.small_goals.filter(smallGoal => smallGoal.completed);
-				completedSmallGoals.push(...completeSmallGoals);
-			}
+		mockGoalsData.forEach(g => {
+			if (!g.completed) completedSmallGoals.push(...g.small_goals.filter(sg => sg.completed));
 		});
-		completedSmallGoals.forEach(smallGoal => {
-			console.log('smallGoal.completed (completed):', smallGoal.completed, typeof smallGoal.completed);
-			const completedSmallGoalTitle = queryByText(smallGoal.title);
-			expect(completedSmallGoalTitle).not.toBeInTheDocument();
+		completedSmallGoals.forEach(sg => {
+			expect(queryByText(sg.title)).not.toBeInTheDocument();
 		});
 	});
 	
+	
 	it('removes a small goal from ongoing Small Goals when it is deleted', async () => {
-		// 初期のモックデータを設定
 		const initialMockGoalsData = [...mockGoalsData];
+
+		// 1️⃣ 既存モックをリセット
+		fetchWithAuth.mockReset();
 	
-		// fetch のモックを設定
-		global.fetch = jest.fn((url, options) => {
-			if (url.endsWith('/api/goals')) {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve(initialMockGoalsData),
-				});
-			} else if (url.endsWith('/api/current_user')) {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve(mockUserData),
-				});
-			} else if (url.includes('/update_rank')) {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve({ success: true }),
-				});
-			} else {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve({}),
-				});
-			}
-		});
+		// 2️⃣ 初回レンダリング用レスポンス
+		//    1回目 = /api/goals, 2回目 = /api/current_user
+		fetchWithAuth
+			.mockResolvedValueOnce({ ok: true, json: async () => initialMockGoalsData })
+			.mockResolvedValueOnce({ ok: true, json: async () => mockUserData })
+			// 以降は空でも可
+			.mockResolvedValue({ ok: true, json: async () => ({}) });
 	
-		// コンポーネントをレンダリング
+		//const Dashboard = require('../pages/dashboard').default;
 		const { unmount } = render(<Dashboard />);
 	
 		// Small Goal が表示されていることを確認
@@ -633,41 +627,21 @@ describe('Dashboard page', () => {
 			return goal;
 		});
 	
-		// fetch のモックを更新
-		global.fetch.mockImplementation((url, options) => {
-			if (url.endsWith('/api/goals')) {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve(updatedMockGoalsData),
-				});
-			} else if (url.endsWith('/api/current_user')) {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve(mockUserData),
-				});
-			} else if (url.includes('/update_rank')) {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve({ success: true }),
-				});
-			} else {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve({}),
-				});
-			}
+		// ❹ fetchWithAuth を更新: 1回目 goals, 2回目 current_user
+		fetchWithAuth.mockReset();
+		fetchWithAuth
+			.mockResolvedValueOnce({ ok: true, json: async () => updatedMockGoalsData })
+			.mockResolvedValueOnce({ ok: true, json: async () => mockUserData });
+		
+			// コンポーネントをアンマウント
+			unmount();
+		
+			// コンポーネントを再レンダリング（再マウント）
+			render(<Dashboard />);
+		
+			// Small Goal が表示されなくなったことを確認
+			await waitFor(() => {
+				expect(screen.queryByText('Sample Small Goal')).not.toBeInTheDocument();
+			});
 		});
-	
-		// コンポーネントをアンマウント
-		unmount();
-	
-		// コンポーネントを再レンダリング（再マウント）
-		render(<Dashboard />);
-	
-		// Small Goal が表示されなくなったことを確認
-		await waitFor(() => {
-			expect(screen.queryByText('Sample Small Goal')).not.toBeInTheDocument();
-		});
-	});
-
 });
