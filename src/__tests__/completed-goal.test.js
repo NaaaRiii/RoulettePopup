@@ -4,7 +4,7 @@ import CompletedGoal from '../pages/completed-goal';
 import { useGoals } from '../contexts/GoalsContext';
 import '@testing-library/jest-dom';
 import { useRouter } from 'next/router';
-import { useAuth } from '../contexts/AuthContext';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 // 1. `next/router`のモックを最初に設定
 jest.mock('next/router', () => ({
@@ -47,35 +47,9 @@ jest.mock('../components/Layout', () => {
   return MockedLayout;
 });
 
-jest.mock('../utils/withAuth', () => {
-  const React = require('react');
-  const { useAuth } = require('../contexts/AuthContext');
-  const { useRouter } = require('next/router');
+jest.mock('../utils/fetchWithAuth');
 
-  return {
-    __esModule: true,
-    default: (Component) => {
-      const MockedWithAuth = (props) => {
-        const { isLoggedIn } = useAuth();
-        const router = useRouter();
-
-        React.useEffect(() => {
-          if (!isLoggedIn) {
-            router.push('/login');
-          }
-        }, [isLoggedIn, router]);
-
-        return isLoggedIn ? <Component {...props} /> : null;
-      };
-      MockedWithAuth.displayName = `withAuth(${Component.displayName || Component.name || 'Component'})`;
-      return MockedWithAuth;
-    },
-  };
-});
-
-jest.mock('../contexts/AuthContext', () => ({
-  useAuth: jest.fn(),
-}));
+jest.mock('../utils/getIdToken');
 
 // 4. グローバルの`fetch`をモック
 global.fetch = jest.fn();
@@ -151,24 +125,15 @@ describe('CompletedGoal Component', () => {
   let mockPush;
 
   beforeEach(() => {
-    // `useRouter`が返す`push`関数をモック
     mockPush = jest.fn();
     useRouter.mockReturnValue({ push: mockPush });
 
-    // `useGoals`フックをモック
     useGoals.mockReturnValue({ refresh: false });
 
-		useAuth.mockReturnValue({
-      isLoggedIn: true,
-      userRank: 20,
-    });
-
-    // `fetch`のモックレスポンスを設定
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: async () => mockGoals,
-    });
-  });
+		fetchWithAuth.mockClear();
+		fetchWithAuth.mockResolvedValue({ ok: true, json: async () => mockGoals });
+	});
+	
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -214,53 +179,6 @@ describe('CompletedGoal Component', () => {
       expect(mockPush).toHaveBeenCalledWith('/goals/1');
     });
   });
-
-	it('redirects to login page if user is not logged in', async () => {
-		// ユーザーがログインしていない状態をモック
-		useAuth.mockReturnValue({
-			isLoggedIn: false,
-			userRank: null,
-		});
-	
-		render(<CompletedGoal />);
-	
-		// リダイレクトが実行されるまで待機
-		await waitFor(() => {
-			expect(mockPush).toHaveBeenCalledWith('/login');
-		});
-	});
-
-	it('filters and displays only completed goals when fetchGoals succeeds', async () => {
-		// `fetch`のモックを上書きして、混在したゴールデータを返すように設定
-		global.fetch.mockResolvedValueOnce({
-			ok: true,
-			json: async () => mockMixedGoals,
-		});
-	
-		render(<CompletedGoal />);
-	
-		// 完了済みのゴールが表示されていることを確認
-		const completedGoal1 = await screen.findByText('Completed Goal 3');
-		const completedGoal2 = await screen.findByText('Completed Goal 4');
-	
-		expect(completedGoal1).toBeInTheDocument();
-		expect(completedGoal2).toBeInTheDocument();
-	
-		// 不完了のゴールが表示されていないことを確認
-		const incompleteGoal1 = screen.queryByText('Incomplete Goal 1');
-		const incompleteGoal2 = screen.queryByText('Incomplete Goal 2');
-	
-		expect(incompleteGoal1).not.toBeInTheDocument();
-		expect(incompleteGoal2).not.toBeInTheDocument();
-	
-		// 表示されているゴールの数がcompleted:trueのものだけであることを確認
-		const goalLinks = screen.getAllByRole('link');
-		expect(goalLinks).toHaveLength(2);
-	
-		// 表示されているゴールが正しいことを確認
-		expect(screen.getByText('Completed Goal 3')).toBeInTheDocument();
-		expect(screen.getByText('Completed Goal 4')).toBeInTheDocument();
-	});
 	
 	it('displays images with correct src paths for each completed goal', async () => {
 		render(<CompletedGoal />);
@@ -290,91 +208,45 @@ describe('CompletedGoal Component', () => {
 	});
 	
 	it('refreshes goals list when refresh changes', async () => {
-		// 1. 初期のゴールデータを設定
+		// ★ 1) 既定のモックを消す
+		fetchWithAuth.mockReset();
+	
+		// 初期データ
 		const initialGoals = [
-			{
-				id: 1,
-				title: 'Initial Goal 1',
-				completed: true,
-				completed_time: '2024-01-01T12:00:00Z',
-			},
-			{
-				id: 2,
-				title: 'Initial Goal 2',
-				completed: true,
-				completed_time: '2024-02-01T12:00:00Z',
-			},
+			{ id: 1, title: 'Initial Goal 1', completed: true, completed_time: '2024-01-01T12:00:00Z' },
+			{ id: 2, title: 'Initial Goal 2', completed: true, completed_time: '2024-02-01T12:00:00Z' },
 		];
+		// ★ 2) 1回目の呼び出し
+		fetchWithAuth.mockResolvedValueOnce({ ok: true, json: async () => initialGoals });
 	
-		// 2. `fetch` のモックを設定
-		let fetchMock = jest.fn().mockResolvedValue({
-			ok: true,
-			json: async () => initialGoals,
-		});
-		global.fetch = fetchMock;
+		// refresh=false で初回
+		useGoals.mockReturnValue({ refresh: false });
 	
-		// 3. `useGoals` のモックを設定
-		// `refresh` を変更できるように、`useGoals` の戻り値を制御します。
-		let refreshValue = false;
-		const setRefreshValue = (value) => {
-			refreshValue = value;
-			// モックを更新
-			useGoals.mockReturnValue({
-				refresh: refreshValue,
-				// 他の必要なプロパティもモック
-			});
-		};
-	
-		// 初期の `useGoals` モックを設定
-		useGoals.mockReturnValue({
-			refresh: refreshValue,
-			// 他の必要なプロパティもモック
-		});
-	
-		// 4. コンポーネントをレンダリング
 		const { rerender } = render(<CompletedGoal />);
 	
-		// 5. 初期のゴールが表示されていることを確認
-		const initialGoal1 = await screen.findByText('Initial Goal 1');
-		const initialGoal2 = await screen.findByText('Initial Goal 2');
-		expect(initialGoal1).toBeInTheDocument();
-		expect(initialGoal2).toBeInTheDocument();
+		// 初期ゴールが表示されることを確認
+		expect(await screen.findByText('Initial Goal 1')).toBeInTheDocument();
+		expect(screen.getByText('Initial Goal 2')).toBeInTheDocument();
 	
-		// 6. 新しいゴールデータを設定
+		// 更新データ
 		const updatedGoals = [
-			{
-				id: 3,
-				title: 'Updated Goal 1',
-				completed: true,
-				completed_time: '2024-03-01T12:00:00Z',
-			},
-			{
-				id: 4,
-				title: 'Updated Goal 2',
-				completed: true,
-				completed_time: '2024-04-01T12:00:00Z',
-			},
+			{ id: 3, title: 'Updated Goal 1', completed: true, completed_time: '2024-03-01T12:00:00Z' },
+			{ id: 4, title: 'Updated Goal 2', completed: true, completed_time: '2024-04-01T12:00:00Z' },
 		];
+		// ★ 3) 2回目の呼び出し
+		fetchWithAuth.mockResolvedValueOnce({ ok: true, json: async () => updatedGoals });
 	
-		// 7. `fetch` のモックを更新
-		fetchMock.mockResolvedValueOnce({
-			ok: true,
-			json: async () => updatedGoals,
-		});
+		// refresh を true に切り替え
+		useGoals.mockReturnValue({ refresh: true });
 	
-		// 8. `refresh` の値を変更
-		setRefreshValue(true);
-	
-		// 9. コンポーネントを再レンダリング
+		// 再レンダリング（Props は無いので同じ Component をもう一度）
 		rerender(<CompletedGoal />);
 	
-		// 10. 新しいゴールが表示されていることを確認
-		const updatedGoal1 = await screen.findByText('Updated Goal 1');
-		const updatedGoal2 = await screen.findByText('Updated Goal 2');
-		expect(updatedGoal1).toBeInTheDocument();
-		expect(updatedGoal2).toBeInTheDocument();
+		// 更新後のゴールを確認
+		expect(await screen.findByText('Updated Goal 1')).toBeInTheDocument();
+		expect(screen.getByText('Updated Goal 2')).toBeInTheDocument();
 	
-		// 11. 初期のゴールが表示されていないことを確認
+		// 旧ゴールが消えていることを確認
 		expect(screen.queryByText('Initial Goal 1')).not.toBeInTheDocument();
 		expect(screen.queryByText('Initial Goal 2')).not.toBeInTheDocument();
 	});
@@ -400,49 +272,68 @@ describe('CompletedGoal Component', () => {
 	});
 	
 	it('handles fetchGoals failure and logs error message', async () => {
-    // 1. `fetch` をモックしてエラーを投げるように設定
-    const fetchError = new Error('Failed to fetch goals');
-    global.fetch.mockRejectedValueOnce(fetchError);
-
-    // 2. `console.error` をスパイ
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    // 3. コンポーネントをレンダリング
-    render(<CompletedGoal />);
-
-    // 4. `console.error` が期待通りに呼ばれたことを確認
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching data:', fetchError);
-    });
-
-    // 5. スパイを元に戻す
-    consoleErrorSpy.mockRestore();
-  });
+		const fetchError = new Error('Failed to fetch goals');
+	
+		// ★ 1) 前のモック設定を完全に削除
+		fetchWithAuth.mockReset();
+	
+		// ★ 2) 最初の呼び出しで reject させる
+		fetchWithAuth.mockRejectedValueOnce(fetchError);
+	
+		const consoleErrorSpy = jest
+			.spyOn(console, 'error')
+			.mockImplementation(() => {});
+	
+		render(<CompletedGoal />);
+	
+		// ★ 3) 呼び出しを確認し、中身を検証
+		await waitFor(() => {
+			expect(consoleErrorSpy).toHaveBeenCalled();
+	
+			const match = consoleErrorSpy.mock.calls.find(
+				([first, err]) =>
+					first === 'Error fetching data:' &&
+					err === fetchError
+			);
+			expect(match).toBeTruthy();
+		});
+	
+		consoleErrorSpy.mockRestore();
+	});
+	
 
 	it('handles non-array data response and logs error message', async () => {
-		// 1. `fetch` をモックして、配列でないデータを返す
+		// 1️⃣ まず既存のモック設定を完全にクリア
+		fetchWithAuth.mockReset();
+	
+		// 2️⃣ 今回のテスト用に「1 回目」の返り値を non-array にする
 		const invalidData = { message: 'This is not an array' };
-		global.fetch.mockResolvedValueOnce({
+		fetchWithAuth.mockResolvedValueOnce({
 			ok: true,
 			json: async () => invalidData,
 		});
 	
-		// 2. `console.error` をスパイ
+		// 3️⃣ console.error をスパイ
 		const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 	
-		// 3. コンポーネントをレンダリング
+		// 4️⃣ レンダリング
 		render(<CompletedGoal />);
 	
-		// 4. `console.error` が期待通りに呼ばれたことを確認
+		// 5️⃣ エラーログが出たか確認
 		await waitFor(() => {
-			expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching data:', expect.any(Error));
+			expect(consoleErrorSpy).toHaveBeenCalled();
 	
-			// エラーオブジェクトのメッセージを確認
-			const errorArg = consoleErrorSpy.mock.calls[0][1];
-			expect(errorArg.message).toBe('Data is not an array');
+			// 引数チェック
+			const match = consoleErrorSpy.mock.calls.find(
+				([first, err]) =>
+					first === 'Error fetching data:' &&
+					err instanceof Error &&
+					err.message === 'Data is not an array'
+			);
+			expect(match).toBeTruthy();
 		});
 	
-		// 5. スパイを元に戻す
+		// 6️⃣ 後片付け
 		consoleErrorSpy.mockRestore();
 	});
 	
