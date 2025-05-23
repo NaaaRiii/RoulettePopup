@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
-import Dashboard from '../pages/dashboard';
+//import Dashboard from '../pages/dashboard';
 import { useRouter } from 'next/router';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@testing-library/jest-dom';
@@ -40,6 +40,7 @@ jest.mock('../components/Layout', () => {
 });
 
 jest.mock('../utils/fetchWithAuth');
+//const { fetchWithAuth } = require('../utils/fetchWithAuth');
 
 jest.mock('../utils/getIdToken');
 
@@ -212,6 +213,7 @@ describe('Dashboard page', () => {
   };
 
 	let mockPush;
+	let Dashboard;
 
 	beforeEach(() => {
 		mockPush = jest.fn();
@@ -222,59 +224,25 @@ describe('Dashboard page', () => {
 			replace: jest.fn(),
     });
 
-		fetchWithAuth.mockImplementation(async (path) => {
-			switch (path) {
-				case '/api/goals':
-					return {
-						ok: true,
-						json: async () => mockGoalsData,
-					};
-	
-				case '/api/current_user':
-					return {
-						ok: true,
-						json: async () => mockUserData,
-					};
-	
-				/* rank 更新など */
-				default:
-					return {
-						ok: true,
-						json: async () => ({ success: true }),
-					};
-			}
-		});
+    fetchWithAuth.mockReset()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockGoalsData,      // 1) /api/goals
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockUserData,       // 2) /api/current_user
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true }),// 3) /update_rank
+      })
+      .mockResolvedValue({                    // 4) 以降
+        ok: true,
+        json: async () => ({}),
+      });
 
-    global.fetch = jest.fn((url, options) => {
-      console.log('Mock fetch called with URL:', url);
-      console.log('Fetch options:', options);
-
-      if (url === 'http://localhost:3000/api/goals') {
-        console.log('Mock fetch matched /api/goals');
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockGoalsData),
-        });
-      } else if (url === 'http://localhost:3000/api/current_user') {
-        console.log('Mock fetch matched /api/current_user');
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockUserData),
-        });
-      } else if (url.endsWith('/update_rank')) {
-        console.log('Mock fetch matched /update_rank');
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ success: true }),
-        });
-      } else {
-        console.log('Mock fetch did not match any condition for URL:', url);
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({}),
-        });
-      }
-    });
+		Dashboard = require('../pages/dashboard').default;
   });
 	
 	// console.log の出力を抑制できるコード
@@ -304,23 +272,23 @@ describe('Dashboard page', () => {
 
 	it('calls updateLastRouletteRank when rank increases past a multiple of 10', async () => {
 		const Dashboard = require('../pages/dashboard').default;
-		const mockFetch = jest.spyOn(global, 'fetch');
-	
 		render(<Dashboard />);
 	
-		await waitFor(() => {
-			expect(mockFetch).toHaveBeenCalledWith(
-				expect.stringContaining('/api/current_users/7/update_rank'),
-				expect.objectContaining({
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					credentials: 'include',
-					body: JSON.stringify({ lastRouletteRank: 20 }),
-				})
-			);
-		});
+		// 何か 1 つ描画されるまでアンカーで待機
+		await screen.findByText('Sample User');
 	
-		mockFetch.mockRestore();
+		// /update_rank が呼ばれていることを確認
+		const updateCalls = fetchWithAuth.mock.calls.filter(([url]) =>
+			url.includes('/update_rank')
+		);
+		expect(updateCalls).toHaveLength(1);
+	
+		const [url, options] = updateCalls[0];
+		expect(url).toContain('/api/current_users/7/update_rank');
+		expect(options).toMatchObject({
+			method: 'POST',
+			body: JSON.stringify({ lastRouletteRank: mockUserData.rank }),
+		});
 	});
 
 	it('updates lastRouletteRank when rank increases past a multiple of 10', async () => {
@@ -433,6 +401,7 @@ describe('Dashboard page', () => {
 	});
 	
 	it('should render the Layout component correctly', async () => {
+		const Dashboard = require('../pages/dashboard').default;
 		render(<Dashboard />);
 		console.log(document.body.innerHTML);
 
