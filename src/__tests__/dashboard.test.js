@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
-//import Dashboard from '../pages/dashboard';
 import { useRouter } from 'next/router';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@testing-library/jest-dom';
@@ -40,7 +39,6 @@ jest.mock('../components/Layout', () => {
 });
 
 jest.mock('../utils/fetchWithAuth');
-//const { fetchWithAuth } = require('../utils/fetchWithAuth');
 
 jest.mock('../utils/getIdToken');
 

@@ -4,17 +4,14 @@ import userEvent from '@testing-library/user-event';
 import EditRouletteText from '../pages/edit-roulette-text';
 import { TicketsContext } from '../contexts/TicketsContext';
 import { useRouter } from 'next/router';
-import { useAuth } from '../contexts/AuthContext';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { Authenticator } from '@aws-amplify/ui-react';
+import { AuthenticatorProvider } from '@aws-amplify/ui-react-core';
 import '@testing-library/jest-dom';
 
 // `next/router` のモック
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
-}));
-
-// `useAuth` のモック
-jest.mock('../contexts/AuthContext', () => ({
-  useAuth: jest.fn(),
 }));
 
 // `useFetchRouletteTexts` のモック
@@ -28,8 +25,9 @@ jest.mock('../hooks/useFetchRouletteTexts', () => {
   };
 });
 
-// `withAuth` HOC のモック
-jest.mock('../utils/withAuth', () => (Component) => Component);
+jest.mock('../utils/fetchWithAuth');
+
+jest.mock('../utils/getIdToken');
 
 const fetchTicketsMock = jest.fn();
 
@@ -52,9 +50,11 @@ const TestWrapper = ({ children }) => {
   }, []);
 
   return (
-    <TicketsContext.Provider value={{ playTickets, setPlayTickets, editTickets, fetchTickets: fetchTicketsMock }}>
-      {children}
-    </TicketsContext.Provider>
+    <Authenticator.Provider>
+      <TicketsContext.Provider value={{ playTickets, setPlayTickets, editTickets, fetchTickets: fetchTicketsMock }}>
+        {children}
+      </TicketsContext.Provider>
+    </Authenticator.Provider>
   );
 };
 
@@ -80,8 +80,7 @@ beforeEach(() => {
     },
   }));
 
-  // `useAuth` のモック実装
-  useAuth.mockImplementation(() => ({
+  fetchWithAuth.mockImplementation(() => ({
     isLoggedIn: true,
     userRank: 20,
     setUserRank: jest.fn(),
@@ -170,9 +169,11 @@ describe('EditRouletteText Component', () => {
 
   it('renders EditRouletteText component without crashing', () => {
     render(
-      <TicketsContext.Provider value={mockTicketsContextValue}>
-        <EditRouletteText />
-      </TicketsContext.Provider>
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={mockTicketsContextValue}>
+          <EditRouletteText />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
     );
 
     expect(screen.getByText('Prize 1')).toBeInTheDocument();
@@ -182,9 +183,11 @@ describe('EditRouletteText Component', () => {
   describe('Ticket Information Display', () => {
     it('displays the correct playTickets value from TicketsContext', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       await waitFor(() => {
@@ -195,9 +198,11 @@ describe('EditRouletteText Component', () => {
 
     it('displays the correct editTickets value from TicketsContext', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const editTicketsText = await screen.findByTestId('edit-tickets');
@@ -206,9 +211,11 @@ describe('EditRouletteText Component', () => {
 
     it('updates the displayed playTickets and editTickets when context values change', async () => {
       const { rerender } = render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const initialPlayTickets = await screen.findByTestId('play-tickets');
@@ -224,9 +231,11 @@ describe('EditRouletteText Component', () => {
       };
 
       rerender(
-        <TicketsContext.Provider value={updatedTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={updatedTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const updatedPlayTickets = await screen.findByTestId('play-tickets');
@@ -240,9 +249,11 @@ describe('EditRouletteText Component', () => {
   describe('Roulette Text List Display', () => {
     it('displays the roulette text list container', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const rouletteTextList = await screen.findByTestId('roulette-text-list');
@@ -251,9 +262,11 @@ describe('EditRouletteText Component', () => {
 
     it('displays the correct number of roulette texts', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const rouletteTextItems = await screen.findAllByTestId(/roulette-text-item-\d+/);
@@ -262,9 +275,11 @@ describe('EditRouletteText Component', () => {
 
     it('displays each roulette text correctly', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const rouletteTextItem1 = await screen.findByTestId('roulette-text-item-1');
@@ -276,9 +291,11 @@ describe('EditRouletteText Component', () => {
 
     it('displays the correct image for each roulette text item', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
   
       // ルーレットテキスト項目を取得
@@ -312,9 +329,11 @@ describe('EditRouletteText Component', () => {
   describe('Data Fetching', () => {
     it('fetches roulette texts on mount and updates state', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       expect(screen.getByText('Prize 1')).toBeInTheDocument();
@@ -325,9 +344,11 @@ describe('EditRouletteText Component', () => {
   describe('Conditional Rendering', () => {
     it('displays the "ルーレットを編集する" button when editTickets > 0 and showForm is false', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const editButton = await screen.findByText('ルーレットを編集する');
@@ -342,9 +363,11 @@ describe('EditRouletteText Component', () => {
       };
 
       render(
-        <TicketsContext.Provider value={mockTicketsContextValueZero}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValueZero}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const editButton = screen.queryByText('ルーレットを編集する');
@@ -353,9 +376,11 @@ describe('EditRouletteText Component', () => {
 
     it('does not display the "ルーレットを編集する" button when showForm is true', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const editButton = await screen.findByText('ルーレットを編集する');
@@ -373,9 +398,11 @@ describe('EditRouletteText Component', () => {
   describe('Edit Form', () => {
     it('includes necessary elements in the edit form', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const editButton = await screen.findByText('ルーレットを編集する');
@@ -387,9 +414,11 @@ describe('EditRouletteText Component', () => {
 
     it('contains a number select box and a text input field', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const editButton = await screen.findByText('ルーレットを編集する');
@@ -406,9 +435,11 @@ describe('EditRouletteText Component', () => {
   describe('Edit Form Interaction', () => {
     it('sets the corresponding text when a number is selected', async () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       const editButton = await screen.findByText('ルーレットを編集する');
@@ -631,9 +662,11 @@ describe('EditRouletteText Component', () => {
       };
       
       render(
-        <TicketsContext.Provider value={mockTicketsContextValueZero}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValueZero}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
       
       // "ルーレットを編集する" ボタンが存在しないことを確認
@@ -705,9 +738,11 @@ describe('EditRouletteText Component', () => {
   describe('Roulette Description Section', () => {
     it('displays the roulette description correctly in a list format', () => {
       render(
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <EditRouletteText />
-        </TicketsContext.Provider>
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={mockTicketsContextValue}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
       );
 
       // ルーレット説明セクションの <ul> を取得
