@@ -1036,17 +1036,11 @@ describe('EditRouletteText Component', () => {
     
       // fetch が正しく呼び出されたことを確認
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
-          'http://localhost:3000/api/roulette_texts/1',
+        expect(fetchWithAuth).toHaveBeenCalledWith(
+          '/api/roulette_texts/1',
           expect.objectContaining({
             method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              roulette_text: { text: 'Updated Prize 1' },
-            }),
+            body: JSON.stringify({ roulette_text: { text: 'Updated Prize 1' } }),
           })
         );
       });
