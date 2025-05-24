@@ -6,13 +6,17 @@ import { TicketsContext } from '../contexts/TicketsContext';
 import { useRouter } from 'next/router';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { Authenticator } from '@aws-amplify/ui-react';
-import { AuthenticatorProvider } from '@aws-amplify/ui-react-core';
 import '@testing-library/jest-dom';
 
 // `next/router` のモック
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }));
+
+const mockRouletteTexts = [
+  { id: 1, number: 1, text: 'Prize 1' },
+  { id: 2, number: 2, text: 'Prize 2' },
+];
 
 // `useFetchRouletteTexts` のモック
 jest.mock('../hooks/useFetchRouletteTexts', () => {
@@ -31,12 +35,6 @@ jest.mock('../utils/getIdToken');
 
 const fetchTicketsMock = jest.fn();
 
-const mockRouletteTexts = [
-  { id: 1, number: 1, text: 'Prize 1' },
-  { id: 2, number: 2, text: 'Prize 2' },
-];
-
-
 // `TestWrapper` コンポーネントを修正して `fetchTicketsMock` に実装を追加
 const TestWrapper = ({ children }) => {
   const [playTickets, setPlayTickets] = React.useState(5);
@@ -44,22 +42,23 @@ const TestWrapper = ({ children }) => {
 
   // `fetchTicketsMock` の実装を設定
   React.useEffect(() => {
-    fetchTicketsMock.mockImplementation(() => {
-      setEditTickets((prev) => prev - 1); // 編集チケットを1減少
-    });
+    fetchTicketsMock.mockReset();
+    fetchTicketsMock.mockImplementation(() =>
+      setEditTickets(prev => prev - 1)
+    );
   }, []);
 
   return (
-    <Authenticator.Provider>
-      <TicketsContext.Provider value={{ playTickets, setPlayTickets, editTickets, fetchTickets: fetchTicketsMock }}>
-        {children}
-      </TicketsContext.Provider>
-    </Authenticator.Provider>
+    <TicketsContext.Provider
+      value={{ playTickets, setPlayTickets, editTickets, fetchTickets: fetchTicketsMock }}
+    >
+      {children}
+    </TicketsContext.Provider>
   );
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  //jest.clearAllMocks();
 
   // `useRouter` のモック実装
   useRouter.mockImplementation(() => ({
@@ -80,12 +79,53 @@ beforeEach(() => {
     },
   }));
 
-  fetchWithAuth.mockImplementation(() => ({
-    isLoggedIn: true,
-    userRank: 20,
-    setUserRank: jest.fn(),
-    setIsLoggedIn: jest.fn(),
-  }));
+  fetchWithAuth.mockImplementation(async (url, opts = {}) => {
+    // GET /api/roulette_texts  --------------------------
+    if (url === '/api/roulette_texts') {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ([
+          { id: 1, number: 1, text: 'Prize 1' },
+          { id: 2, number: 2, text: 'Prize 2' },
+        ]),
+      };
+    }
+
+    // PATCH /api/roulette_texts/1  -----------------------
+    if (url === '/api/roulette_texts/1' && opts.method === 'PATCH') {
+      const body = JSON.parse(opts.body);
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          roulette_text: {
+            id: 1,
+            number: 1,
+            text: body.roulette_text.text,
+          },
+        }),
+      };
+    }
+
+    // GET /api/current_user  （Header が呼ぶ）-----------
+    if (url === '/api/current_user') {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          id: 7, name: 'Sample User', rank: 10,
+        }),
+      };
+    }
+
+    // それ以外は 200 で空 JSON --------------------------
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    };
+  });
 });
 
 beforeAll(() => {
@@ -133,6 +173,7 @@ global.fetch = jest.fn((url, options) => {
   if (parsedUrl.pathname === '/api/current_user') {
     return Promise.resolve({
       ok: true,
+      status: 200,
       json: () => Promise.resolve({
         id: 7,
         name: 'Sample User',
@@ -153,9 +194,11 @@ global.fetch = jest.fn((url, options) => {
     });
   }
 
-  // 他のエンドポイントが必要な場合はここに追加
-  console.error('Unknown endpoint:', url);
-  return Promise.reject(new Error('Unknown endpoint'));
+  return Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve({}),
+  });
 });
 
 // テストケース
@@ -447,13 +490,13 @@ describe('EditRouletteText Component', () => {
 
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
 
-      userEvent.selectOptions(numberSelect, '1');
+      await userEvent.selectOptions(numberSelect, '1');
 
       const textInput = screen.getByLabelText('Edit text');
 
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
 
-      userEvent.selectOptions(numberSelect, '2');
+      await userEvent.selectOptions(numberSelect, '2');
 
       await waitFor(() => expect(textInput).toHaveValue('Prize 2'));
     });
@@ -464,9 +507,11 @@ describe('EditRouletteText Component', () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
   
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
   
       const editButton = await screen.findByText('ルーレットを編集する');
@@ -507,9 +552,11 @@ describe('EditRouletteText Component', () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
   
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
   
       const editButton = await screen.findByText('ルーレットを編集する');
@@ -541,9 +588,11 @@ describe('EditRouletteText Component', () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
 
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
 
       const editTicketsText = await screen.findByTestId('edit-tickets');
@@ -578,9 +627,11 @@ describe('EditRouletteText Component', () => {
     jest.spyOn(window, 'confirm').mockImplementation(() => true);
 
     render(
-      <TestWrapper>
-        <EditRouletteText />
-      </TestWrapper>
+      <Authenticator.Provider>
+        <TestWrapper>
+          <EditRouletteText />
+        </TestWrapper>
+      </Authenticator.Provider>
     );
 
     // "ルーレットを編集する" ボタンをクリックしてフォームを表示
@@ -681,9 +732,11 @@ describe('EditRouletteText Component', () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
   
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
   
       // "ルーレットを編集する" ボタンをクリックしてフォームを表示
@@ -711,9 +764,11 @@ describe('EditRouletteText Component', () => {
   describe('RoulettePopup Rendering within EditRouletteText', () => {
     it('renders RoulettePopup component correctly within EditRouletteText', () => {
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
 
       // RoulettePopup の主要な要素を確認
@@ -783,9 +838,11 @@ describe('EditRouletteText Component', () => {
     it('verifies that tickets are consumed correctly and the display is updated accordingly', async () => {
       // TestWrapper を使用してコンポーネントをラップ
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
   
       // 初期表示を確認
@@ -861,9 +918,11 @@ describe('EditRouletteText Component', () => {
   describe('Form Input State Updates', () => {
     it('updates state variables when select box and input field values change', async () => {
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
   
       // 編集フォームを表示
@@ -896,9 +955,11 @@ describe('EditRouletteText Component', () => {
   describe('Button Click Events', () => {
     it('shows the edit form when the "ルーレットを編集する" button is clicked', async () => {
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
   
       // 編集フォームが初期状態で表示されていないことを確認
@@ -914,9 +975,11 @@ describe('EditRouletteText Component', () => {
 
     it('hides the edit form when the "キャンセル" button is clicked', async () => {
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
     
       // 編集フォームを表示する
@@ -944,9 +1007,11 @@ describe('EditRouletteText Component', () => {
       global.fetch.mockClear();
     
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
     
       // 編集フォームを表示する
@@ -991,46 +1056,39 @@ describe('EditRouletteText Component', () => {
     });
 
     it('calls fetchTickets after successful edit', async () => {
-      // window.confirm をモックして常に true を返す
-      jest.spyOn(window, 'confirm').mockImplementation(() => true);
+      jest.spyOn(window, 'confirm').mockReturnValue(true);
     
-      // fetchTicketsMock をクリア
-      fetchTicketsMock.mockClear();
+      // ---- fetchTicketsMock を初期化 ----
+      fetchTicketsMock.mockReset();
+      fetchTicketsMock.mockImplementation(() => {});
     
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
     
-      // 編集フォームを表示し、編集操作を行う（前のテストと同様）
+      // アンカー
+      await screen.findByText('Prize 1');
     
-      // 「ルーレットを編集する」ボタンをクリック
-      const editButton = screen.getByText('ルーレットを編集する');
-      userEvent.click(editButton);
-    
-      // 数字を選択
+      // フォーム操作
+      await userEvent.click(screen.getByText('ルーレットを編集する'));
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
-      userEvent.selectOptions(numberSelect, '1');
+      await userEvent.selectOptions(numberSelect, '1');
     
-      // テキスト入力フィールドに初期値がセットされるのを待つ
       const textInput = screen.getByLabelText('Edit text');
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
     
-      // 新しいテキストを入力
       await userEvent.clear(textInput);
       await userEvent.type(textInput, 'Updated Prize 1');
     
-      // 「内容を保存する」ボタンをクリック
-      const saveButton = screen.getByText('内容を保存する');
-      userEvent.click(saveButton);
+      await userEvent.click(screen.getByText('内容を保存する'));
     
-      // fetchTickets が呼び出されたことを確認
-      await waitFor(() => {
-        expect(fetchTicketsMock).toHaveBeenCalled();
-      });
+      // fetchTickets が呼ばれるまで待つ
+      await waitFor(() => expect(fetchTicketsMock).toHaveBeenCalled());
     
-      // window.confirm のモックを元に戻す
       window.confirm.mockRestore();
     });
     
@@ -1039,9 +1097,11 @@ describe('EditRouletteText Component', () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
     
       render(
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
     
       // 「ルーレットを回す」ボタンを取得

@@ -35,7 +35,7 @@ const Header = () => {
         setIsLoggedIn(true);
         setUserRank(data.rank);
       } else {
-        console.error('Failed to fetch user rank');
+        console.error('Failed to fetch user rank', res.status);
       }
     } catch (error) {
       console.error('Error fetching user rank:', error);
