@@ -962,11 +962,9 @@ describe('EditRouletteText Component', () => {
       });
     });
 
-    it('calls handleSubmit and sends PATCH request when the "内容を保存する" button is clicked', async () => {
-      // window.confirm をモックして常に true を返す
-      jest.spyOn(window, 'confirm').mockImplementation(() => true);
-    
-      // fetch のモックをクリア
+    it('calls handleSubmit and sends PATCH request', async () => {
+      jest.spyOn(window, 'confirm').mockReturnValue(true);
+      fetchWithAuth.mockClear();
       global.fetch.mockClear();
     
       render(
@@ -977,38 +975,34 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
     
-      // 編集フォームを表示する
-      const editButton = screen.getByText('ルーレットを編集する');
-      userEvent.click(editButton);
+      userEvent.click(await screen.findByText('ルーレットを編集する'));
     
-      // 数字を選択
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       userEvent.selectOptions(numberSelect, '1');
     
-      // テキスト入力フィールドに初期値がセットされるのを待つ
       const textInput = screen.getByLabelText('Edit text');
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
     
-      // 新しいテキストを入力
       await userEvent.clear(textInput);
       await userEvent.type(textInput, 'Updated Prize 1');
     
-      // 「内容を保存する」ボタンをクリック
-      const saveButton = screen.getByText('内容を保存する');
-      userEvent.click(saveButton);
+      userEvent.click(screen.getByText('内容を保存する'));
     
-      // fetch が正しく呼び出されたことを確認
       await waitFor(() => {
-        expect(fetchWithAuth).toHaveBeenCalledWith(
-          '/api/roulette_texts/1',
-          expect.objectContaining({
-            method: 'PATCH',
-            body: JSON.stringify({ roulette_text: { text: 'Updated Prize 1' } }),
-          })
+        const call = global.fetch.mock.calls.find(([url, opts]) =>
+          url.endsWith('/api/roulette_texts/1') && opts.method === 'PATCH'
         );
+        expect(call).toBeDefined();
+      
+        const [, mergedOpts] = call;
+        expect(mergedOpts).toMatchObject({
+          method     : 'PATCH',
+          credentials: 'include',
+          headers    : {'Content-Type':'application/json'},
+          body       : JSON.stringify({ roulette_text:{ text:'Updated Prize 1' } }),
+        });
       });
     
-      // window.confirm のモックを元に戻す
       window.confirm.mockRestore();
     });
 
