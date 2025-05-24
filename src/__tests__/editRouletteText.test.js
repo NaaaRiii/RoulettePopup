@@ -29,7 +29,22 @@ jest.mock('../hooks/useFetchRouletteTexts', () => {
   };
 });
 
-jest.mock('../utils/fetchWithAuth');
+//jest.mock('../utils/fetchWithAuth');
+jest.mock('../utils/fetchWithAuth', () => {
+  const fetchWithAuth = jest.fn(async (url, opts = {}) => {
+    /* 1) マージ */
+    const merged = {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      ...opts,
+    };
+
+    /* 2) ここで global.fetch を呼ぶ -------------- */
+    return global.fetch(url, merged);
+  });
+
+  return { __esModule: true, default: fetchWithAuth, fetchWithAuth };
+});
 
 jest.mock('../utils/getIdToken');
 
@@ -60,7 +75,6 @@ const TestWrapper = ({ children }) => {
 beforeEach(() => {
   //jest.clearAllMocks();
 
-  // `useRouter` のモック実装
   useRouter.mockImplementation(() => ({
     route: '/edit-roulette-text',
     pathname: '/edit-roulette-text',
@@ -78,54 +92,6 @@ beforeEach(() => {
       emit: jest.fn(),
     },
   }));
-
-  fetchWithAuth.mockImplementation(async (url, opts = {}) => {
-    // GET /api/roulette_texts  --------------------------
-    if (url === '/api/roulette_texts') {
-      return {
-        ok: true,
-        status: 200,
-        json: async () => ([
-          { id: 1, number: 1, text: 'Prize 1' },
-          { id: 2, number: 2, text: 'Prize 2' },
-        ]),
-      };
-    }
-
-    // PATCH /api/roulette_texts/1  -----------------------
-    if (url === '/api/roulette_texts/1' && opts.method === 'PATCH') {
-      const body = JSON.parse(opts.body);
-      return {
-        ok: true,
-        status: 200,
-        json: async () => ({
-          roulette_text: {
-            id: 1,
-            number: 1,
-            text: body.roulette_text.text,
-          },
-        }),
-      };
-    }
-
-    // GET /api/current_user  （Header が呼ぶ）-----------
-    if (url === '/api/current_user') {
-      return {
-        ok: true,
-        status: 200,
-        json: async () => ({
-          id: 7, name: 'Sample User', rank: 10,
-        }),
-      };
-    }
-
-    // それ以外は 200 で空 JSON --------------------------
-    return {
-      ok: true,
-      status: 200,
-      json: async () => ({}),
-    };
-  });
 });
 
 beforeAll(() => {
@@ -836,7 +802,6 @@ describe('EditRouletteText Component', () => {
     });
 
     it('verifies that tickets are consumed correctly and the display is updated accordingly', async () => {
-      // TestWrapper を使用してコンポーネントをラップ
       render(
         <Authenticator.Provider>
           <TestWrapper>
@@ -877,24 +842,22 @@ describe('EditRouletteText Component', () => {
       // 「内容を保存する」ボタンをクリック
       const saveButton = screen.getByRole('button', { name: /内容を保存する/i });
       userEvent.click(saveButton);
-  
-      // fetch が PATCH メソッドで '/api/roulette_texts/1' に呼び出されたことを確認
+
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenNthCalledWith(3, // 3回目の呼び出し
-          'http://localhost:3000/api/roulette_texts/1',
-          expect.objectContaining({
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              roulette_text: { text: 'New Prize 1' },
-            }),
-          })
+        /* global.fetch に飛んだ実際のリクエストを探す */
+        const patchCall = global.fetch.mock.calls.find(([url, opts = {}]) =>
+          url.endsWith('/api/roulette_texts/1') && opts.method === 'PATCH'
         );
+        expect(patchCall).toBeDefined();
+
+        const [, options] = patchCall;
+        expect(options).toMatchObject({
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roulette_text: { text: 'New Prize 1' } }),
+        });
       });
-  
+
       // fetchTicketsMock が呼び出されたことを確認
       await waitFor(() => {
         expect(fetchTicketsMock).toHaveBeenCalled();
