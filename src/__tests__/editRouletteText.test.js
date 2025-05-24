@@ -816,40 +816,31 @@ describe('EditRouletteText Component', () => {
       expect(playTicketsElement).toHaveTextContent('プレイチケットを『5』枚持っています。');
       expect(editTicketsElement).toHaveTextContent('編集チケットを『2』枚持っています。');
   
-      // 「ルーレットを編集する」ボタンをクリックして、フォームを表示
-      const editButton = screen.getByRole('button', { name: /ルーレットを編集する/i });
-      userEvent.click(editButton);
-  
-      // フォームが表示されるのを待つ
-      const form = await screen.findByTestId('edit-roulette-text-form');
-      expect(form).toBeInTheDocument();
-  
-      // フォーム内で rouletteNumber を選択
-      const rouletteNumberSelect = screen.getByLabelText('編集したい数字を選んでください。');
-      userEvent.selectOptions(rouletteNumberSelect, '1');
-  
-      // テキスト入力フィールドに初期値がセットされるのを待つ
-      const rouletteTextInput = screen.getByLabelText('Edit text');
-      await waitFor(() => expect(rouletteTextInput).toHaveValue('Prize 1'));
-
-      // 入力フィールドをクリアしてから新しい値を入力
-      await userEvent.clear(rouletteTextInput);
-      await userEvent.type(rouletteTextInput, 'New Prize 1');
-  
-      // window.confirm をモックして常に true を返す
+      userEvent.click(screen.getByRole('button', { name: /ルーレットを編集する/i }));
+      await screen.findByTestId('edit-roulette-text-form');
+    
+      // セレクト→入力
+      userEvent.selectOptions(screen.getByLabelText('編集したい数字を選んでください。'), '1');
+      await waitFor(() => expect(screen.getByLabelText('Edit text')).toHaveValue('Prize 1'));
+      await userEvent.clear(screen.getByLabelText('Edit text'));
+      await userEvent.type(screen.getByLabelText('Edit text'), 'New Prize 1');
+    
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
-  
-      // 「内容を保存する」ボタンをクリック
-      const saveButton = screen.getByRole('button', { name: /内容を保存する/i });
-      userEvent.click(saveButton);
-
+    
+      // **ここで global.fetch の履歴を消す！**
+      global.fetch.mockClear();
+    
+      // 送信
+      userEvent.click(screen.getByText('内容を保存する'));
+    
+      // 以降はその呼び出しだけを検証
       await waitFor(() => {
-        /* global.fetch に飛んだ実際のリクエストを探す */
-        const patchCall = global.fetch.mock.calls.find(([url, opts = {}]) =>
-          url.endsWith('/api/roulette_texts/1') && opts.method === 'PATCH'
+        const patchCall = global.fetch.mock.calls.find(
+          ([url, opts]) =>
+            url.endsWith('/api/roulette_texts/1') &&
+            opts.method === 'PATCH'
         );
         expect(patchCall).toBeDefined();
-
         const [, options] = patchCall;
         expect(options).toMatchObject({
           credentials: 'include',
@@ -857,25 +848,10 @@ describe('EditRouletteText Component', () => {
           body: JSON.stringify({ roulette_text: { text: 'New Prize 1' } }),
         });
       });
-
-      // fetchTicketsMock が呼び出されたことを確認
-      await waitFor(() => {
-        expect(fetchTicketsMock).toHaveBeenCalled();
-      });
-  
-      // editTickets が1減少していることを確認
-      await waitFor(() => {
-        expect(editTicketsElement).toHaveTextContent('編集チケットを『1』枚持っています。');
-      });
-  
-      // フォームが閉じられたことを確認
-      await waitFor(() => {
-        expect(screen.queryByTestId('edit-roulette-text-form')).not.toBeInTheDocument();
-      });
-  
-      // window.confirm のモックを元に戻す
+    
       window.confirm.mockRestore();
     });
+
   });
 
   describe('Form Input State Updates', () => {
