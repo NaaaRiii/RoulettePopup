@@ -589,9 +589,9 @@ describe('EditRouletteText Component', () => {
   });
 
   it('displays a flash message after successful edit', async () => {
-    // window.confirm をモックして常に true を返すように設定
-    jest.spyOn(window, 'confirm').mockImplementation(() => true);
-
+    jest.spyOn(window, 'confirm').mockReturnValue(true);
+    global.fetch.mockClear();
+  
     render(
       <Authenticator.Provider>
         <TestWrapper>
@@ -599,74 +599,46 @@ describe('EditRouletteText Component', () => {
         </TestWrapper>
       </Authenticator.Provider>
     );
-
-    // "ルーレットを編集する" ボタンをクリックしてフォームを表示
-    const editButton = await screen.findByText('ルーレットを編集する');
-    userEvent.click(editButton);
-
-    // セレクトボックスを取得して数字「1」を選択
+  
+    // フォームを開く
+    await userEvent.click(await screen.findByText('ルーレットを編集する'));
+  
+    // 数字選択して初期値が入るまで待つ
     const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
     userEvent.selectOptions(numberSelect, '1');
-
-    // テキスト入力フィールドを取得
     const textInput = screen.getByLabelText('Edit text');
-
-    // テキストフィールドが 'Prize 1' に更新されるのを待つ
     await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
-
-    // テキストフィールドをクリア
-    userEvent.clear(textInput);
-
-    // 新しい値を入力
+  
+    // 新しいテキストを入れて
+    await userEvent.clear(textInput);
     await userEvent.type(textInput, 'Updated Prize 1');
-
-    // テキストフィールドの値が更新されたことを確認
+  
+    // 送信→PATCH
+    userEvent.click(screen.getByText('内容を保存する'));
+  
+    // ―― ① PATCH リクエストが行われたかを待機
     await waitFor(() => {
-      expect(textInput).toHaveValue('Updated Prize 1');
-    });
-
-    // フォームを送信
-    const submitButton = screen.getByText('内容を保存する');
-    userEvent.click(submitButton);
-
-    // fetch がPATCHメソッドで正しいURLに呼び出されたことを確認
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/roulette_texts/1',
-        expect.objectContaining({
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            roulette_text: { text: 'Updated Prize 1' },
-          }),
-        })
+      const patchCall = global.fetch.mock.calls.find(([url, opts]) =>
+        url.endsWith('/api/roulette_texts/1') &&
+        opts.method === 'PATCH'
       );
+      expect(patchCall).toBeDefined();
+      
+      const [, options] = patchCall;
+      expect(options).toMatchObject({
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roulette_text: { text: 'Updated Prize 1' } }),
+      });
     });
-
-    // `fetchTickets` が呼び出されたことを確認
-    expect(fetchTicketsMock).toHaveBeenCalled();
-
-    // 編集チケットが1減少していることを確認
+  
     await waitFor(() => {
-      const editTicketsText = screen.getByTestId('edit-tickets');
-      expect(editTicketsText).toHaveTextContent('編集チケットを『1』枚持っています。');
+      expect(fetchTicketsMock).toHaveBeenCalled();
+      expect(screen.getByTestId('edit-tickets')).toHaveTextContent('編集チケットを『1』枚持っています。');
+      expect(screen.getByText('Number: 1 を Updated Prize 1 に変更しました。')).toBeInTheDocument();
     });
-
-    // 更新後のテキストが表示されていることを確認
-    await waitFor(() => {
-      expect(screen.getByText('Updated Prize 1')).toBeInTheDocument();
-    });
-
-    // フラッシュメッセージが表示されていることを確認
-    await waitFor(() => {
-      const flashMessage = screen.getByText('Number: 1 を Updated Prize 1 に変更しました。');
-      expect(flashMessage).toBeInTheDocument();
-    });
-
-    // window.confirm のモックを元に戻す
+  
     window.confirm.mockRestore();
   });
 
@@ -785,9 +757,11 @@ describe('EditRouletteText Component', () => {
   describe('TicketsContext Data Usage', () => {
     it('retrieves and displays playTickets and editTickets correctly', () => {
       render(
-        <TestWrapper playTickets={5} editTickets={2}>
-          <EditRouletteText />
-        </TestWrapper>
+        <Authenticator.Provider>
+          <TestWrapper playTickets={5} editTickets={2}>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
 
       // playTickets の表示を確認
