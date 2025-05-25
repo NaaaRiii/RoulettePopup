@@ -470,7 +470,8 @@ describe('EditRouletteText Component', () => {
 
   describe('Form Submission', () => {
     it('edits the text and submits the form correctly', async () => {
-      jest.spyOn(window, 'confirm').mockImplementation(() => true);
+      jest.spyOn(window, 'confirm').mockReturnValue(true);
+      global.fetch.mockClear();
   
       render(
         <Authenticator.Provider>
@@ -496,21 +497,22 @@ describe('EditRouletteText Component', () => {
       userEvent.click(submitButton);
   
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
-          '/api/roulette_texts/1',
-          expect.objectContaining({
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              roulette_text: { text: 'Updated Prize 1' },
-            }),
-          })
+        const patchCall = global.fetch.mock.calls.find(
+          ([url, opts]) =>
+            url.endsWith('/api/roulette_texts/1') &&
+            opts.method === 'PATCH'
         );
+        expect(patchCall).toBeDefined();
+    
+        const [, options] = patchCall;
+        expect(options).toMatchObject({
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roulette_text: { text: 'Updated Prize 1' } }),
+        });
       });
-  
+
       window.confirm.mockRestore();
     });
   
