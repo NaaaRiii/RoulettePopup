@@ -497,7 +497,7 @@ describe('EditRouletteText Component', () => {
   
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith(
-          'http://localhost:3000/api/roulette_texts/1',
+          '/api/roulette_texts/1',
           expect.objectContaining({
             method: 'PATCH',
             headers: {
