@@ -77,4 +77,65 @@ describe('GoalPage ― 初期レンダリング／状態遷移', () => {
     await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
     expect(screen.getByText(/goal not found/i)).toBeInTheDocument();
   });
+
+
+	it('goal 取得成功で goal 情報と small goal 一覧が描画される', async () => {
+		// goalDetails と small_goals の正常レスポンス
+		fetchWithAuth.mockImplementation((url) => {
+			if (url === '/api/goals/test-id') {
+				return Promise.resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							id: 1,
+							title: 'Test Goal',
+							content: 'Goal content',
+							deadline: '2025-06-30T00:00:00Z',
+							completed: false,
+						}),
+				});
+			}
+			if (url === '/api/goals/test-id/small_goals') {
+				return Promise.resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve([
+							{
+								id: 11,
+								title: 'Small A',
+								difficulty: 'easy',
+								deadline: '2025-06-15T00:00:00Z',
+								completed: false,
+								tasks: [
+									{ id: 101, content: 'task-1', completed: false },
+									{ id: 102, content: 'task-2', completed: true },
+								],
+							},
+						]),
+				});
+			}
+			return Promise.reject(new Error(`unexpected: ${url}`));
+		});
+
+		render(
+			<Authenticator.Provider
+				value={{ route: 'authenticated', user: {} }}
+			>
+				<GoalPage />
+			</Authenticator.Provider>
+		);
+
+		// Loading… が消えるまで待つ
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+
+		// Goal タイトルが描画
+		expect(screen.getByText('目標 : Test Goal')).toBeInTheDocument();
+
+		// Small goal タイトルが描画
+		expect(screen.getByText('Small A')).toBeInTheDocument();
+
+		// タスク内容も表示されている
+		expect(screen.getByText('task-1')).toBeInTheDocument();
+		expect(screen.getByText('task-2')).toBeInTheDocument();
+	});
 });
