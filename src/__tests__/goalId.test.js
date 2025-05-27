@@ -78,7 +78,6 @@ describe('GoalPage ― 初期レンダリング／状態遷移', () => {
     expect(screen.getByText(/goal not found/i)).toBeInTheDocument();
   });
 
-
 	it('goal 取得成功で goal 情報と small goal 一覧が描画される', async () => {
 		// goalDetails と small_goals の正常レスポンス
 		fetchWithAuth.mockImplementation((url) => {
@@ -138,4 +137,100 @@ describe('GoalPage ― 初期レンダリング／状態遷移', () => {
 		expect(screen.getByText('task-1')).toBeInTheDocument();
 		expect(screen.getByText('task-2')).toBeInTheDocument();
 	});
+
+	it('URL クエリに ?message= がある場合、そのメッセージが表示される', async () => {
+		const msg = 'Small Goal を作成しました！';
+	
+		// ── Router だけ上書きして message を含める
+		useRouter.mockReturnValueOnce({
+			query: {
+				goalId: 'test-id',
+				message: encodeURIComponent(msg), // ← コンポーネント内で decode される
+			},
+			push: jest.fn(),
+		});
+	
+		// goalDetails / small_goals 正常レスポンスを再利用
+		fetchWithAuth.mockImplementation((url) => {
+			if (url === '/api/goals/test-id') {
+				return Promise.resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							id: 1,
+							title: 'Test Goal',
+							content: 'dummy',
+							deadline: '2025-06-30T00:00:00Z',
+							completed: false,
+						}),
+				});
+			}
+			if (url === '/api/goals/test-id/small_goals') {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve([]),
+				});
+			}
+			return Promise.reject(new Error(`unexpected: ${url}`));
+		});
+	
+		render(
+			<Authenticator.Provider
+				value={{ route: 'authenticated', user: {} }}
+			>
+				<GoalPage />
+			</Authenticator.Provider>
+		);
+	
+		// Loading… が消えるまで待つ
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+	
+		// クエリ文字列のメッセージが描画されているか
+		expect(screen.getByText(msg)).toBeInTheDocument();
+	});
+
+	it('日付フォーマットが正しく表示される', async () => {
+		// Router に goalId をセット
+		useRouter.mockReturnValueOnce({
+			query: { goalId: 'test-id' },
+			push: jest.fn(),
+		});
+	
+		// API レスポンスをスタブ（deadline に ISO 文字列をセット）
+		fetchWithAuth.mockImplementation((url) => {
+			if (url === '/api/goals/test-id') {
+				return Promise.resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							id: 1,
+							title: 'Date Test Goal',
+							content: 'dummy',
+							deadline: '2025-05-27T03:00:00Z', // ← テスト対象の日付
+							completed: false,
+						}),
+				});
+			}
+			if (url === '/api/goals/test-id/small_goals') {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve([]),
+				});
+			}
+			return Promise.reject(new Error(`unexpected: ${url}`));
+		});
+	
+		render(
+			<Authenticator.Provider value={{ route: 'authenticated', user: {} }}>
+				<GoalPage />
+			</Authenticator.Provider>
+		);
+	
+		// Loading… が消えるまで待つ
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+	
+		// フォーマット後の期限表示を検証
+		expect(screen.getByText('期限: 2025-05-27')).toBeInTheDocument();
+	});
+	
 });
