@@ -29,17 +29,14 @@ jest.mock('../hooks/useFetchRouletteTexts', () => {
   };
 });
 
-//jest.mock('../utils/fetchWithAuth');
 jest.mock('../utils/fetchWithAuth', () => {
   const fetchWithAuth = jest.fn(async (url, opts = {}) => {
-    /* 1) マージ */
     const merged = {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       ...opts,
     };
 
-    /* 2) ここで global.fetch を呼ぶ -------------- */
     return global.fetch(url, merged);
   });
 
