@@ -33,6 +33,7 @@ jest.mock('@aws-amplify/ui-react', () => {
   };
 });
 
+////////////////////////////////////////////////////////////////////////////////
 
 describe('GoalPage ― 初期レンダリング／状態遷移', () => {
   beforeEach(() => {
@@ -249,9 +250,8 @@ describe('GoalPage ― 初期レンダリング／状態遷移', () => {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-describe('副作用フック（useEffect & useCallback）', () => {
+describe('副作用フック(useEffect & useCallback)', () => {
   beforeEach(() => {
-    // ここで常に「ログイン済み」を返す
     useAuthenticator.mockReturnValue({
       route: 'authenticated',
       user: { username: 'tester' },
@@ -287,6 +287,137 @@ describe('副作用フック（useEffect & useCallback）', () => {
 
     expect(fetchWithAuth).not.toHaveBeenCalled();
   });
+
+	it('goalDetails + smallGoals 正常系: 2つのエンドポイントを叩き、state が統合データで更新される', async () => {
+    // → goalId を含む router
+    useRouter.mockReturnValue({ query: { goalId: 'xyz' }, push: jest.fn() });
+
+    const mockGoal = {
+      id: 7,
+      title: 'Combined Goal',
+      content: 'Combined content',
+      deadline: '2025-12-31T12:00:00Z',
+      completed: false,
+    };
+    const mockSmallGoals = [
+      {
+        id: 71,
+        title: 'SG1',
+        difficulty: 'easy',
+        deadline: '2025-12-01T00:00:00Z',
+        completed: false,
+        tasks: [{ id: 1001, content: 'foo', completed: false }],
+      },
+    ];
+
+    // 2 つの URL に対して返却を定義
+    fetchWithAuth.mockImplementation((url) => {
+      if (url === '/api/goals/xyz') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(mockGoal) });
+      }
+      if (url === '/api/goals/xyz/small_goals') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(mockSmallGoals) });
+      }
+      return Promise.reject(new Error(`unexpected request: ${url}`));
+    });
+
+    render(<GoalPage />);
+
+    // 2 つとも呼ばれたことを確認
+    await waitFor(() => {
+      expect(fetchWithAuth).toHaveBeenCalledWith('/api/goals/xyz');
+      expect(fetchWithAuth).toHaveBeenCalledWith('/api/goals/xyz/small_goals');
+    });
+
+    // 結合された state が UI に反映されているか
+    expect(await screen.findByText('目標 : Combined Goal')).toBeInTheDocument();
+    expect(screen.getByText('SG1')).toBeInTheDocument();
+    expect(screen.getByText('foo')).toBeInTheDocument();
+  });
+
+	it('small_goals 異常フォーマット時に smallGoalsError がセットされ、small_goals は空配列になる', async () => {
+		// ① goalId を含む router をセット
+		useRouter.mockReturnValue({
+			query: { goalId: 'xyz' },
+			push: jest.fn(),
+		});
+	
+		// ② モックデータ定義
+		const mockGoal = {
+			id: 42,
+			title: 'Error Format Goal',
+			content: 'dummy',
+			deadline: '2025-08-01T00:00:00Z',
+			completed: false,
+		};
+	
+		// ③ fetchWithAuth の振る舞いを切り替え
+		fetchWithAuth.mockImplementation((url) => {
+			if (url === '/api/goals/xyz') {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(mockGoal),
+				});
+			}
+			if (url === '/api/goals/xyz/small_goals') {
+				// 配列ではなくオブジェクトを返して異常フォーマットをシミュレート
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({ foo: 'bar' }),
+				});
+			}
+			return Promise.reject(new Error(`unexpected request: ${url}`));
+		});
+	
+		// ④ レンダリング開始
+		render(<GoalPage />);
+	
+		// ⑤ 異常フォーマット検知後にエラーメッセージが出るまで待つ
+		await waitFor(() => {
+			expect(
+				screen.getByText(/invalid data format for small goals\./i)
+			).toBeInTheDocument();
+		});
+	
+		// ⑥ small_goals は空配列扱いなので、h3(小目標タイトル) が存在しないことを確認
+		expect(
+			screen.queryByRole('heading', { level: 3 })
+		).toBeNull();
+	});
+
+	it('response.ok === false のとき goal が null になり "Goal not found" が表示される', async () => {
+		// goalId をセット
+		useRouter.mockReturnValue({ query: { goalId: 'err1' }, push: jest.fn() });
+		// 1 回目の fetchWithAuth（goalDetails）が ok:false
+		fetchWithAuth.mockResolvedValueOnce({ ok: false, status: 500 });
+	
+		render(<GoalPage />);
+	
+		// loading が消えるまで待機
+		await waitFor(() =>
+			expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
+		);
+	
+		// フォールバックとして "Goal not found" が表示される
+		expect(screen.getByText(/goal not found/i)).toBeInTheDocument();
+	});
+	
+	it('fetchWithAuth が reject したとき goal が null になり "Goal not found" が表示される', async () => {
+		// goalId をセット
+		useRouter.mockReturnValue({ query: { goalId: 'err2' }, push: jest.fn() });
+		// fetchWithAuth がネットワークエラーで reject
+		fetchWithAuth.mockRejectedValueOnce(new Error('Network error'));
+	
+		render(<GoalPage />);
+	
+		// loading が消えるまで待機
+		await waitFor(() =>
+			expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
+		);
+	
+		// フォールバックとして "Goal not found" が表示される
+		expect(screen.getByText(/goal not found/i)).toBeInTheDocument();
+	});
 });
 
 ////////////////////////////////////////////////////////////////////////////////
