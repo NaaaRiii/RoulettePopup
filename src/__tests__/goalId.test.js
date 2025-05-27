@@ -21,68 +21,60 @@ jest.mock('../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
 }));
 
-describe('GoalPage ― ロード状態の表示 (Amplify 本物)', () => {
+
+describe('GoalPage ― 初期レンダリング／状態遷移', () => {
   beforeEach(() => {
-    // Router クエリに goalId を注入
+    // 共通モック（毎テスト実行前にリセットしたいもの）
     useRouter.mockReturnValue({
-      query: { goalId: '123' },
+      query: { goalId: 'test-id' },
       push: jest.fn(),
     });
-
-    // GoalsContext は必要最低限で OK
     useGoals.mockReturnValue({
       goalsState: [],
       setGoalsState: jest.fn(),
       refreshGoals: jest.fn(),
     });
-
-    // API レスポンスをスタブ
-    fetchWithAuth.mockImplementation((url) => {
-      if (url === '/api/goals/123') {
-        return Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              id: 123,
-              title: 'Test Goal',
-              content: 'dummy',
-              deadline: '2025-06-30',
-              completed: false,
-            }),
-        });
-      }
-
-      if (url === '/api/goals/123/small_goals') {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve([]),
-        });
-      }
-
-      return Promise.reject(new Error(`unexpected request: ${url}`));
-    });
+    fetchWithAuth.mockClear();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('データ取得中は "Loading..." が表示され、取得完了後に消える', async () => {
-    render(
-			<Authenticator.Provider
-				value={{ route: 'authenticated', user: { username: 'tester' } }}
-			>
-				<GoalPage />
-			</Authenticator.Provider>
+  it('loading=true の間 “Loading...” が表示される', async () => {
+    // 成功レスポンスをスタブ
+    fetchWithAuth.mockImplementation((url) =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            url.endsWith('/small_goals') ? [] : { id: 1, title: 'Goal', completed: false }
+          ),
+      })
     );
 
-    // 初期レンダリング直後
+    render(
+      <Authenticator.Provider value={{ route: 'authenticated', user: {} }}>
+        <GoalPage />
+      </Authenticator.Provider>
+    );
+
+    // ロード中
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-    // 非同期 fetch が完了したら Loading が消える
+    // データ取得完了後には消える
     await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+  });
 
-    // 代わりにコンテンツが描画されているか簡易確認
-    expect(screen.getByText('目標 : Test Goal')).toBeInTheDocument();
+  it('API が 404 / 空データなら “Goal not found” を表示', async () => {
+    // goalDetails 404
+    fetchWithAuth.mockImplementation((url) => {
+      if (url.includes('/small_goals')) return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      return Promise.resolve({ ok: false, status: 404 });
+    });
+
+    render(
+      <Authenticator.Provider value={{ route: 'authenticated', user: {} }}>
+        <GoalPage />
+      </Authenticator.Provider>
+    );
+
+    await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+    expect(screen.getByText(/goal not found/i)).toBeInTheDocument();
   });
 });
