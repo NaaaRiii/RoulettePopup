@@ -5,7 +5,7 @@ import GoalPage from '../pages/goals/[goalId]';
 import { useRouter } from 'next/router';
 import { useGoals } from '../contexts/GoalsContext';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
-import { Authenticator } from '@aws-amplify/ui-react';
+import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import '@testing-library/jest-dom';
 
 
@@ -20,6 +20,18 @@ jest.mock('../contexts/GoalsContext', () => ({
 jest.mock('../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
 }));
+
+jest.mock('@aws-amplify/ui-react', () => {
+  const actual = jest.requireActual('@aws-amplify/ui-react');
+  return {
+    __esModule: true,
+    ...actual,
+    useAuthenticator: jest.fn(() => ({
+      route: 'authenticated',
+      user: { username: 'tester' },
+    })),
+  };
+});
 
 
 describe('GoalPage ― 初期レンダリング／状態遷移', () => {
@@ -234,3 +246,48 @@ describe('GoalPage ― 初期レンダリング／状態遷移', () => {
 	});
 	
 });
+
+////////////////////////////////////////////////////////////////////////////////
+
+describe('副作用フック（useEffect & useCallback）', () => {
+  beforeEach(() => {
+    // ここで常に「ログイン済み」を返す
+    useAuthenticator.mockReturnValue({
+      route: 'authenticated',
+      user: { username: 'tester' },
+    });
+
+    useGoals.mockReturnValue({
+      goalsState: [],
+      setGoalsState: jest.fn(),
+      refreshGoals: jest.fn(),
+    });
+
+    fetchWithAuth.mockClear();
+  });
+
+  it('goalId が存在するときのみ API(fetchWithAuth) が呼ばれる', async () => {
+    useRouter.mockReturnValue({
+      query: { goalId: 'abc' },
+      push: jest.fn(),
+    });
+    fetchWithAuth.mockResolvedValue({ ok: true, json: () => Promise.resolve({}) });
+
+    render(<GoalPage />);
+
+    await waitFor(() => {
+      expect(fetchWithAuth).toHaveBeenCalled();
+    });
+  });
+
+  it('goalId が undefined のときは API(fetchWithAuth) が呼ばれない', () => {
+    useRouter.mockReturnValue({ query: {}, push: jest.fn() });
+
+    render(<GoalPage />);
+
+    expect(fetchWithAuth).not.toHaveBeenCalled();
+  });
+});
+
+////////////////////////////////////////////////////////////////////////////////
+
