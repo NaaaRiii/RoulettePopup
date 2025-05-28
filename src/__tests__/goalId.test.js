@@ -2,6 +2,9 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GoalPage from '../pages/goals/[goalId]';
+import CreateSmallGoal from '../components/CreateSmallGoal';
+import EditGoalModal from '../components/EditGoal';
+import EditSmallGoalModal from '../components/EditSmallGoal';
 import { useRouter } from 'next/router';
 import { useGoals } from '../contexts/GoalsContext';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
@@ -773,6 +776,129 @@ describe('UI インタラクション', () => {
 			expect(screen.queryByText('SG10')).not.toBeInTheDocument();
 			expect(screen.getByText('SG11')).toBeInTheDocument();
 		});
+	});
+	
+	it('Small Goal モーダルの open/close', async () => {
+    render(<GoalPage />);
+    await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+
+    // 初回は isOpen=false
+    expect(CreateSmallGoal).toHaveBeenCalledWith(
+      expect.objectContaining({ isOpen: false }),
+      expect.anything()
+    );
+
+    // ボタンをクリックして open
+    await userEvent.click(screen.getByText('Small Goalの作成'));
+    expect(
+      CreateSmallGoal.mock.calls.some(call => call[0].isOpen === true)
+    ).toBe(true);
+
+    // onClose() を呼ぶ（act不要）
+    const { onClose } = CreateSmallGoal.mock.calls.slice(-1)[0][0];
+    onClose();
+    // 閉じた呼び出しが入るまで待つ
+    await waitFor(() =>
+      expect(
+        CreateSmallGoal.mock.calls.some(
+          (call, i) => call[0].isOpen === false && i > 0
+        )
+      ).toBe(true)
+    );
+  });
+
+  it('Goal 編集モーダルの open/close', async () => {
+    render(<GoalPage />);
+    await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+
+    expect(EditGoalModal).toHaveBeenCalledWith(
+      expect.objectContaining({ isOpen: false }),
+      expect.anything()
+    );
+
+    await userEvent.click(screen.getByText('目標を編集する'));
+    expect(
+      EditGoalModal.mock.calls.some(call => call[0].isOpen === true)
+    ).toBe(true);
+
+    const { onClose } = EditGoalModal.mock.calls.slice(-1)[0][0];
+    onClose();
+    await waitFor(() =>
+      expect(
+        EditGoalModal.mock.calls.some(
+          (call, i) => call[0].isOpen === false && i > 0
+        )
+      ).toBe(true)
+    );
+  });
+
+  it('Small Goal 編集モーダルの open/close', async () => {
+    render(<GoalPage />);
+    await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+
+    expect(EditSmallGoalModal).toHaveBeenCalledWith(
+      expect.objectContaining({ isOpen: false }),
+      expect.anything()
+    );
+
+    // 各 smallGoal の Edit リンクを取得してクリック
+    const edits = screen.getAllByText('Edit');
+    await userEvent.click(edits[0]);
+
+    expect(
+      EditSmallGoalModal.mock.calls.some(call => call[0].isOpen === true)
+    ).toBe(true);
+
+    const { onClose } = EditSmallGoalModal.mock.calls.slice(-1)[0][0];
+    onClose();
+    await waitFor(() =>
+      expect(
+        EditSmallGoalModal.mock.calls.some(
+          (call, i) => call[0].isOpen === false && i > 0
+        )
+      ).toBe(true)
+    );
+  });
+
+	it('Small Goal 編集モーダル: small goal オブジェクトが渡されると選択済みでモーダルが開く', async () => {
+		// モックデータ：1件の small goal
+		const smallGoals = [
+			{
+				id: 99,
+				title: 'SG99',
+				difficulty: 'medium',
+				deadline: null,
+				completed: false,
+				tasks: [],
+			},
+		];
+	
+		// fetchWithAuth のモック実装
+		fetchWithAuth.mockImplementation((url) => {
+			if (url === '/api/goals/xyz') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(goalDetails) });
+			}
+			if (url === '/api/goals/xyz/small_goals') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(smallGoals) });
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+	
+		render(<GoalPage />);
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+	
+		// small goal の Edit リンクをクリック
+		const editLink = screen.getByText('Edit');
+		await userEvent.click(editLink);
+	
+		// EditSmallGoalModal が呼ばれた最新の呼び出しを取得
+		const lastCall = EditSmallGoalModal.mock.calls.slice(-1)[0][0];
+	
+		// isOpen が true
+		expect(lastCall.isOpen).toBe(true);
+	
+		// smallGoal prop に正しいオブジェクトが渡されている
+		expect(lastCall.smallGoal).toEqual(smallGoals[0]);
 	});
 	
 });
