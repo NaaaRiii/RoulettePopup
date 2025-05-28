@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import { useGoals } from '../contexts/GoalsContext';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
+import { within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 
@@ -904,3 +905,105 @@ describe('UI インタラクション', () => {
 });
 
 ////////////////////////////////////////////////////////////////////////////////
+
+describe('条件付きレンダリング', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+
+    // 常に認証済み
+    useAuthenticator.mockReturnValue({ route: 'authenticated', user: {} });
+
+    // router に goalId をセット
+    useRouter.mockReturnValue({ query: { goalId: 'xyz' }, push: jest.fn() });
+
+    // GoalsContext のダミー
+    useGoals.mockReturnValue({
+      goalsState: [],
+      setGoalsState: jest.fn(),
+      refreshGoals: jest.fn(),
+    });
+  });
+
+  it('完了済み Goal では「このGoalは達成しました!」が表示され、編集リンク／完了ボタンが非表示', async () => {
+    const completedGoal = {
+      id: 1,
+      title: 'Done Goal',
+      content: 'dummy',
+      deadline: null,
+      completed: true,  // ← 完了済み
+    };
+
+    fetchWithAuth.mockImplementation((url) => {
+      if (url === '/api/goals/xyz') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(completedGoal) });
+      }
+      if (url === '/api/goals/xyz/small_goals') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+
+    render(<GoalPage />);
+
+    // ローディング完了待ち
+    await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+
+    // 完了メッセージ表示
+    expect(screen.getByText('このGoalは達成しました!')).toBeInTheDocument();
+
+    // 「目標を編集する」は消えている
+    expect(screen.queryByText('目標を編集する')).toBeNull();
+
+    // Completed Goal ボタンも消えている
+    expect(screen.queryByRole('button', { name: /Completed Goal/ })).toBeNull();
+  });
+
+	it('完了／未完了 small goal の列挙: completed フラグで振り分けられる', async () => {
+		// ← まず goalDetails を定義
+		const goalDetails = {
+			id: 123,
+			title: 'List Test Goal',
+			content: 'dummy',
+			deadline: null,
+			completed: false,
+		};
+	
+		// ここで mixedSmallGoals を定義
+		const mixedSmallGoals = [
+			{ id: 1, title: 'SG Incomplete', difficulty: 'easy', deadline: null, completed: false, tasks: [] },
+			{ id: 2, title: 'SG Complete',   difficulty: 'easy', deadline: null, completed: true,  tasks: [] },
+		];
+	
+		// fetchWithAuth を URL ごとに返却を切り替え
+		fetchWithAuth.mockImplementation((url) => {
+			if (url === '/api/goals/xyz') {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(goalDetails),
+				});
+			}
+			if (url === '/api/goals/xyz/small_goals') {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(mixedSmallGoals),
+				});
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+	
+		render(<GoalPage />);
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+	
+		// SG Incomplete が描画され、トップ要素に completed クラスがついていないことを検証
+		const inc = screen.getByText(/SG Incomplete/);
+		expect(inc.closest('.goalid-small-goal__top--completed')).toBeNull();
+	
+		// SG Complete が描画され、トップ要素に completed クラスがついていることを検証
+		const comp = screen.getByText(/SG Complete/);
+		expect(comp.closest('.goalid-small-goal__top--completed')).not.toBeNull();
+	});
+	
+});
+
+///////////////////////////////////////////////////////////////////////////////
+
