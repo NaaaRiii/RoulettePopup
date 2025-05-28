@@ -587,6 +587,115 @@ describe('UI インタラクション', () => {
       );
     });
   });
+
+	it('未完了 small goal があるとき Completed Goal ボタンは disabled', async () => {
+		// smallGoals のうち 1 件は未完了
+		const smallGoalsSomeIncomplete = [
+			{ id: 10, title: 'SG1', difficulty: 'easy', deadline: null, completed: false, tasks: [] },
+			{ id: 11, title: 'SG2', difficulty: 'easy', deadline: null, completed: true,  tasks: [] },
+		];
+	
+		fetchWithAuth.mockImplementation((url, options) => {
+			if (url === '/api/goals/xyz') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(goalDetails) });
+			}
+			if (url === '/api/goals/xyz/small_goals') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(smallGoalsSomeIncomplete) });
+			}
+			// Completed Goal 用エンドポイントは呼ばれないはずなのでダミー返却
+			if (url === '/api/goals/xyz/complete') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+	
+		render(<GoalPage />);
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+	
+		const completeButton = screen.getByRole('button', { name: 'Completed Goal' });
+		expect(completeButton).toBeDisabled();
+	});
+	
+	it('すべて完了した small goal のとき Completed Goal ボタンは有効でクリック時に /api/goals/xyz/complete に POST', async () => {
+		// smallGoals はすべて completed: true
+		const smallGoalsAllDone = [
+			{ id: 20, title: 'SG1', difficulty: 'easy', deadline: null, completed: true, tasks: [] },
+		];
+	
+		fetchWithAuth.mockImplementation((url, options) => {
+			if (url === '/api/goals/xyz') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(goalDetails) });
+			}
+			if (url === '/api/goals/xyz/small_goals') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(smallGoalsAllDone) });
+			}
+			if (url === '/api/goals/xyz/complete') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve({ message: 'Goal 完了' }) });
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+	
+		render(<GoalPage />);
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+	
+		const completeButton = screen.getByRole('button', { name: 'Completed Goal' });
+		expect(completeButton).toBeEnabled();
+	
+		await userEvent.click(completeButton);
+		await waitFor(() => {
+			expect(fetchWithAuth).toHaveBeenCalledWith(
+				'/api/goals/xyz/complete',
+				{ method: 'POST' }
+			);
+		});
+	});
+	
+	it('Goal 削除: window.confirm=true のとき DELETE → refreshGoals と router.push("/dashboard")', async () => {
+		// モックデータ
+		const goalDetails = { id: 1, title: 'Del Goal', content: 'dummy', deadline: null, completed: false };
+		const smallGoals = [];
+	
+		// confirm ダイアログは常に OK
+		window.confirm = jest.fn(() => true);
+	
+		// fetchWithAuth の動作を URL ごとに定義
+		fetchWithAuth.mockImplementation((url, options) => {
+			if (url === '/api/goals/xyz') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(goalDetails) });
+			}
+			if (url === '/api/goals/xyz/small_goals') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(smallGoals) });
+			}
+			if (url === '/api/goals/xyz' && options?.method === 'DELETE') {
+				return Promise.resolve({ ok: true });
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+	
+		// render
+		render(<GoalPage />);
+	
+		// 初回ロード完了待ち
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+	
+		// Delete Goal リンクをクリック
+		await userEvent.click(screen.getByTestId('delete-goal-link'));
+	
+		// DELETE エンドポイントが呼ばれるまで待機
+		await waitFor(() => {
+			expect(fetchWithAuth).toHaveBeenCalledWith(
+				'/api/goals/xyz',
+				expect.objectContaining({ method: 'DELETE' })
+			);
+		});
+	
+		// refreshGoals が呼ばれたか
+		expect(useGoals().refreshGoals).toHaveBeenCalled();
+	
+		// router.push('/dashboard') が呼ばれたか
+		expect(useRouter().push).toHaveBeenCalledWith('/dashboard');
+	});
+	
 });
 
 ////////////////////////////////////////////////////////////////////////////////
