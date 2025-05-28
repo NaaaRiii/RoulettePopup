@@ -19,9 +19,21 @@ jest.mock('../components/Calendar', () => {
   MockCalendar.displayName = 'Calendar';
   return MockCalendar;
 });
-jest.mock('../components/CreateSmallGoal', () => () => null);
-jest.mock('../components/EditGoal',      () => () => null);
-jest.mock('../components/EditSmallGoal', () => () => null);
+
+jest.mock('../components/CreateSmallGoal', () => {
+  const fn = jest.fn(props => null);
+  return { __esModule: true, default: fn };
+});
+
+jest.mock('../components/EditGoal', () => {
+  const fn = jest.fn(props => null);
+  return { __esModule: true, default: fn };
+});
+
+jest.mock('../components/EditSmallGoal', () => {
+  const fn = jest.fn(props => null);
+  return { __esModule: true, default: fn };
+});
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -694,6 +706,73 @@ describe('UI インタラクション', () => {
 	
 		// router.push('/dashboard') が呼ばれたか
 		expect(useRouter().push).toHaveBeenCalledWith('/dashboard');
+	});
+	
+	it('Small Goal 削除: confirm OK で該当 small goal が state から除去される', async () => {
+		// モックデータ：2 つの small goal
+		const smallGoals = [
+			{
+				id: 10,
+				title: 'SG10',
+				difficulty: 'easy',
+				deadline: null,
+				completed: false,
+				tasks: [],
+			},
+			{
+				id: 11,
+				title: 'SG11',
+				difficulty: 'easy',
+				deadline: null,
+				completed: false,
+				tasks: [],
+			},
+		];
+	
+		// confirm は常に OK
+		window.confirm = jest.fn(() => true);
+		// alert は無視
+		window.alert = jest.fn();
+	
+		// URL ごとに返却を分岐
+		fetchWithAuth.mockImplementation((url, options) => {
+			if (url === '/api/goals/xyz') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(goalDetails) });
+			}
+			if (url === '/api/goals/xyz/small_goals') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(smallGoals) });
+			}
+			if (url === '/api/goals/xyz/small_goals/10') {
+				return Promise.resolve({ ok: true });
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+	
+		render(<GoalPage />);
+	
+		// 初期ロード完了
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+	
+		// まず両方のタイトルが見えている
+		expect(screen.getByText('SG10')).toBeInTheDocument();
+		expect(screen.getByText('SG11')).toBeInTheDocument();
+	
+		// 小目標 10 の削除リンクをクリック
+		await userEvent.click(screen.getByTestId('delete-small-goal-10'));
+	
+		// DELETE API 呼び出しを待機
+		await waitFor(() => {
+			expect(fetchWithAuth).toHaveBeenCalledWith(
+				'/api/goals/xyz/small_goals/10',
+				expect.objectContaining({ method: 'DELETE' })
+			);
+		});
+	
+		// State 更新後、SG10 が消え、SG11 は残る
+		await waitFor(() => {
+			expect(screen.queryByText('SG10')).not.toBeInTheDocument();
+			expect(screen.getByText('SG11')).toBeInTheDocument();
+		});
 	});
 	
 });
