@@ -422,3 +422,103 @@ describe('副作用フック(useEffect & useCallback)', () => {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+describe('UI インタラクション', () => {
+	const goalDetails = {
+    id: 1,
+    title: 'Toggle Goal',
+    content: 'dummy',
+    deadline: null,
+    completed: false,
+  };
+  const smallGoals = [
+    {
+      id: 10,
+      title: 'SG',
+      difficulty: 'easy',
+      deadline: null,
+      completed: false,
+      tasks: [{ id: 100, content: 'task-1', completed: false }],
+    },
+  ];
+
+  beforeEach(() => {
+		jest.resetAllMocks();
+		//fetchWithAuth.mockReset(); 
+    // 常にログイン済みを返す
+    useAuthenticator.mockReturnValue({ route: 'authenticated', user: {} });
+    // goalId をセット
+    useRouter.mockReturnValue({ query: { goalId: 'xyz' }, push: jest.fn() });
+    // Context はダミー
+    useGoals.mockReturnValue({
+      goalsState: [],
+      setGoalsState: jest.fn(),
+      refreshGoals: jest.fn(),
+    });
+    
+		fetchWithAuth.mockImplementation((url) => {
+			if (url === '/api/goals/xyz') {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(goalDetails),
+				});
+			}
+			if (url === '/api/goals/xyz/small_goals') {
+				return Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve(smallGoals),
+				});
+			}
+			if (url.startsWith('/api/tasks/') && url.endsWith('/complete')) {
+				return Promise.resolve({ ok: true });
+			}
+			// 他のフェッチ（/api/current_user など）は空レスポンスで無視
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+
+  });
+
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
+
+  it('タスクチェックボックスを change すると fetchWithAuth が呼ばれ、チェックが反転する', async () => {
+    render(<GoalPage />);
+
+    // 1) Loading… が消えるまで待つ
+    await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+
+		console.log('🔍 fetchWithAuth.calls:',
+			fetchWithAuth.mock.calls);
+		screen.debug(); 
+
+		const allCheckboxes = screen.getAllByRole('checkbox');
+		console.log('🔍 checkbox count:', allCheckboxes.length);
+		screen.debug();
+
+    expect(screen.getByText('task-1')).toBeInTheDocument();
+
+		const checkbox = await screen.findByRole('checkbox', { name: /task-1/ });
+		expect(checkbox).not.toBeChecked();
+
+    await userEvent.click(checkbox);
+
+    await waitFor(() => {
+      expect(fetchWithAuth).toHaveBeenCalledWith(
+        '/api/tasks/100/complete',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ completed: true }),
+        })
+      );
+    });
+
+		await waitFor(() => {
+			expect(
+				screen.getByRole('checkbox', { name: /task-1/ })
+			).toBeChecked();
+		});
+  });
+
+});
+
+////////////////////////////////////////////////////////////////////////////////
