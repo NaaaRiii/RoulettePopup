@@ -8,6 +8,7 @@ import EditSmallGoalModal from '../components/EditSmallGoal';
 import { useRouter } from 'next/router';
 import { useGoals } from '../contexts/GoalsContext';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { formatDate } from '../pages/goals/[goalId]';
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import { within } from '@testing-library/react';
 import '@testing-library/jest-dom';
