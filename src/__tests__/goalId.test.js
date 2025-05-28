@@ -1003,6 +1003,55 @@ describe('条件付きレンダリング', () => {
 		expect(comp.closest('.goalid-small-goal__top--completed')).not.toBeNull();
 	});
 	
+	it('完了済みセクションではチェックボックスではなく「・」＋内容が表示される', async () => {
+		// テスト用ゴールと smallGoals（完了済みのみ）
+		const goalDetails = {
+			id: 1,
+			title: 'Task Display Goal',
+			content: 'dummy',
+			deadline: null,
+			completed: false,
+		};
+		const smallGoals = [
+			{
+				id: 1,
+				title: 'SG Completed',
+				difficulty: 'easy',
+				deadline: null,
+				completed: true,
+				tasks: [
+					{ id: 100, content: 'completed-task', completed: true },
+				],
+			},
+		];
+	
+		// fetchWithAuth モック実装
+		fetchWithAuth.mockImplementation((url) => {
+			if (url === '/api/goals/xyz') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(goalDetails) });
+			}
+			if (url === '/api/goals/xyz/small_goals') {
+				return Promise.resolve({ ok: true, json: () => Promise.resolve(smallGoals) });
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+	
+		// 描画とロード完了待ち
+		render(<GoalPage />);
+		await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+	
+		// 完了済みセクションのカードを取得
+		const completedCard = screen.getByText('SG Completed').closest('.c-card');
+		expect(completedCard).toBeInTheDocument();
+	
+		// 「・completed-task」が描画されている
+		const bullet = within(completedCard).getByText('・completed-task');
+		expect(bullet).toBeInTheDocument();
+	
+		// 完了済みセクションにチェックボックスはない
+		expect(within(completedCard).queryByRole('checkbox')).toBeNull();
+	});
+	
 });
 
 ///////////////////////////////////////////////////////////////////////////////
