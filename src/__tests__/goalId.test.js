@@ -9,6 +9,20 @@ import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import '@testing-library/jest-dom';
 
 
+jest.mock('../components/Layout', () => {
+  const MockLayout = ({ children }) => <>{children}</>;
+  MockLayout.displayName = 'Layout';
+  return MockLayout;
+});
+jest.mock('../components/Calendar', () => {
+  const MockCalendar = () => <div data-testid="calendar" />;
+  MockCalendar.displayName = 'Calendar';
+  return MockCalendar;
+});
+jest.mock('../components/CreateSmallGoal', () => () => null);
+jest.mock('../components/EditGoal',      () => () => null);
+jest.mock('../components/EditSmallGoal', () => () => null);
+
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }));
@@ -441,14 +455,25 @@ describe('UI インタラクション', () => {
     },
   ];
 
+	const smallGoalsAllDone = [
+    {
+      id: 10,
+      title: 'SG',
+      difficulty: 'easy',
+      deadline: null,
+      completed: false,
+      tasks: [
+        { id: 100, content: 't1', completed: true },
+        { id: 101, content: 't2', completed: true },
+      ],
+    },
+  ];
+
   beforeEach(() => {
 		jest.resetAllMocks();
-		//fetchWithAuth.mockReset(); 
-    // 常にログイン済みを返す
+
     useAuthenticator.mockReturnValue({ route: 'authenticated', user: {} });
-    // goalId をセット
     useRouter.mockReturnValue({ query: { goalId: 'xyz' }, push: jest.fn() });
-    // Context はダミー
     useGoals.mockReturnValue({
       goalsState: [],
       setGoalsState: jest.fn(),
@@ -519,6 +544,49 @@ describe('UI インタラクション', () => {
 		});
   });
 
+
+  it('全タスク完了時のみ「完了」ボタンが活性化し、クリックで /small_goals/:id/complete に POST する', async () => {
+    // ① fetchWithAuth を URL 別にスタブ
+    fetchWithAuth.mockImplementation((url, options) => {
+      if (url === '/api/goals/xyz') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(goalDetails),
+        });
+      }
+      if (url === '/api/goals/xyz/small_goals') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(smallGoalsAllDone),
+        });
+      }
+      if (url === '/api/goals/xyz/small_goals/10/complete') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ message: '小目標を完了しました' }),
+        });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+
+    render(<GoalPage />);
+
+    // ② 初回ロードが終わるまで待機
+    await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
+
+    // ③ 「完了」ボタンが存在して活性化されている
+    const completeBtn = screen.getByRole('button', { name: '完了' });
+    expect(completeBtn).toBeEnabled();
+
+    // ④ クリックして API 呼び出しを検証
+    await userEvent.click(completeBtn);
+    await waitFor(() => {
+      expect(fetchWithAuth).toHaveBeenCalledWith(
+        '/api/goals/xyz/small_goals/10/complete',
+        { method: 'POST' }
+      );
+    });
+  });
 });
 
 ////////////////////////////////////////////////////////////////////////////////
