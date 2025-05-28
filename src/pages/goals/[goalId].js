@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { format } from 'date-fns';
 import { useRouter } from 'next/router';
 import { useGoals } from '../../contexts/GoalsContext';
+import { formatDate } from '../../utils/formatDate';
 import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
@@ -56,11 +56,6 @@ function GoalPage() {
 
   const handleGoalUpdated = async (updatedGoal) => {
     await fetchGoalData();
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return format(date, 'yyyy-MM-dd');
   };
 
   useEffect(() => {

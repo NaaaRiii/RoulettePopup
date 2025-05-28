@@ -8,7 +8,7 @@ import EditSmallGoalModal from '../components/EditSmallGoal';
 import { useRouter } from 'next/router';
 import { useGoals } from '../contexts/GoalsContext';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
-import { formatDate } from '../pages/goals/[goalId]';
+import { formatDate } from '../utils/formatDate';
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import { within } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -1057,3 +1057,44 @@ describe('条件付きレンダリング', () => {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+describe('ユーティリティ関数', () => {
+  describe('formatDate', () => {
+    it('ISO 文字列を yyyy-MM-dd 形式に変換する', () => {
+      const isoString = '2025-05-27T03:00:00Z';
+      expect(formatDate(isoString)).toBe('2025-05-27');
+    });
+
+    it('Date オブジェクトを yyyy-MM-dd 形式に変換する', () => {
+      // JS の Date は月が 0 始まりなので、4 は 5 月
+      const dateObj = new Date(2025, 4, 27, 3, 0, 0);
+      expect(formatDate(dateObj)).toBe('2025-05-27');
+    });
+  });
+
+	it('openEditSmallGoalModal のガード: goalId がない場合はモーダルは開かない', async () => {
+		// まず全モックをリセット＆再設定
+		jest.resetAllMocks();
+	
+		// 認証済み、context はダミー
+		useAuthenticator.mockReturnValue({ route: 'authenticated', user: {} });
+		useGoals.mockReturnValue({
+			goalsState: [],
+			setGoalsState: jest.fn(),
+			refreshGoals: jest.fn(),
+		});
+		// goalId を与えない
+		useRouter.mockReturnValue({ query: {}, push: jest.fn() });
+	
+		// fetchWithAuth をスタブ（呼ばれない想定なので何でもOK）
+		fetchWithAuth.mockResolvedValue({ ok: true, json: () => Promise.resolve(null) });
+	
+		// レンダリング
+		render(<GoalPage />);
+		
+		expect(screen.getByText(/loading/i)).toBeInTheDocument();
+	
+		expect(EditSmallGoalModal).toHaveBeenCalledTimes(0);
+	});
+});
+
+///////////////////////////////////////////////////////////////////////////////
