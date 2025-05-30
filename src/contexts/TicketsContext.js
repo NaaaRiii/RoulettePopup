@@ -6,7 +6,7 @@ export const TicketsContext = createContext();
 
 export const TicketsProvider = ({ children }) => {
   const [playTickets, setPlayTickets] = useState(0);
-  const [editTickets, setEditTickets] = useState(0);
+  //const [editTickets, setEditTickets] = useState(0);
 
   const fetchTickets = async () => {
     console.log('[Tickets] fetch start');
@@ -36,8 +36,8 @@ export const TicketsProvider = ({ children }) => {
       value={{
         playTickets,
         setPlayTickets,
-        editTickets,
-        setEditTickets,
+        //editTickets,
+        //setEditTickets,
         fetchTickets,
       }}
     >

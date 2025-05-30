@@ -13,7 +13,7 @@ const EditRouletteText = () => {
   const [showForm, setShowForm] = useState(false);
   const [editedText, setEditedText] = useState('');
   const [flashMessage, setFlashMessage] = useState('');
-  const { playTickets, editTickets, fetchTickets } = useContext(TicketsContext);
+  const { playTickets, fetchTickets } = useContext(TicketsContext);
   const { rouletteTexts, setRouletteTexts } = useFetchRouletteTexts();
   console.log('[EditRoulette] playTickets=', playTickets);
 
@@ -66,17 +66,17 @@ const EditRouletteText = () => {
     console.log("Selected Roulette Text Number:", rouletteNumber);
     console.log("Edited Text:", editedText);
 
-    if (editTickets <= 0) {
-      alert('編集チケットが不足しています');
-      return;
-    }
+    //if (editTickets <= 0) {
+    //  alert('編集チケットが不足しています');
+    //  return;
+    //}
 
     if (!rouletteNumber) {
       console.error('Roulette Number is undefined.');
       return;
     }
 
-    if (!window.confirm("チケットを1枚消費して、この内容でテキストを編集しますか？")) {
+    if (!window.confirm("この内容でテキストを編集しますか？")) {
       return;
     }
 
@@ -130,14 +130,20 @@ const EditRouletteText = () => {
         <div className="edit-roulette-left-container">
           <h2 className="page-title">ごほうびルーレット</h2>
           <h3 className="ticket-info" data-testid="play-tickets">
-            プレイチケットを『{playTickets}』枚持っています。
+            チケットを『{playTickets}』枚持っています。
           </h3>
-          <h3 className="roulette-edit-info" data-testid="edit-tickets">
+          {/*<h3 className="roulette-edit-info" data-testid="edit-tickets">
             編集チケットを『{editTickets}』枚持っています。
-          </h3>
+          </h3>*/}
 
           <div>
-            {editTickets > 0 && !showForm && (
+            {/*{editTickets > 0 && !showForm && (
+              <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
+                ルーレットを編集する
+              </button>
+            )}*/}
+
+            {!showForm && (
               <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
                 ルーレットを編集する
               </button>
@@ -221,15 +227,13 @@ const EditRouletteText = () => {
 
           <div className="roulette-description c-card">
             <ul data-testid="roulette-description-list">
-              <li>Rankが10上がるごとに、プレイチケットと編集チケットが付与されます。</li>
-              <li>ルーレットを回すには、プレイチケットを1枚使用する必要があります。</li>
-              <li>ルーレットの各テキストを編集するには、編集チケットを1枚使用する必要があります。</li>
+              <li>Rankが10上がるごとに、チケットが付与されます。</li>
+              <li>ルーレットを回すには、チケットを1枚使用する必要があります。</li>
+              {/*<li>ルーレットの各テキストを編集するには、編集チケットを1枚使用する必要があります。</li>*/}
               <li>各チケットの枚数は、左上に表示されています。</li>
             </ul>
           </div>
-
         </div>
-
       </div>
     </Layout>
   );
