@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { useGoals } from '../../contexts/GoalsContext';
+import { useContext } from 'react';
+import { TicketsContext } from '../../contexts/TicketsContext';
 import { formatDate } from '../../utils/formatDate';
 import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import Link from 'next/link';
@@ -24,6 +26,8 @@ function GoalPage() {
   const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
   const [isEditSmallGoalModalOpen, setIsEditSmallGoalModalOpen] = useState(false);
   const [selectedSmallGoal, setSelectedSmallGoal] = useState(null);
+
+  const { fetchTickets } = useContext(TicketsContext);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -216,6 +220,11 @@ function GoalPage() {
 
     const data = await response.json();
     if (response.ok) {
+      try {
+        await fetchTickets();
+      } catch (e) {
+        console.error('Failed to refresh tickets after completing goal', e);
+      }
       router.push({
         pathname: '/dashboard',
         query: { message: encodeURIComponent(data.message) }

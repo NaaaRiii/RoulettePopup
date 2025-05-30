@@ -14,8 +14,10 @@ export const TicketsProvider = ({ children }) => {
       const data = await response.json();
       setPlayTickets(data.play_tickets);
       setEditTickets(data.edit_tickets);
+      return data;
     } catch (error) {
       console.error('Error fetching tickets:', error);
+      throw error;
     }
   };
 
@@ -24,7 +26,15 @@ export const TicketsProvider = ({ children }) => {
   }, []);
 
   return (
-    <TicketsContext.Provider value={{ playTickets, setPlayTickets, editTickets, setEditTickets, fetchTickets }}>
+    <TicketsContext.Provider
+      value={{
+        playTickets,
+        setPlayTickets,
+        editTickets,
+        setEditTickets,
+        fetchTickets,
+      }}
+    >
       {children}
     </TicketsContext.Provider>
   );

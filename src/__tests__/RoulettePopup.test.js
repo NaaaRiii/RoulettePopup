@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import RoulettePopup, { isValidAngle } from '../components/RoulettePopup';
 import { render, screen, waitFor } from '@testing-library/react';
 import { TicketsProvider, TicketsContext } from '../contexts/TicketsContext';
-import { AuthProvider } from '../contexts/AuthContext';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@testing-library/jest-dom';
 
 
@@ -61,16 +61,25 @@ jest.mock('../components/utils', () => ({
   fetchRouletteText: jest.fn((matchNumber) => Promise.resolve({ text: `Text for segment ${matchNumber}` })),
 }));
 
+jest.mock('../utils/fetchWithAuth', () => ({
+  fetchWithAuth: jest.fn(),
+}));
+
 describe('RoulettePopup Component', () => {
   const mockFetchRouletteText = require('../components/utils').fetchRouletteText;
 
   const renderComponent = () => {
+    fetchWithAuth.mockImplementation((url) => {
+      if (url === '/api/current_user') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+  
     render(
-      <AuthProvider>
-        <TicketsProvider>
-          <RoulettePopup />
-        </TicketsProvider>
-      </AuthProvider>
+      <TicketsProvider>
+        <RoulettePopup />
+      </TicketsProvider>
     );
   };
 
@@ -169,13 +178,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
 
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
           <RoulettePopup />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+        </TicketsProvider>
+      );
+    };
 
     // 非同期状態更新を待機
     await screen.findByTestId('start-button');
@@ -193,13 +209,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
 
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
           <RoulettePopup />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+        </TicketsProvider>
+      );
+    };
 
     // ボタンが有効であることを検証
     await waitFor(() => {
@@ -218,13 +241,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
 
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
           <RoulettePopup />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+        </TicketsProvider>
+      );
+    };
 
     // 非同期状態更新を待機
     await screen.findByTestId('start-button');
@@ -248,13 +278,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
   
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
           <RoulettePopup />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+        </TicketsProvider>
+      );
+    };
   
     const user = userEvent.setup();
   
@@ -279,13 +316,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
 
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
           <RoulettePopup />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+        </TicketsProvider>
+      );
+    };
 
     // `userEvent` のセットアップ
     const user = userEvent.setup();
@@ -317,13 +361,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
   
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
           <RoulettePopup />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+        </TicketsProvider>
+      );
+    };
   
     const user = userEvent.setup();
   
@@ -360,13 +411,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
 
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
           <RoulettePopup />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+        </TicketsProvider>
+      );
+    };
 
     const user = userEvent.setup();
 
@@ -407,13 +465,20 @@ describe('RoulettePopup Component', () => {
   
     const onSpinComplete = jest.fn();
   
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <RoulettePopup onSpinComplete={onSpinComplete} spinDuration={0} />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
+          <RoulettePopup />
+        </TicketsProvider>
+      );
+    };
   
     const user = userEvent.setup();
   
@@ -476,13 +541,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
 
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <RoulettePopup spinDuration={0} />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
+          <RoulettePopup />
+        </TicketsProvider>
+      );
+    };
 
     const user = userEvent.setup();
 
@@ -533,13 +605,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
   
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <RoulettePopup spinDuration={0} />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
+          <RoulettePopup />
+        </TicketsProvider>
+      );
+    };
   
     const user = userEvent.setup();
   
@@ -584,13 +663,20 @@ describe('RoulettePopup Component', () => {
       fetchTickets: jest.fn(),
     };
 
-    render(
-      <AuthProvider>
-        <TicketsContext.Provider value={mockTicketsContextValue}>
-          <RoulettePopup spinDuration={0} />
-        </TicketsContext.Provider>
-      </AuthProvider>
-    );
+    const renderComponent = () => {
+      fetchWithAuth.mockImplementation((url) => {
+        if (url === '/api/current_user') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ rank: 10 }) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+    
+      render(
+        <TicketsProvider>
+          <RoulettePopup />
+        </TicketsProvider>
+      );
+    };
 
     const user = userEvent.setup();
 
