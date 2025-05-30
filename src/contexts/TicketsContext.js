@@ -9,16 +9,22 @@ export const TicketsProvider = ({ children }) => {
   const [editTickets, setEditTickets] = useState(0);
 
   const fetchTickets = async () => {
-    try {
-      const response = await fetchWithAuth('/api/roulette_texts/tickets');
-      const data = await response.json();
-      setPlayTickets(data.play_tickets);
-      setEditTickets(data.edit_tickets);
-      return data;
-    } catch (error) {
-      console.error('Error fetching tickets:', error);
-      throw error;
-    }
+    console.log('[Tickets] fetch start');
+    const res  = await fetchWithAuth('/api/roulette_texts/tickets');
+    const data = await res.json();
+    console.log('[Tickets] received', data.play_tickets);
+    setPlayTickets(data.play_tickets);
+    return data;  
+    //try {
+    //  const response = await fetchWithAuth('/api/roulette_texts/tickets');
+    //  const data = await response.json();
+    //  setPlayTickets(data.play_tickets);
+    //  setEditTickets(data.edit_tickets);
+    //  return data;
+    //} catch (error) {
+    //  console.error('Error fetching tickets:', error);
+    //  throw error;
+    //}
   };
 
   useEffect(() => {

@@ -219,16 +219,18 @@ function GoalPage() {
     );
 
     const data = await response.json();
+
     if (response.ok) {
-      try {
-        await fetchTickets();
-      } catch (e) {
-        console.error('Failed to refresh tickets after completing goal', e);
-      }
-      router.push({
-        pathname: '/dashboard',
-        query: { message: encodeURIComponent(data.message) }
-      });
+     try {
+       await fetchTickets();
+       console.log('[Goal] after fetchTickets');
+     } catch (e) {
+       console.error('Failed to refresh tickets', e);
+     }
+     router.push({
+       pathname: '/dashboard',
+       query: { message: encodeURIComponent(data.message) }
+     });
     } else {
       alert(data.message);
     }

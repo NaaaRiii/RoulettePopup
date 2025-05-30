@@ -15,6 +15,7 @@ const EditRouletteText = () => {
   const [flashMessage, setFlashMessage] = useState('');
   const { playTickets, editTickets, fetchTickets } = useContext(TicketsContext);
   const { rouletteTexts, setRouletteTexts } = useFetchRouletteTexts();
+  console.log('[EditRoulette] playTickets=', playTickets);
 
   useEffect(() => {
     if (rouletteNumber !== '') {
