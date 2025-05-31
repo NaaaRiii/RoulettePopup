@@ -13,9 +13,9 @@ const EditRouletteText = () => {
   const [showForm, setShowForm] = useState(false);
   const [editedText, setEditedText] = useState('');
   const [flashMessage, setFlashMessage] = useState('');
-  const { playTickets, fetchTickets } = useContext(TicketsContext);
+  const { tickets, fetchTickets } = useContext(TicketsContext);
   const { rouletteTexts, setRouletteTexts } = useFetchRouletteTexts();
-  console.log('[EditRoulette] playTickets=', playTickets);
+  console.log('[EditRoulette] tickets=', tickets);
 
   useEffect(() => {
     if (rouletteNumber !== '') {
@@ -129,8 +129,8 @@ const EditRouletteText = () => {
       <div className="edit-roulette-container">
         <div className="edit-roulette-left-container">
           <h2 className="page-title">ごほうびルーレット</h2>
-          <h3 className="ticket-info" data-testid="play-tickets">
-            チケットを『{playTickets}』枚持っています。
+          <h3 className="ticket-info" data-testid="tickets">
+            チケットを『{tickets}』枚持っています。
           </h3>
           {/*<h3 className="roulette-edit-info" data-testid="edit-tickets">
             編集チケットを『{editTickets}』枚持っています。

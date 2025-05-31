@@ -31,7 +31,7 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rouletteText, setRouletteText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { playTickets, setPlayTickets, fetchTickets } = useContext(TicketsContext);
+  const { tickets, setTickets, fetchTickets } = useContext(TicketsContext);
 
   // ルーレットのセグメントを定義（例: 12セグメント）
   const segmentAngles = 360 / 12;
@@ -63,8 +63,8 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
   });
 
   const startSpinningWithTicket = async () => {
-    if (playTickets <= 0) {
-      alert('プレイチケットが不足しています');
+    if (tickets <= 0) {
+      alert('チケットが不足しています');
       return;
     }
   
@@ -87,7 +87,7 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
       const data = await response.json();
       console.log('Spin Response:', data);
   
-      setPlayTickets(data.play_tickets);
+      setTickets(data.tickets);
   
       startSpinning();
     } catch (error) {
