@@ -6,27 +6,30 @@ export const TicketsContext = createContext();
 
 export const TicketsProvider = ({ children }) => {
   const [tickets, setTickets] = useState(0);
-  //const [editTickets, setEditTickets] = useState(0);
 
-  const fetchTickets = async () => {
-    console.log('[Tickets] fetch start');
-    const res  = await fetchWithAuth('/api/roulette_texts/tickets');
-    const { tickets } = await res.json();
-    console.log('[Tickets] received', data.play_tickets);
-    setTickets(tickets);
-  };
+  const fetchTickets = useCallback(async () => {
+    try {
+      console.log('[Tickets] fetch start');
+      const res = await fetchWithAuth('/api/roulette_texts/tickets');
 
-  useEffect(() => {
-    fetchTickets();
+      if (!res.ok) throw new Error(`status=${res.status}`);
+
+      const data = await res.json();
+      console.log('[Tickets] received', data.tickets);
+
+      setTickets(data.tickets ?? data.play_tickets ?? 0);
+    } catch (e) {
+      console.error('[Tickets] fetch failed:', e);
+    }
   }, []);
+
+  useEffect(() => { fetchTickets(); }, [fetchTickets]);
 
   return (
     <TicketsContext.Provider
       value={{
         tickets,
         setTickets,
-        //editTickets,
-        //setEditTickets,
         fetchTickets,
       }}
     >
