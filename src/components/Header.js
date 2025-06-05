@@ -1,7 +1,7 @@
 import React from 'react';
-import { useEffect } from 'react';
+//import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+//import { fetchWithAuth } from '../utils/fetchWithAuth';
 import Link from 'next/link';
 
 import { useAuthenticator } from '@aws-amplify/ui-react'; 
@@ -26,27 +26,27 @@ const Header = () => {
     router.push('/'); // ログアウト後の画面へ遷移
   };
 
-  const fetchUserRank = async () => {
-    try {
-      await fetchWithAuth('/api/current_user', { credentials:'include' });
+  //const fetchUserRank = async () => {
+  //  try {
+  //    await fetchWithAuth('/api/current_user', { credentials:'include' });
 
-      if (response.ok) {
-        const data = await response.json();
-        setIsLoggedIn(true);
-        setUserRank(data.rank);
-      } else {
-        console.error('Failed to fetch user rank', res.status);
-      }
-    } catch (error) {
-      console.error('Error fetching user rank:', error);
-    }
-  };
+  //    if (response.ok) {
+  //      const data = await response.json();
+  //      setIsLoggedIn(true);
+  //      //setUserRank(data.rank);
+  //    } else {
+  //      console.error('Failed to fetch user rank', res.status);
+  //    }
+  //  } catch (error) {
+  //    console.error('Error fetching user rank:', error);
+  //  }
+  //};
 
-  useEffect(() => {
-    fetchUserRank();
-  // TODO: Fix the dependency array issue
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //useEffect(() => {
+  //  fetchUserRank();
+  //// TODO: Fix the dependency array issue
+  //// eslint-disable-next-line react-hooks/exhaustive-deps
+  //}, []);
 
   return (
     <div className="flex_header">
