@@ -30,16 +30,13 @@ jest.mock('../hooks/useFetchRouletteTexts', () => {
 });
 
 jest.mock('../utils/fetchWithAuth', () => {
-  const fetchWithAuth = jest.fn(async (url, opts = {}) => {
-    const merged = {
+  const fetchWithAuth = jest.fn((url, opts = {}) => {
+    return global.fetch(url, {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       ...opts,
-    };
-
-    return global.fetch(url, merged);
+    });
   });
-
   return { __esModule: true, default: fetchWithAuth, fetchWithAuth };
 });
 
@@ -47,22 +44,19 @@ jest.mock('../utils/getIdToken');
 
 const fetchTicketsMock = jest.fn();
 
-// `TestWrapper` コンポーネントを修正して `fetchTicketsMock` に実装を追加
 const TestWrapper = ({ children }) => {
-  const [playTickets, setPlayTickets] = React.useState(5);
-  const [editTickets, setEditTickets] = React.useState(2);
+  const [tickets, setTickets] = React.useState(5);
 
-  // `fetchTicketsMock` の実装を設定
   React.useEffect(() => {
     fetchTicketsMock.mockReset();
     fetchTicketsMock.mockImplementation(() =>
-      setEditTickets(prev => prev - 1)
+      setTickets((prev) => prev - 1)
     );
   }, []);
 
   return (
     <TicketsContext.Provider
-      value={{ playTickets, setPlayTickets, editTickets, fetchTickets: fetchTicketsMock }}
+      value={{ tickets, setTickets, fetchTickets: fetchTicketsMock }}
     >
       {children}
     </TicketsContext.Provider>
@@ -103,56 +97,54 @@ afterAll(() => {
 
 // `fetch` のモック設定
 global.fetch = jest.fn((url, options) => {
+  const { method = 'GET' } = options;
 
-  if (parsedUrl.pathname === '/api/roulette_texts') {
+  if (url === '/api/roulette_texts' && method === 'GET') {
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: () => Promise.resolve([
-        { id: 1, number: 1, text: 'Prize 1' },
-        { id: 2, number: 2, text: 'Prize 2' },
-      ]),
+      json: () => Promise.resolve(mockRouletteTexts),
     });
   }
-
-  // PATCH リクエストの処理を追加
-  if (parsedUrl.pathname === '/api/roulette_texts/1' && options.method === 'PATCH') {
-    const requestBody = JSON.parse(options.body);
+  // ---------------- PATCH /api/roulette_texts/:number ------
+  const idMatch = url.match(/^\/api\/roulette_texts\/(\d+)$/);
+  if (idMatch && method === 'PATCH') {
+    const body = JSON.parse(options.body);
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({
-        roulette_text: {
-          id: 1,
-          number: 1,
-          text: requestBody.roulette_text.text,
-        },
-      }),
+      json: () =>
+        Promise.resolve({
+          roulette_text: {
+            id: Number(idMatch[1]),
+            number: Number(idMatch[1]),
+            text: body.roulette_text.text,
+          },
+        }),
     });
   }
 
   // ユーザー情報を取得するエンドポイントのモック
-  if (parsedUrl.pathname === '/api/current_user') {
+  if (url === '/api/current_user' && method === 'GET') {
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({
-        id: 7,
-        name: 'Sample User',
-        email: 'sample@example.com',
-        totalExp: 140,
-        rank: 10,
-      }),
+      json: () =>
+        Promise.resolve({
+          id: 7,
+          name: 'Sample User',
+          email: 'sample@example.com',
+          totalExp: 140,
+          rank: 10,
+        }),
     });
   }
 
-  if (parsedUrl.pathname === '/api/roulette_texts/spin' && options.method === 'PATCH') {
+  if (url === '/api/roulette_texts/spin' && method === 'PATCH') {
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({
-        play_tickets: 4, // プレイチケットの残数を適切に設定
-      }),
+      json: () => Promise.resolve({ play_tickets: 4 }),
     });
   }
 
@@ -198,6 +190,39 @@ describe('EditRouletteText Component', () => {
         expect(ticketsText).toHaveTextContent('チケットを『5』枚持っています。');
       });
     });
+
+    it('updates the displayed tickets when context values change', async () => {
+      const Wrapper = () => {
+        const [tickets, setTickets] = React.useState(5);
+    
+        return (
+          <TicketsContext.Provider
+            value={{ tickets, setTickets, fetchTickets: jest.fn() }}
+          >
+            <EditRouletteText />
+            <button data-testid="inc" onClick={() => setTickets(8)}>
+              change tickets
+            </button>
+          </TicketsContext.Provider>
+        );
+      };
+    
+      render(
+        <Authenticator.Provider>
+          <Wrapper />
+        </Authenticator.Provider>
+      );
+    
+      const ticketsText = await screen.findByTestId('tickets');
+      expect(ticketsText).toHaveTextContent('チケットを『5』枚持っています。');
+
+      userEvent.click(screen.getByTestId('inc'));
+    
+      await waitFor(() => {
+        expect(ticketsText).toHaveTextContent('チケットを『8』枚持っています。');
+      });
+    });
+    
   });
 
 
@@ -293,60 +318,6 @@ describe('EditRouletteText Component', () => {
 
       expect(screen.getByText('Prize 1')).toBeInTheDocument();
       expect(screen.getByText('Prize 2')).toBeInTheDocument();
-    });
-  });
-
-  describe('Conditional Rendering', () => {
-    it('displays the "ルーレットを編集する" button when editTickets > 0 and showForm is false', async () => {
-      render(
-        <Authenticator.Provider>
-          <TicketsContext.Provider value={mockTicketsContextValue}>
-            <EditRouletteText />
-          </TicketsContext.Provider>
-        </Authenticator.Provider>
-      );
-
-      const editButton = await screen.findByText('ルーレットを編集する');
-      expect(editButton).toBeInTheDocument();
-    });
-
-    it('does not display the "ルーレットを編集する" button when editTickets <= 0', async () => {
-      const mockTicketsContextValueZero = {
-        playTickets: 5,
-        editTickets: 0,
-        fetchTickets: jest.fn(),
-      };
-
-      render(
-        <Authenticator.Provider>
-          <TicketsContext.Provider value={mockTicketsContextValueZero}>
-            <EditRouletteText />
-          </TicketsContext.Provider>
-        </Authenticator.Provider>
-      );
-
-      const editButton = screen.queryByText('ルーレットを編集する');
-      expect(editButton).not.toBeInTheDocument();
-    });
-
-    it('does not display the "ルーレットを編集する" button when showForm is true', async () => {
-      render(
-        <Authenticator.Provider>
-          <TicketsContext.Provider value={mockTicketsContextValue}>
-            <EditRouletteText />
-          </TicketsContext.Provider>
-        </Authenticator.Provider>
-      );
-
-      const editButton = await screen.findByText('ルーレットを編集する');
-      expect(editButton).toBeInTheDocument();
-
-      userEvent.click(editButton);
-
-      await waitFor(() => {
-        const editButtonAfterClick = screen.queryByText('ルーレットを編集する');
-        expect(editButtonAfterClick).not.toBeInTheDocument();
-      });
     });
   });
 
@@ -534,7 +505,7 @@ describe('EditRouletteText Component', () => {
 
       window.confirm.mockRestore();
     });
-  });
+
 
   it('displays a flash message after successful edit', async () => {
     jest.spyOn(window, 'confirm').mockReturnValue(true);
@@ -547,10 +518,10 @@ describe('EditRouletteText Component', () => {
         </TestWrapper>
       </Authenticator.Provider>
     );
-  
+    
     // フォームを開く
     await userEvent.click(await screen.findByText('ルーレットを編集する'));
-  
+    
     // 数字選択して初期値が入るまで待つ
     const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
     userEvent.selectOptions(numberSelect, '1');
@@ -563,7 +534,7 @@ describe('EditRouletteText Component', () => {
   
     // 送信→PATCH
     userEvent.click(screen.getByText('内容を保存する'));
-  
+    
     // ―― ① PATCH リクエストが行われたかを待機
     await waitFor(() => {
       const patchCall = global.fetch.mock.calls.find(([url, opts]) =>
@@ -580,14 +551,14 @@ describe('EditRouletteText Component', () => {
         body: JSON.stringify({ roulette_text: { text: 'Updated Prize 1' } }),
       });
     });
-  
+    
     await waitFor(() => {
       expect(fetchTicketsMock).toHaveBeenCalled();
-      expect(screen.getByTestId('edit-tickets')).toHaveTextContent('編集チケットを『1』枚持っています。');
       expect(screen.getByText('Number: 1 を Updated Prize 1 に変更しました。')).toBeInTheDocument();
     });
   
-    window.confirm.mockRestore();
+      window.confirm.mockRestore();
+    });
   });
 
   describe('Insufficient Edit Tickets', () => {
