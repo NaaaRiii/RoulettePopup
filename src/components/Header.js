@@ -1,13 +1,10 @@
 import React from 'react';
-//import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-//import { fetchWithAuth } from '../utils/fetchWithAuth';
 import Link from 'next/link';
 
 import { useAuthenticator } from '@aws-amplify/ui-react'; 
 
 const Header = () => {
-  //const { isLoggedIn, userRank, setIsLoggedIn, setUserRank } = useAuth();
   const router = useRouter();
 
   const { route, user, signOut } = useAuthenticator((context) => [
@@ -26,28 +23,6 @@ const Header = () => {
     router.push('/'); // ログアウト後の画面へ遷移
   };
 
-  //const fetchUserRank = async () => {
-  //  try {
-  //    await fetchWithAuth('/api/current_user', { credentials:'include' });
-
-  //    if (response.ok) {
-  //      const data = await response.json();
-  //      setIsLoggedIn(true);
-  //      //setUserRank(data.rank);
-  //    } else {
-  //      console.error('Failed to fetch user rank', res.status);
-  //    }
-  //  } catch (error) {
-  //    console.error('Error fetching user rank:', error);
-  //  }
-  //};
-
-  //useEffect(() => {
-  //  fetchUserRank();
-  //// TODO: Fix the dependency array issue
-  //// eslint-disable-next-line react-hooks/exhaustive-deps
-  //}, []);
-
   return (
     <div className="flex_header">
       <div>
@@ -64,7 +39,7 @@ const Header = () => {
             </div>
           ) : (
             <ul className="flex_list">
-              <li><Link href="/guest_login">Guest Login</Link></li>
+              {/*<li><Link href="/guest_login">Guest Login</Link></li>*/}
               <li><Link href="/signup">Sign Up</Link></li>
               <li><Link href="/login">Log In</Link></li>
             </ul>

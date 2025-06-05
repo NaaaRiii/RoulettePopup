@@ -187,7 +187,7 @@ describe('EditRouletteText Component', () => {
   });
 
   describe('Ticket Information Display', () => {
-    it('displays the correct playTickets value from TicketsContext', async () => {
+    it('displays the correct tickets value from TicketsContext', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -197,8 +197,8 @@ describe('EditRouletteText Component', () => {
       );
 
       await waitFor(() => {
-        const playTicketsText = screen.getByTestId('play-tickets');
-        expect(playTicketsText).toHaveTextContent('プレイチケットを『5』枚持っています。');
+        const ticketsText = screen.getByTestId('tickets');
+        expect(ticketsText).toHaveTextContent('チケットを『5』枚持っています。');
       });
     });
 
