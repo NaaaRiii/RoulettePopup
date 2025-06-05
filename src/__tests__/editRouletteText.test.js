@@ -103,7 +103,6 @@ afterAll(() => {
 
 // `fetch` のモック設定
 global.fetch = jest.fn((url, options) => {
-  const parsedUrl = new URL(url, 'http://localhost');
 
   if (parsedUrl.pathname === '/api/roulette_texts') {
     return Promise.resolve({
@@ -167,10 +166,8 @@ global.fetch = jest.fn((url, options) => {
 // テストケース
 describe('EditRouletteText Component', () => {
   const mockTicketsContextValue = {
-    playTickets: 5,
-    setPlayTickets: jest.fn(),
-    editTickets: 2,
-    fetchTickets: jest.fn(),
+    tickets: 5,
+    setTickets: jest.fn(),
   };
 
   it('renders EditRouletteText component without crashing', () => {
@@ -201,56 +198,8 @@ describe('EditRouletteText Component', () => {
         expect(ticketsText).toHaveTextContent('チケットを『5』枚持っています。');
       });
     });
-
-    it('displays the correct editTickets value from TicketsContext', async () => {
-      render(
-        <Authenticator.Provider>
-          <TicketsContext.Provider value={mockTicketsContextValue}>
-            <EditRouletteText />
-          </TicketsContext.Provider>
-        </Authenticator.Provider>
-      );
-
-      const editTicketsText = await screen.findByTestId('edit-tickets');
-      expect(editTicketsText).toHaveTextContent('編集チケットを『2』枚持っています。');
-    });
-
-    it('updates the displayed playTickets and editTickets when context values change', async () => {
-      const { rerender } = render(
-        <Authenticator.Provider>
-          <TicketsContext.Provider value={mockTicketsContextValue}>
-            <EditRouletteText />
-          </TicketsContext.Provider>
-        </Authenticator.Provider>
-      );
-
-      const initialPlayTickets = await screen.findByTestId('play-tickets');
-      const initialEditTickets = await screen.findByTestId('edit-tickets');
-
-      expect(initialPlayTickets).toHaveTextContent('プレイチケットを『5』枚持っています。');
-      expect(initialEditTickets).toHaveTextContent('編集チケットを『2』枚持っています。');
-
-      const updatedTicketsContextValue = {
-        playTickets: 3,
-        editTickets: 4,
-        fetchTickets: jest.fn(),
-      };
-
-      rerender(
-        <Authenticator.Provider>
-          <TicketsContext.Provider value={updatedTicketsContextValue}>
-            <EditRouletteText />
-          </TicketsContext.Provider>
-        </Authenticator.Provider>
-      );
-
-      const updatedPlayTickets = await screen.findByTestId('play-tickets');
-      const updatedEditTickets = await screen.findByTestId('edit-tickets');
-
-      expect(updatedPlayTickets).toHaveTextContent('プレイチケットを『3』枚持っています。');
-      expect(updatedEditTickets).toHaveTextContent('編集チケットを『4』枚持っています。');
-    });
   });
+
 
   describe('Roulette Text List Display', () => {
     it('displays the roulette text list container', async () => {
