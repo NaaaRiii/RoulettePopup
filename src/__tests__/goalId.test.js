@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { useGoals } from '../contexts/GoalsContext';
+import { within } from '@testing-library/react';
 import { TicketsContext } from '../contexts/TicketsContext';
 import '@testing-library/jest-dom';
 
@@ -196,6 +197,23 @@ describe('Data Fetching', () => {
 
 
 describe('Display Logic', () => {
+	beforeEach(() => {
+    // useRouter のモック
+    useRouter.mockImplementation(() => ({
+      query: { goalId: '123', message: null },
+      push: jest.fn(),
+    }));
+
+    // useGoals をモックして最低限のプロパティを返す
+    useGoals.mockImplementation(() => ({
+      goalsState: [],
+      setGoalsState: jest.fn(),
+      refreshGoals: jest.fn(),
+    }));
+
+    jest.clearAllMocks();
+  });
+
   it('shows message from query string when ?message=... is present', async () => {
     // ルーターに goalId と message をセット
     useRouter.mockImplementation(() => ({
@@ -228,7 +246,145 @@ describe('Display Logic', () => {
     expect(messageEl).toBeInTheDocument();
   });
 
-	
+  it('renders "Completed Goal" button disabled when there are incomplete small goals', async () => {
+    useRouter.mockImplementation(() => ({
+      query: { goalId: '123', message: null },
+      push: jest.fn(),
+    }));
+
+    const mockGoalDetails = {
+      id: 123,
+      title: 'Test Goal',
+      content: 'Some content',
+      completed: false,
+      deadline: '2025-06-10',
+    };
+    const mockSmallGoals = [
+      { id: 1, completed: false, title: 'Small Goal 1', content: '...', deadline: null, difficulty: 'Easy', tasks: [] },
+      { id: 2, completed: true, title: 'Small Goal 2', content: '...', deadline: null, difficulty: 'Easy', tasks: [] },
+    ];
+
+    fetchWithAuth
+      .mockResolvedValueOnce({ ok: true, json: async () => mockGoalDetails })
+      .mockResolvedValueOnce({ ok: true, json: async () => mockSmallGoals });
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    // small goals が描画されるのを待つ
+    await waitFor(() => {
+      expect(screen.getByText('Small Goal 1')).toBeInTheDocument();
+    });
+
+    const button = screen.getByRole('button', { name: /Completed Goal/i });
+    expect(button).toBeDisabled();
+  });
+
+  it('renders "Completed Goal" button enabled when all small goals are completed', async () => {
+    useRouter.mockImplementation(() => ({
+      query: { goalId: '123', message: null },
+      push: jest.fn(),
+    }));
+
+    const mockGoalDetails = {
+      id: 123,
+      title: 'Test Goal',
+      content: 'Some content',
+      completed: false,
+      deadline: '2025-06-10',
+    };
+    const mockSmallGoals = [
+      { id: 1, completed: true, title: 'SG1', content: '...', deadline: null, difficulty: 'Easy', tasks: [] },
+      { id: 2, completed: true, title: 'SG2', content: '...', deadline: null, difficulty: 'Easy', tasks: [] },
+    ];
+
+    fetchWithAuth
+      .mockResolvedValueOnce({ ok: true, json: async () => mockGoalDetails })
+      .mockResolvedValueOnce({ ok: true, json: async () => mockSmallGoals });
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+		await waitFor(() => {
+			expect(screen.getByText('SG1')).toBeInTheDocument();
+		});
+
+    const button = screen.getByRole('button', { name: /Completed Goal/i });
+    expect(button).toBeEnabled();
+  });
+
+	it('groups small goals into incomplete and completed sections based on completed flag', async () => {
+    const mockGoalDetails = {
+      id: 123,
+      title: 'Test Goal',
+      content: 'Some content',
+      completed: false,
+      deadline: '2025-06-10',
+    };
+    const mockSmallGoals = [
+      {
+        id: 1,
+        completed: false,
+        title: 'Unfinished SG',
+        content: '...',
+        deadline: null,
+        difficulty: 'Easy',
+        tasks: [],
+      },
+      {
+        id: 2,
+        completed: true,
+        title: 'Finished SG',
+        content: '...',
+        deadline: null,
+        difficulty: 'Easy',
+        tasks: [],
+      },
+    ];
+
+    fetchWithAuth
+      .mockResolvedValueOnce({ ok: true, json: async () => mockGoalDetails })
+      .mockResolvedValueOnce({ ok: true, json: async () => mockSmallGoals });
+
+    const { container } = render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider
+          value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}
+        >
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    // 小ゴールがレンダリングされるのを待つ
+    await screen.findByText('Unfinished SG');
+    await screen.findByText('Finished SG');
+
+    // 「未完了」セクションと「完了済み」セクションを取得
+    const incompleteSection = container.querySelector('.goal-content-bottom-top');
+    const completedSection = container.querySelector('.goal-content-bottom-bottom');
+
+    // 未完了セクションに 'Unfinished SG' が含まれる
+    expect(
+      within(incompleteSection).getByText('Unfinished SG')
+    ).toBeInTheDocument();
+
+    // 完了済みセクションに 'Finished SG' が含まれる
+    expect(
+      within(completedSection).getByText('Finished SG')
+    ).toBeInTheDocument();
+  });
+
 });
 
 
