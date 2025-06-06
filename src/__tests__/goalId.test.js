@@ -131,4 +131,65 @@ describe('Data Fetching', () => {
 		expect(screen.getByText('・Task 2')).toBeInTheDocument();
   });
 
+	it('on fetch failure shows "Goal not found"', async () => {
+    // 取得失敗: response.ok===false
+    fetchWithAuth.mockResolvedValueOnce({ ok: false, status: 500 });
+    // small_goals は呼ばれないがモックにしておく
+    fetchWithAuth.mockResolvedValueOnce({ ok: true, json: async () => [] });
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    const notFoundEl = await screen.findByText('Goal not found');
+    expect(notFoundEl).toBeInTheDocument();
+  });
+
+  it('on fetch exception shows "Goal not found"', async () => {
+    // 例外を投げる
+    fetchWithAuth.mockRejectedValueOnce(new Error('Network error'));
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    const notFoundEl = await screen.findByText('Goal not found');
+    expect(notFoundEl).toBeInTheDocument();
+  });
+
+	it('when small_goals format is invalid, sets smallGoalsError and displays error message', async () => {
+    const mockGoalDetails = {
+      id: 123,
+      title: 'Test Goal Title',
+      content: 'Test Content',
+      completed: false,
+      deadline: '2025-06-10',
+    };
+
+    // 1回目は goalDetails、2回目は small_goals にオブジェクトを返して形式異常を起こす
+    fetchWithAuth
+      .mockResolvedValueOnce({ ok: true, json: async () => mockGoalDetails })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ invalid: 'data' }) });
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    // smallGoalsError がセットされると、"Invalid data format for small goals." を描画
+    const errorEl = await screen.findByText('Invalid data format for small goals.');
+    expect(errorEl).toBeInTheDocument();
+  });
+	
 });
