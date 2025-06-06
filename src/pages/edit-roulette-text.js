@@ -66,11 +66,6 @@ const EditRouletteText = () => {
     console.log("Selected Roulette Text Number:", rouletteNumber);
     console.log("Edited Text:", editedText);
 
-    //if (editTickets <= 0) {
-    //  alert('編集チケットが不足しています');
-    //  return;
-    //}
-
     if (!rouletteNumber) {
       console.error('Roulette Number is undefined.');
       return;
@@ -92,15 +87,15 @@ const EditRouletteText = () => {
       console.log("Response Status:", response.status);
 
       if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.error || '更新に失敗しました。');
-        return;
-      }
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error Response Text:", errorText);
-        alert('更新に失敗しました。');
+        let errorMessage = '更新に失敗しました。';
+        try {
+          const err = await response.clone().json();
+          errorMessage = err.error || errorMessage;
+        } catch {
+          const errText = await response.text();
+          console.error('Error Response Text:', errText);
+        }
+        alert(errorMessage);
         return;
       }
 
@@ -132,17 +127,8 @@ const EditRouletteText = () => {
           <h3 className="ticket-info" data-testid="tickets">
             チケットを『{tickets}』枚持っています。
           </h3>
-          {/*<h3 className="roulette-edit-info" data-testid="edit-tickets">
-            編集チケットを『{editTickets}』枚持っています。
-          </h3>*/}
 
           <div>
-            {/*{editTickets > 0 && !showForm && (
-              <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
-                ルーレットを編集する
-              </button>
-            )}*/}
-
             {!showForm && (
               <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
                 ルーレットを編集する
@@ -182,12 +168,6 @@ const EditRouletteText = () => {
                     <button
                       type="submit"
                       className="btn btn-primary"
-                      //onClick={(e) => {
-                      //  e.preventDefault();
-                      //  if (window.confirm("チケットを1枚消費して、この内容でテキストを編集しますか？")) {
-                      //    handleSubmit(e);
-                      //  }
-                      //}}
                     >
                       内容を保存する
                     </button>
@@ -229,7 +209,6 @@ const EditRouletteText = () => {
             <ul data-testid="roulette-description-list">
               <li>Rankが10上がるごとに、チケットが付与されます。</li>
               <li>ルーレットを回すには、チケットを1枚使用する必要があります。</li>
-              {/*<li>ルーレットの各テキストを編集するには、編集チケットを1枚使用する必要があります。</li>*/}
               <li>各チケットの枚数は、左上に表示されています。</li>
             </ul>
           </div>
