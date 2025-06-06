@@ -334,7 +334,11 @@ function GoalPage() {
 
                     <div className='add-small-goal-button'>
                       <Link href={`#`} onClick={openModal}>
-                        <div className='add-small-goal-button-link'>
+                      <div
+                          className="add-small-goal-button-link"
+                          role="button"
+                          tabIndex={0}
+                        >
                           Small Goalの作成
                         </div>
                       </Link>

@@ -1,11 +1,10 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, userEvent, fireEvent, within } from '@testing-library/react';
 import GoalPage from '../pages/goals/[goalId]';
 import { useRouter } from 'next/router';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { useGoals } from '../contexts/GoalsContext';
-import { within } from '@testing-library/react';
 import { TicketsContext } from '../contexts/TicketsContext';
 import '@testing-library/jest-dom';
 
@@ -388,3 +387,68 @@ describe('Display Logic', () => {
 });
 
 
+describe('Modal Operations', () => {
+  beforeEach(() => {
+		jest.clearAllMocks();
+    fetchWithAuth.mockReset();
+
+    useRouter.mockImplementation(() => ({
+      query: { goalId: '123', message: null },
+      push: jest.fn(),
+    }));
+
+    useGoals.mockImplementation(() => ({
+      goalsState: [],
+      setGoalsState: jest.fn(),
+      refreshGoals: jest.fn(),
+    }));
+
+    // フェッチは空配列を返すだけ
+    fetchWithAuth
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 123, title: 'Test Goal' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('opens CreateSmallGoal modal then closes it with onClose', async () => {
+    // goalDetails と small_goals を返す
+    fetchWithAuth
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 123, title: 'Test Goal' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    // 目標タイトルが表示されるまで待つ
+    await screen.findByText('目標 : Test Goal');
+
+    // 「Small Goalの作成」を含む div を取得し、そこから <a> を探してクリック
+    const labelDiv = await screen.findByText(/Small\s*Goalの作成/);
+    const linkAnchor = labelDiv.closest('a');
+    expect(linkAnchor).not.toBeNull();
+
+    fireEvent.click(linkAnchor);
+
+    // モーダルは data-testid="create-small-goal" をもつ div
+    const modal = await screen.findByTestId('create-small-goal');
+    expect(modal).toBeInTheDocument();
+
+    // モーダル内の「キャンセル」または「閉じる」ボタンをクリックして閉じる
+    const closeBtn = within(modal).getByRole('button', { name: /Close/i });
+    fireEvent.click(closeBtn);
+
+    // モーダルが消えるまで待機
+    await waitFor(() => {
+      expect(screen.queryByTestId('create-small-goal')).not.toBeInTheDocument();
+    });
+  });
+
+});
