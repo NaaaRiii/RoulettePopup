@@ -193,3 +193,42 @@ describe('Data Fetching', () => {
   });
 	
 });
+
+
+describe('Display Logic', () => {
+  it('shows message from query string when ?message=... is present', async () => {
+    // ルーターに goalId と message をセット
+    useRouter.mockImplementation(() => ({
+      query: { goalId: '123', message: encodeURIComponent('Hello World') },
+      push: jest.fn(),
+    }));
+
+    // fetchWithAuth をモック：まず goalDetails、次に small_goals を返す
+    const mockGoalDetails = {
+      id: 123,
+      title: 'Test Goal',
+      content: 'Some content',
+      completed: false,
+      deadline: '2025-06-10',
+    };
+    fetchWithAuth
+      .mockResolvedValueOnce({ ok: true, json: async () => mockGoalDetails })
+      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    // ローディングが終わり、メッセージが表示されるのを待つ
+    const messageEl = await screen.findByText('Hello World');
+    expect(messageEl).toBeInTheDocument();
+  });
+
+	
+});
+
+
