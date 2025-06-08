@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, waitFor, userEvent, fireEvent, within } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import GoalPage from '../pages/goals/[goalId]';
 import CreateSmallGoal from '../components/CreateSmallGoal';
 import EditGoalModal from '../components/EditGoal';
@@ -540,5 +541,64 @@ describe('Modal Operations', () => {
 
 		expect(await screen.findByTestId('mock-edit-small-goal')).toBeInTheDocument();
   });
+});
 
+
+describe('Task Toggle', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    /* ---- Router / GoalsContext の最小限モック ---- */
+    useRouter.mockReturnValue({ query:{ goalId:'123' }, push:jest.fn() });
+    useGoals.mockReturnValue({ goalsState:[], setGoalsState:jest.fn(), refreshGoals:jest.fn() });
+
+    /* ---- fetchWithAuth を URL 判定で一元モック ---- */
+    const goal = { id:123, title:'Test Goal' };
+    const smallGoals = [{
+      id:1,
+      title:'Small Goal 1',
+      completed:false,
+      difficulty:'Easy',
+      deadline:null,
+      tasks:[ { id:11, content:'Task 1', completed:false } ],
+    }];
+
+    fetchWithAuth.mockImplementation(async (url, opts={}) => {
+      if (url === '/api/goals/123')                       return { ok:true, json:async()=>goal       };
+      if (url === '/api/goals/123/small_goals')           return { ok:true, json:async()=>smallGoals };
+      if (url.endsWith('/api/tasks/11/complete'))         return { ok:true, json:async()=>({ completed:true }) };
+      /* デフォルト */
+      return { ok:true, json:async()=>({}) };
+    });
+  });
+
+  it('calls POST /api/tasks/:id/complete and toggles completed state', async () => {
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets:0, setTickets:jest.fn(), fetchTickets:jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    /* --- チェックボックスを取得してクリック --- */
+    const checkbox = await screen.findByRole('checkbox', { name:/Task\s*1/i });
+    expect(checkbox).not.toBeChecked();
+
+    const user = userEvent.setup();
+    await user.click(checkbox);
+
+    /* --- POST が送られたか --- */
+    await waitFor(() =>
+      expect(fetchWithAuth).toHaveBeenCalledWith(
+        '/api/tasks/11/complete',
+        { method:'POST', body:JSON.stringify({ completed:true }) }
+      )
+    );
+
+    /* --- UI が更新されたか --- */
+    await waitFor(() =>
+      expect(screen.getByRole('checkbox', { name:/Task\s*1/i })).toBeChecked()
+    );
+  });
 });
