@@ -1,6 +1,9 @@
 import React from 'react';
 import { render, screen, waitFor, userEvent, fireEvent, within } from '@testing-library/react';
 import GoalPage from '../pages/goals/[goalId]';
+import CreateSmallGoal from '../components/CreateSmallGoal';
+import EditGoalModal from '../components/EditGoal';
+import EditSmallGoalModal from '../components/EditSmallGoal';
 import { useRouter } from 'next/router';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -16,6 +19,31 @@ jest.mock('../utils/fetchWithAuth');
 jest.mock('../contexts/GoalsContext', () => ({
   useGoals: jest.fn(),
 }));
+
+jest.mock('../components/EditGoal', () => {
+  const React = require('react');
+  const MockEditGoal = props => {
+    const { isOpen, onGoalUpdated } = props;
+    return isOpen
+      ? <button data-testid="mock-edit-goal" onClick={onGoalUpdated}>Save Goal</button>
+      : null;
+  };
+  MockEditGoal.displayName = 'EditGoal';
+  return MockEditGoal;
+});
+
+jest.mock('../components/EditSmallGoal', () => {
+  const React = require('react');
+  const MockEditSmallGoal = props => {
+    const { isOpen, onSmallGoalUpdated } = props;
+    return isOpen
+      ? <button data-testid="mock-edit-small-goal" onClick={onSmallGoalUpdated}>Save SmallGoal</button>
+      : null;
+  };
+  MockEditSmallGoal.displayName = 'EditSmallGoal';
+  return MockEditSmallGoal;
+});
+
 
 describe('Data Fetching', () => {
   beforeEach(() => {
@@ -403,10 +431,23 @@ describe('Modal Operations', () => {
       refreshGoals: jest.fn(),
     }));
 
-    // フェッチは空配列を返すだけ
-    fetchWithAuth
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 123, title: 'Test Goal' }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+	fetchWithAuth
+		.mockResolvedValueOnce({ ok: true, json: async () => ({ id: 123, title: 'Test Goal' }) })
+		.mockResolvedValueOnce({
+			ok:true,
+			json:async()=>[
+				{
+					id:1,
+					title:'Small Goal 1',
+					completed:false,
+					difficulty:'Easy',     // ← 実装側で参照されるフィールドは入れておく
+					deadline:null,
+					tasks:[
+						{ id:11, content:'Task 1', completed:false },
+					],
+				},
+			],
+		});
   });
 
   afterEach(() => {
@@ -449,6 +490,55 @@ describe('Modal Operations', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('create-small-goal')).not.toBeInTheDocument();
     });
+  });
+
+	it('opens EditGoalModal when "目標を編集する" link is clicked', async () => {
+    // 1st: goalDetails, 2nd: small_goals
+    fetchWithAuth
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 123, title: 'Test Goal' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    await screen.findByText('目標 : Test Goal');
+
+		const goalLink = screen.getByRole('link', { name: /目標を編集する/ });
+		fireEvent.click(goalLink);
+	
+		expect(await screen.findByTestId('mock-edit-goal')).toBeInTheDocument();
+	});
+
+  it('opens EditSmallGoalModal when a small-goal Edit link is clicked', async () => {
+    const goal = { id: 123, title: 'Test Goal' };
+    const smallGoals = [
+      { id: 1, title: 'Small Goal 1', completed: false, difficulty: 'Easy', deadline: null, tasks: [] }
+    ];
+
+    fetchWithAuth
+      .mockResolvedValueOnce({ ok: true, json: async () => goal })
+      .mockResolvedValueOnce({ ok: true, json: async () => smallGoals });
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+		await screen.findByText(/Small\s*Goal\s*1/);
+
+
+		const editTrigger = await screen.findByText(/^Edit$/);
+		fireEvent.click(editTrigger);  
+
+		expect(await screen.findByTestId('mock-edit-small-goal')).toBeInTheDocument();
   });
 
 });
