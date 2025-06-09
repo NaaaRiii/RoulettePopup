@@ -1004,3 +1004,45 @@ describe('副作用フック', () => {
 
   });
 });
+
+
+describe('UI コンポーネント存在', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    /* --------- Router / GoalsContext 最小限モック --------- */
+    useRouter.mockReturnValue({ query: { goalId: '123' }, push: jest.fn() });
+    useGoals.mockReturnValue({ goalsState: [], setGoalsState: jest.fn(), refreshGoals: jest.fn() });
+
+    /* --------- fetchWithAuth を URL で分岐モック --------- */
+    fetchWithAuth.mockImplementation(async (url) => {
+      if (url === '/api/goals/123')
+        return { ok: true, json: async () => ({ id: 123, title: 'Test Goal' }) };
+      if (url === '/api/goals/123/small_goals')
+        return { ok: true, json: async () => [] };
+      return { ok: true, json: async () => ({}) };
+    });
+  });
+
+  /**
+   * ExpCalendar が描画されるかを確認
+   * GoalPage 内では <div data-testid="calendar">…</div> を含むため
+   * これを取得して存在をアサートする
+   */
+  it('ExpCalendar が描画される', async () => {
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider
+          value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}
+        >
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    /* Goal データが表示されるのを待ってから Calendar を検証 */
+    await screen.findByText(/目標\s*:\s*Test\s*Goal/);
+
+    expect(screen.getByTestId('calendar')).toBeInTheDocument();
+  });
+});
