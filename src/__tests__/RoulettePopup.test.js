@@ -1,21 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RoulettePopup from '../components/RoulettePopup';
 import { isValidAngle } from '../components/RoulettePopup';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { TicketsContext } from '../contexts/TicketsContext';
 
-
-//jest.mock('../contexts/TicketsContext', () => {
-//  const React = require('react');
-//  return {
-//    TicketsContext: React.createContext({
-//      tickets: 0,
-//      setTickets: jest.fn(),
-//      fetchTickets: jest.fn(),
-//    }),
-//  };
-//});
 
 jest.mock('../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
@@ -150,4 +139,79 @@ describe('チケット関連の分岐', () => {
     // API 呼び出しは行われない
     expect(fetchWithAuth).not.toHaveBeenCalled();
   });
+
+  it('window.confirm が false を返した場合、スピンが開始されない（setIsSpinning も呼ばれない）', () => {
+    // confirm をモックして「いいえ」を返す
+    window.confirm = jest.fn(() => false);
+  
+    render(
+      <TicketsContext.Provider
+        value={{ tickets: 1, setTickets: jest.fn(), fetchTickets: jest.fn() }}
+      >
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+  
+    const wheel = screen.getByTestId('roulette-wheel');
+    const button = screen.getByTestId('start-button');
+  
+    // ボタンをクリック
+    fireEvent.click(button);
+  
+    // 確認ダイアログが出ていること
+    expect(window.confirm).toHaveBeenCalledWith(
+      'チケットを1枚消費して、ルーレットを回しますか？'
+    );
+  
+    // API 呼び出しは行われない
+    expect(fetchWithAuth).not.toHaveBeenCalled();
+  
+    // スピン開始フラグが立っていないので transition は none のまま
+    expect(wheel.style.transition).toBe('none');
+    // ボタンもまだ有効
+    expect(button.disabled).toBe(false);
+  });
+
+
+  it('window.confirm が true の場合、fetchWithAuth("/api/roulette_texts/spin", PATCH) が呼ばれ、成功時に setTickets へレスポンスの tickets が反映される', async () => {
+    // confirm をモックして「はい」を返す
+    window.confirm = jest.fn(() => true);
+
+    // fetchWithAuth のモックレスポンスを用意
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ tickets: 3 }),
+    });
+
+    const mockSetTickets = jest.fn();
+    const mockFetchTickets = jest.fn();
+
+    render(
+      <TicketsContext.Provider
+        value={{
+          tickets: 1,
+          setTickets: mockSetTickets,
+          fetchTickets: mockFetchTickets,
+        }}
+      >
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+
+    // ボタンをクリックして処理を開始
+    fireEvent.click(screen.getByTestId('start-button'));
+
+    // fetchWithAuth が正しい引数で呼ばれるのを待機
+    await waitFor(() => {
+      expect(fetchWithAuth).toHaveBeenCalledWith(
+        '/api/roulette_texts/spin',
+        { method: 'PATCH' }
+      );
+    });
+
+    // 成功レスポンスから setTickets が呼ばれるのを確認
+    expect(mockSetTickets).toHaveBeenCalledWith(3);
+  });
+
+  
 });
