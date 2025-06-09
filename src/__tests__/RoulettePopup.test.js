@@ -64,4 +64,35 @@ describe('初期レンダリング', () => {
     expect(screen.getByTestId('roulette-wheel')).toBeTruthy();
   });
 
+  it('segment 要素が 12 個生成され、data-number が 1〜12 の連番になっていること', () => {
+    const { container } = render(<RoulettePopup />);
+    const segments = container.getElementsByClassName('segment');
+
+    // 12 個あること
+    expect(segments.length).toBe(12);
+
+    // data-number が 1 から 12 の連番になっていること
+    Array.from(segments).forEach((seg, idx) => {
+      expect(seg.getAttribute('data-number')).toBe(String(idx + 1));
+    });
+  });
+
+  it('初期状態では rotation が 90deg で適用され、transition が none である', () => {
+    render(<RoulettePopup />);
+  
+    const wheel = screen.getByTestId('roulette-wheel');
+    // inline style ベースで確認
+    expect(wheel.style.transform).toBe('rotate(90deg)');
+    expect(wheel.style.transition).toBe('none');
+  });
+
+  it('「ルーレットを回す」ボタンが存在し、初期状態で disabled=false', () => {
+    render(<RoulettePopup />);
+    const button = screen.getByTestId('start-button');
+    // ボタンが存在すること
+    expect(button).toBeTruthy();
+    // 初期状態で disabled が false であること
+    expect(button.disabled).toBe(false);
+  });
+  
 });
