@@ -5,6 +5,7 @@ import GoalPage from '../pages/goals/[goalId]';
 import CreateSmallGoal from '../components/CreateSmallGoal';
 import EditGoalModal from '../components/EditGoal';
 import EditSmallGoalModal from '../components/EditSmallGoal';
+import EditRouletteText        from '../pages/edit-roulette-text'; 
 import { useRouter } from 'next/router';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -44,6 +45,17 @@ jest.mock('../components/EditSmallGoal', () => {
   MockEditSmallGoal.displayName = 'EditSmallGoal';
   return MockEditSmallGoal;
 });
+
+jest.mock('../hooks/useFetchRouletteTexts', () => ({
+  useFetchRouletteTexts: () => ({
+    // map できるように最低限の配列を渡す
+    rouletteTexts: [
+      { id: 1, number: 1, text: 'Prize 1' },
+      { id: 2, number: 2, text: 'Prize 2' },
+    ],
+    setRouletteTexts: jest.fn(),
+  }),
+}));
 
 
 describe('Data Fetching', () => {
@@ -760,6 +772,181 @@ describe('Goal 完了', () => {
         pathname: '/dashboard',
         query: { message: encodeURIComponent('Goal Completed!') },
       })
+    );
+  });
+});
+
+
+describe('削除操作', () => {
+  const goalId      = '123';
+  const pushMock    = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    /* ---- Router / GoalsContext ---- */
+    useRouter.mockReturnValue({ query:{ goalId }, push:pushMock });
+    useGoals.mockReturnValue({ goalsState:[], setGoalsState:jest.fn(), refreshGoals:jest.fn() });
+
+    /* ---- ダミーデータ ---- */
+    const goalDetails = { id:123, title:'Test Goal' };
+    const smallGoals  = [
+      { id:1, title:'Small Goal 1', completed:false, difficulty:'Easy', deadline:null, tasks:[] },
+      { id:2, title:'Small Goal 2', completed:false, difficulty:'Easy', deadline:null, tasks:[] },
+    ];
+
+    /* ---- fetchWithAuth を URL 判定で一元モック ---- */
+    fetchWithAuth.mockImplementation(async (url, opts = {}) => {
+      if (url === `/api/goals/${goalId}`)                    // Goal 詳細
+        return { ok:true, json:async()=>goalDetails };
+
+      if (url === `/api/goals/${goalId}/small_goals`)        // Small Goals 一覧
+        return { ok:true, json:async()=>smallGoals };
+
+      if (url === `/api/goals/${goalId}/small_goals/1`       // 削除エンドポイント
+          && opts.method === 'DELETE')
+        return { ok:true, json:async()=>({}) };
+
+      /* デフォルト */
+      return { ok:true, json:async()=>({}) };
+    });
+  });
+
+  it('Confirm OK → DELETE で small goal が UI から消える', async () => {
+
+    /* ① confirm を YES にしておく */
+    const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
+
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets:0, setTickets:jest.fn(), fetchTickets:jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    /* ② 小ゴール２件が描画されるまで待機 */
+    await screen.findByText(/Small\s*Goal\s*1/);
+    await screen.findByText(/Small\s*Goal\s*2/);
+
+    /* ③ id=1 の削除リンクをクリック */
+    const deleteLink = screen.getByTestId('delete-small-goal-1');
+    fireEvent.click(deleteLink);
+
+    /* ④ DELETE リクエストが正しい URL／method で送られたか */
+    await waitFor(() =>
+      expect(fetchWithAuth).toHaveBeenCalledWith(
+        `/api/goals/${goalId}/small_goals/1`,
+        { method:'DELETE' }
+      )
+    );
+
+    /* ⑤ UI から Small Goal 1 が消え、Small Goal 2 は残る */
+    await waitFor(() =>
+      expect(screen.queryByText(/Small\s*Goal\s*1/)).not.toBeInTheDocument()
+    );
+    expect(screen.getByText(/Small\s*Goal\s*2/)).toBeInTheDocument();
+
+    confirmSpy.mockRestore();
+  });
+
+	it('Confirm OK → DELETE /api/goals/:id → refreshGoals が呼ばれ dashboard に遷移', async () => {
+		const goalId = '123';
+	
+		/* ---- Router / GoalsContext のモックを再設定 ---- */
+		const pushMock        = jest.fn();
+		const refreshGoalsSpy = jest.fn();
+	
+		useRouter.mockReturnValue({ query:{ goalId }, push:pushMock });
+		useGoals.mockReturnValue({ goalsState:[], setGoalsState:jest.fn(), refreshGoals:refreshGoalsSpy });
+	
+		/* ---- fetchWithAuth モック ---- */
+		const goalDetails = { id:123, title:'Test Goal' };
+		fetchWithAuth.mockImplementation(async (url, opts={}) => {
+			if (url === `/api/goals/${goalId}` && !opts.method)
+				return { ok:true, json:async()=>goalDetails };           // Goal 詳細
+			if (url === `/api/goals/${goalId}/small_goals`)
+				return { ok:true, json:async()=>[] };                    // small_goals 空
+			if (url === `/api/goals/${goalId}` && opts.method==='DELETE')
+				return { ok:true, json:async()=>({}) };                  // Goal DELETE
+			return { ok:true, json:async()=>({}) };
+		});
+	
+		/* ---- confirm を YES に固定 ---- */
+		const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
+	
+		/* ---- ① 画面描画 ---- */
+		render(
+			<Authenticator.Provider>
+				<TicketsContext.Provider value={{ tickets:0, setTickets:jest.fn(), fetchTickets:jest.fn() }}>
+					<GoalPage />
+				</TicketsContext.Provider>
+			</Authenticator.Provider>
+		);
+	
+		/* ---- ② Goal が表示されるまで待機 ---- */
+		await screen.findByText('目標 : Test Goal');
+	
+		/* ---- ③ 「Delete Goal」リンクをクリック ---- */
+		const deleteLink = screen.getByTestId('delete-goal-link');
+		fireEvent.click(deleteLink);
+	
+		/* ---- ④ DELETE が正しい URL で呼ばれたか ---- */
+		await waitFor(() =>
+			expect(fetchWithAuth).toHaveBeenCalledWith(
+				`/api/goals/${goalId}`,
+				{ method:'DELETE' }
+			)
+		);
+	
+		/* ---- ⑤ refreshGoals() が呼ばれたか ---- */
+		expect(refreshGoalsSpy).toHaveBeenCalled();
+	
+		/* ---- ⑥ /dashboard へ遷移したか ---- */
+		expect(pushMock).toHaveBeenCalledWith('/dashboard');
+	
+		confirmSpy.mockRestore();
+	});
+});
+
+
+describe('チケット表示', () => {
+  /**
+   * <h3 class="ticket-info">チケットを『{tickets}』枚…</h3>
+   * が TicketsContext.tickets の変更をリアルタイムに反映するかを確認
+   */
+  it('TicketsContext 反映', async () => {
+    /* ① wrapper で tickets を操作出来るように */
+    const TestWrapper = () => {
+      const [tickets, setTickets] = React.useState(3);   // 初期 3 枚
+      return (
+        <TicketsContext.Provider
+          value={{ tickets, setTickets, fetchTickets: jest.fn() }}
+        >
+          <EditRouletteText />
+          {/* テスト用: tickets を 7 に更新するボタン */}
+          <button data-testid="update-tickets" onClick={() => setTickets(7)}>
+            update
+          </button>
+        </TicketsContext.Provider>
+      );
+    };
+
+    render(
+      <Authenticator.Provider>
+        <TestWrapper />
+      </Authenticator.Provider>
+    );
+
+    /* ② 初期表示は 3 枚 */
+    expect(screen.getByTestId('tickets')).toHaveTextContent('チケットを『3』枚');
+
+    /* ③ クリックで tickets を 7 に変更 */
+    fireEvent.click(screen.getByTestId('update-tickets'));
+
+    /* ④ DOM が 7 枚に更新されるまで待つ */
+    await waitFor(() =>
+      expect(screen.getByTestId('tickets')).toHaveTextContent('チケットを『7』枚')
     );
   });
 });
