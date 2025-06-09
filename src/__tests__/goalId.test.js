@@ -602,3 +602,164 @@ describe('Task Toggle', () => {
     );
   });
 });
+
+
+describe('Small Goal 完了', () => {
+  const goalId = '123';
+  const routerPush = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    /* Router / GoalsContext モック */
+    useRouter.mockReturnValue({ query: { goalId }, push: routerPush });
+    useGoals.mockReturnValue({ goalsState: [], setGoalsState: jest.fn(), refreshGoals: jest.fn() });
+
+    /* ダミーデータ */
+    const goal = { id: 123, title: 'Test Goal' };
+    const smallGoals = [
+      {
+        id: 1,
+        title: 'Small Goal 1',
+        completed: false,
+        difficulty: 'Easy',
+        deadline: null,
+        tasks: [{ id: 11, content: 'Task 1', completed: true }],
+      },
+    ];
+
+    /* fetchWithAuth を URL 判定で一元モック */
+    fetchWithAuth.mockImplementation(async (url, opts = {}) => {
+      if (url === `/api/goals/${goalId}`) return { ok: true, json: async () => goal };
+      if (url === `/api/goals/${goalId}/small_goals`) return { ok: true, json: async () => smallGoals };
+      if (url === `/api/goals/${goalId}/small_goals/1/complete`) {
+        /* ---- SmallGoal 完了 API 応答 ---- */
+        return {
+          ok: true,
+          json: async () => ({ message: 'Small Goal Completed!' }),
+        };
+      }
+      return { ok: true, json: async () => ({}) };
+    });
+  });
+
+  it('“完了” ボタン → POST /complete → smallGoal.completed が true になり dashboard に遷移する', async () => {
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    /* ① Small Goal が描画されるまで待機 */
+    await screen.findByText(/Small\s*Goal\s*1/i);
+
+    /* ② “完了” ボタンをクリック */
+    const completeBtn = screen.getByRole('button', { name: /完了/i });
+    const user = userEvent.setup();
+    await user.click(completeBtn);
+
+    /* ③ POST が正しい URL で送られたか */
+    await waitFor(() =>
+      expect(fetchWithAuth).toHaveBeenCalledWith(
+        `/api/goals/${goalId}/small_goals/1/complete`,
+        { method: 'POST' }
+      )
+    );
+
+    /* ④ router.push が flash メッセージ付きで呼ばれたか */
+    await waitFor(() =>
+      expect(routerPush).toHaveBeenCalledWith({
+        pathname: '/dashboard',
+        query: { message: encodeURIComponent('Small Goal Completed!') },
+      })
+    );
+  });
+});
+
+
+describe('Goal 完了', () => {
+  const goalId      = '123';
+  const routerPush  = jest.fn();
+  const fetchTicketsMock = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    /* -------- Router / GoalsContext のモック -------- */
+    useRouter.mockReturnValue({ query:{ goalId, message:null }, push:routerPush });
+    useGoals.mockReturnValue({ goalsState:[], setGoalsState:jest.fn(), refreshGoals:jest.fn() });
+
+    /* -------- API モック -------- */
+    const goalDetails = {
+      id:      123,
+      title:   'Test Goal',
+      content: 'Some content',
+      completed: false,
+      deadline: null,
+    };
+    // すべて completed:true ⇒ “Completed Goal” ボタンが有効になる
+    const smallGoals = [
+      { id:1, title:'SG1', completed:true,  difficulty:'Easy', deadline:null, tasks:[] },
+      { id:2, title:'SG2', completed:true,  difficulty:'Easy', deadline:null, tasks:[] },
+    ];
+
+    fetchWithAuth.mockImplementation(async (url, opts = {}) => {
+      if (url === `/api/goals/${goalId}`)                     // Goal 詳細
+        return { ok:true, json:async()=>goalDetails };
+
+      if (url === `/api/goals/${goalId}/small_goals`)         // Small Goals
+        return { ok:true, json:async()=>smallGoals };
+
+      if (url === `/api/goals/${goalId}/complete`)            // Goal 完了 POST
+        return { ok:true, json:async()=>({ message:'Goal Completed!' }) };
+
+      return { ok:true, json:async()=>({}) };
+    });
+  });
+
+  it('未完了 small goal が無いとき “Completed Goal” で Goal 完了 & ダッシュボード遷移', async () => {
+    render(
+      <Authenticator.Provider>
+        <TicketsContext.Provider
+          value={{ tickets:0, setTickets:jest.fn(), fetchTickets:fetchTicketsMock }}
+        >
+          <GoalPage />
+        </TicketsContext.Provider>
+      </Authenticator.Provider>
+    );
+
+    /* ① Goal & Small Goals の描画を待つ */
+    await screen.findByText('目標 : Test Goal');
+
+    /* “Completed Goal” ボタンが有効になっているはず */
+    const completeBtn = screen.getByRole('button', { name:/Completed Goal/i });
+    expect(completeBtn).toBeEnabled();
+
+    /* ② クリック */
+    const user = userEvent.setup();
+    await user.click(completeBtn);
+
+    /* ③ /api/goals/:id/complete が POST されたか */
+    await waitFor(() =>
+      expect(fetchWithAuth).toHaveBeenCalledWith(
+        `/api/goals/${goalId}/complete`,
+        { method:'POST' }
+      )
+    );
+
+    /* ④ fetchTickets() が呼ばれる（チケット枚数更新） */
+    await waitFor(() =>
+      expect(fetchTicketsMock).toHaveBeenCalled()
+    );
+
+    /* ⑤ router.push('/dashboard', flash message) が呼ばれる */
+    await waitFor(() =>
+      expect(routerPush).toHaveBeenCalledWith({
+        pathname: '/dashboard',
+        query: { message: encodeURIComponent('Goal Completed!') },
+      })
+    );
+  });
+});
