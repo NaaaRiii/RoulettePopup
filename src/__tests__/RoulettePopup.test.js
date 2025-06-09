@@ -213,5 +213,205 @@ describe('チケット関連の分岐', () => {
     expect(mockSetTickets).toHaveBeenCalledWith(3);
   });
 
+  it('response.ok が false の場合、alert にエラーメッセージを表示し、スピンを開始しない', async () => {
+    // confirm は「はい」を返す
+    window.confirm = jest.fn(() => true);
+    // alert をモック
+    window.alert = jest.fn();
+    // fetchWithAuth をエラー返却でモック
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ error: 'テスト用エラー' }),
+    });
   
+    render(
+      <TicketsContext.Provider
+        value={{
+          tickets: 1,
+          setTickets: jest.fn(),
+          fetchTickets: jest.fn(),
+        }}
+      >
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+  
+    // ボタンをクリックして API 呼び出しへ
+    fireEvent.click(screen.getByTestId('start-button'));
+  
+    // fetchWithAuth が呼ばれるのを待機
+    await waitFor(() => {
+      expect(fetchWithAuth).toHaveBeenCalledWith(
+        '/api/roulette_texts/spin',
+        { method: 'PATCH' }
+      );
+    });
+  
+    // エラーメッセージで alert が呼ばれる
+    expect(window.alert).toHaveBeenCalledWith('テスト用エラー');
+  
+    // 角度は変わらず 90deg のまま（回転していない）
+    const wheel = screen.getByTestId('roulette-wheel');
+    expect(wheel.style.transform).toBe('rotate(90deg)');
+  });
+});
+
+
+describe('ルーレット回転処理', () => {
+  beforeEach(() => {
+    // confirm は「はい」を返し、API モックも成功レスポンスを返す
+    window.confirm = jest.fn(() => true);
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ tickets: 5 }),
+    });
+    jest.spyOn(Math, 'random').mockReturnValue(100 / 360);
+  });
+
+  afterEach(() => {
+    jest.spyOn(Math, 'random').mockRestore();
+  });
+
+  it('スピン開始後 isSpinning が true になり、ボタンが disabled になる', () => {
+    const mockSetTickets = jest.fn();
+    const mockFetchTickets = jest.fn();
+
+    render(
+      <TicketsContext.Provider
+        value={{ tickets: 5, setTickets: mockSetTickets, fetchTickets: mockFetchTickets }}
+      >
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+
+    const button = screen.getByTestId('start-button');
+    // 初期状態では有効
+    expect(button.disabled).toBe(false);
+
+    // クリックでスピン開始
+    fireEvent.click(button);
+
+    // isSpinning が true になってボタンが無効化される
+    expect(button.disabled).toBe(true);
+  });
+
+  it('Math.random をモックして決定角を固定 → setRotation に 5×360 + randomAngle + 初期 90 が適用される', async () => {
+    jest.useRealTimers();
+
+    render(
+      <TicketsContext.Provider value={{ tickets: 5, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+        <RoulettePopup spinDuration={0} />
+      </TicketsContext.Provider>
+    );
+
+    // スピン開始
+    fireEvent.click(screen.getByTestId('start-button'));
+
+    await waitFor(() => {
+      const wheel = screen.getByTestId('roulette-wheel');
+      const expected = 90 + 5 * 360 + 100;
+      expect(wheel.style.transform).toBe(`rotate(${expected}deg)`);
+    });
+  });
+
+  it('isSpinning が true の間、transition が cubic-bezier(0.17, 0.67, 0.83, 0.67) 付きで 6s になる', () => {
+    const mockSetTickets = jest.fn();
+    const mockFetchTickets = jest.fn();
+    render(
+      <TicketsContext.Provider value={{ tickets: 5, setTickets: mockSetTickets, fetchTickets: mockFetchTickets }}>
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+
+    const button = screen.getByTestId('start-button');
+    fireEvent.click(button);
+
+    const wheel = screen.getByTestId('roulette-wheel');
+    expect(wheel.style.transition).toBe(
+      'transform 6s cubic-bezier(0.17, 0.67, 0.83, 0.67)'
+    );
+  });
+
+  it('onSpinComplete prop が渡された場合、setTimeout 後に正しい matchNumber が渡される', async () => {
+    // Math.random → 100°
+    jest.spyOn(Math, 'random').mockReturnValue(100 / 360);
+    // confirm は OK
+    window.confirm = jest.fn(() => true);
+    // API 成功
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ tickets: 5 }),
+    });
+  
+    // FakeTimers
+    jest.useFakeTimers();
+  
+    const mockOnSpinComplete = jest.fn();
+  
+    render(
+      <TicketsContext.Provider value={{ tickets: 5, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+        <RoulettePopup spinDuration={0} onSpinComplete={mockOnSpinComplete} />
+      </TicketsContext.Provider>
+    );
+  
+    // スピン開始
+    fireEvent.click(screen.getByTestId('start-button'));
+  
+    /* ① fetchWithAuth の Promise が解決するまで待つ
+         （ここで startSpinning() が呼ばれる） */
+    await waitFor(() => expect(fetchWithAuth).toHaveBeenCalled());
+  
+    /* ② setTimeout(0) を即実行して onSpinComplete をコール */
+    jest.runAllTimers();
+  
+    // matchNumber の検証（randomAngle=100 → matchNumber=9）
+    expect(mockOnSpinComplete).toHaveBeenCalledWith(9);
+  
+    jest.useRealTimers();
+    Math.random.mockRestore();
+  });
+  
+  
+  it('Math.random をレンジ内 → レンジ外の順で返すようにし、再抽選が機能するか確認', async () => {
+    // confirm は OK
+    window.confirm = jest.fn(() => true);
+
+    // spin API は成功
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ tickets: 5 }),
+    });
+
+    // 最初 randomAngle=3（除外範囲内）、次に randomAngle=50（有効）
+    const randomValues = [3 / 360, 50 / 360];
+    jest.spyOn(Math, 'random').mockImplementation(() => randomValues.shift());
+
+    // リアルタイマーに戻す
+    jest.useRealTimers();
+
+    render(
+      <TicketsContext.Provider value={{ tickets: 5, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+        {/* spinDuration=0 で待ち時間なしに */}
+        <RoulettePopup spinDuration={0} />
+      </TicketsContext.Provider>
+    );
+
+    // スピン開始
+    fireEvent.click(screen.getByTestId('start-button'));
+
+    // fetchWithAuth が呼ばれて startSpinning が実行されるまで待つ
+    await waitFor(() => {
+      expect(fetchWithAuth).toHaveBeenCalledWith('/api/roulette_texts/spin', { method: 'PATCH' });
+    });
+
+    // rotation が更新されるまでポーリング
+    await waitFor(() => {
+      const wheel = screen.getByTestId('roulette-wheel');
+      // 初期 90 + 5*360 + 50 = 90 + 1800 + 50 = 1940
+      expect(wheel.style.transform).toBe('rotate(1940deg)');
+    });
+
+    // cleanup
+    Math.random.mockRestore();
+  });
 });
