@@ -469,3 +469,4 @@ describe('モーダルの挙動', () => {
     Math.random.mockRestore();
   });
 });
+
