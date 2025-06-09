@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
-import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import RoulettePopup from '../components/RoulettePopup';
-import { TicketsContext } from '../contexts/TicketsContext';
 import { isValidAngle } from '../components/RoulettePopup';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { TicketsContext } from '../contexts/TicketsContext';
 
 
-jest.mock('../contexts/TicketsContext', () => {
-  const React = require('react');
-  return {
-    TicketsContext: React.createContext({
-      tickets: 1,
-      setTickets: jest.fn(),
-      fetchTickets: jest.fn(),
-    }),
-  };
-});
+//jest.mock('../contexts/TicketsContext', () => {
+//  const React = require('react');
+//  return {
+//    TicketsContext: React.createContext({
+//      tickets: 0,
+//      setTickets: jest.fn(),
+//      fetchTickets: jest.fn(),
+//    }),
+//  };
+//});
+
+jest.mock('../utils/fetchWithAuth', () => ({
+  fetchWithAuth: jest.fn(),
+}));
 
 
 describe('ユーティリティ関数 isValidAngle', () => {
@@ -55,44 +60,94 @@ describe('ユーティリティ関数 isValidAngle', () => {
 
 
 describe('初期レンダリング', () => {
-  it('ルーレット用コンテナ・ポインタ・ホイールが存在し、data-testid が付与されていること', () => {
-    render(<RoulettePopup />);
+  it('ルーレット用コンテナ・ポインタ・ホイールが存在していること', () => {
+    render(
+      <TicketsContext.Provider
+        value={{
+          tickets: 1,
+          setTickets: jest.fn(),
+          fetchTickets: jest.fn(),
+        }}
+      >
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
 
-    // toBeInTheDocument を使わずに存在チェック
     expect(screen.getByTestId('roulette-container')).toBeTruthy();
     expect(screen.getByTestId('roulette-pointer')).toBeTruthy();
     expect(screen.getByTestId('roulette-wheel')).toBeTruthy();
   });
 
   it('segment 要素が 12 個生成され、data-number が 1〜12 の連番になっていること', () => {
-    const { container } = render(<RoulettePopup />);
-    const segments = container.getElementsByClassName('segment');
+    render(
+      <TicketsContext.Provider value={{ tickets: 1, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+
+    // テストIDを正規表現で取得
+    const segments = screen.getAllByTestId((testId) => /^segment-\d+$/.test(testId));
 
     // 12 個あること
     expect(segments.length).toBe(12);
 
-    // data-number が 1 から 12 の連番になっていること
-    Array.from(segments).forEach((seg, idx) => {
+    // data-number が 1〜12 の連番になっていること
+    segments.forEach((seg, idx) => {
       expect(seg.getAttribute('data-number')).toBe(String(idx + 1));
     });
   });
 
   it('初期状態では rotation が 90deg で適用され、transition が none である', () => {
-    render(<RoulettePopup />);
-  
+    render(
+      <TicketsContext.Provider value={{ tickets: 1, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+
     const wheel = screen.getByTestId('roulette-wheel');
-    // inline style ベースで確認
+    // transform style の確認
     expect(wheel.style.transform).toBe('rotate(90deg)');
+    // isSpinning=false のため transition は none
     expect(wheel.style.transition).toBe('none');
   });
 
   it('「ルーレットを回す」ボタンが存在し、初期状態で disabled=false', () => {
-    render(<RoulettePopup />);
+    render(
+      <TicketsContext.Provider value={{ tickets: 1, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+
     const button = screen.getByTestId('start-button');
-    // ボタンが存在すること
     expect(button).toBeTruthy();
-    // 初期状態で disabled が false であること
     expect(button.disabled).toBe(false);
   });
-  
+});
+
+
+describe('チケット関連の分岐', () => {
+  it('tickets が 0 の場合、クリック時に alert が呼び出され、fetchWithAuth が呼ばれない', () => {
+    // alert をモック
+    window.alert = jest.fn();
+
+    // tickets=0 のコンテキスト値を Provider で注入
+    render(
+      <TicketsContext.Provider
+        value={{
+          tickets: 0,
+          setTickets: jest.fn(),
+          fetchTickets: jest.fn(),
+        }}
+      >
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('start-button'));
+
+    // アラートが呼ばれる
+    expect(window.alert).toHaveBeenCalledWith('チケットが不足しています');
+    // API 呼び出しは行われない
+    expect(fetchWithAuth).not.toHaveBeenCalled();
+  });
 });
