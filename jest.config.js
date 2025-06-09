@@ -2,6 +2,9 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
+  coverageProvider: 'v8',
+  collectCoverage: false,
+
 
   // CSS / 画像などをスタブ
   moduleNameMapper: {

@@ -10,9 +10,9 @@ export const fetchRouletteText = async (number) => {
     }
 
     const rouletteText = await response.json();
-    return rouletteText; // オブジェクト全体を返す
+    return rouletteText;
   } catch (error) {
     console.error('Error fetching roulette text:', error);
-    return { text: 'Error fetching text' }; // エラー時もオブジェクトを返す
+    return { text: 'Error fetching text' };
   }
 };

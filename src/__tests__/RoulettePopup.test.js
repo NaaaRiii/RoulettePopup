@@ -4,11 +4,19 @@ import RoulettePopup from '../components/RoulettePopup';
 import { isValidAngle } from '../components/RoulettePopup';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { TicketsContext } from '../contexts/TicketsContext';
+import * as utils from '../components/utils';
 
 
 jest.mock('../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
 }));
+
+jest.mock('../components/Modal', () => {
+  const React = require('react');
+  return function MockedModal({ isOpen, children }) {
+    return isOpen ? <div data-testid="modal">{children}</div> : null;
+  };
+});
 
 
 describe('ユーティリティ関数 isValidAngle', () => {
@@ -412,6 +420,52 @@ describe('ルーレット回転処理', () => {
     });
 
     // cleanup
+    Math.random.mockRestore();
+  });
+});
+
+
+describe('モーダルの挙動', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('fetchRouletteText が matchNumber を引数に呼ばれ、戻り値で rouletteText が更新される', async () => {
+    // ----------------- モック設定 -----------------
+    window.confirm = jest.fn(() => true);
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ tickets: 5 }),
+    });
+
+    // ここで “実装版” を spy して戻り値を差し替える
+    jest.spyOn(utils, 'fetchRouletteText')
+        .mockResolvedValueOnce({ text: 'テストテキスト' });
+
+    // randomAngle: 3° (除外) → 60° (有効)
+    const rands = [3 / 360, 50 / 360];
+    jest.spyOn(Math, 'random').mockImplementation(() => rands.shift());
+
+    // ----------------- レンダリング -----------------
+    render(
+      <TicketsContext.Provider value={{ tickets: 5, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+        <RoulettePopup spinDuration={0} />
+      </TicketsContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('start-button'));
+
+    // API → startSpinning() 完了を待つ
+    await waitFor(() =>
+      expect(fetchWithAuth).toHaveBeenCalledWith('/api/roulette_texts/spin', { method: 'PATCH' })
+    );
+
+    // 60° ⇒ matchNumber = ceil((360-60)/30) = 10
+    await waitFor(() =>
+      expect(utils.fetchRouletteText).toHaveBeenCalledWith(11)
+    );
+
+    await screen.findByText('Matched text is: テストテキスト');
+    expect(screen.getByText('Matched text is: テストテキスト')).toBeTruthy();
+
     Math.random.mockRestore();
   });
 });
