@@ -950,3 +950,57 @@ describe('チケット表示', () => {
     );
   });
 });
+
+
+describe('副作用フック', () => {
+	beforeEach(() => {
+		fetchWithAuth.mockImplementation(async (url) => {
+			/* ── 123 系 ────────────────────────── */
+			if (url === '/api/goals/123')
+				return { ok: true, json: async () => ({ id: 123, title: 'First Goal' }) };
+	
+			if (url === '/api/goals/123/small_goals')
+				return { ok: true, json: async () => [] };
+	
+			/* ── 456 系 ────────────────────────── */
+			if (url === '/api/goals/456')
+				return { ok: true, json: async () => ({ id: 456, title: 'Second Goal' }) };
+	
+			if (url === '/api/goals/456/small_goals')
+				return { ok: true, json: async () => [] };
+	
+			/* デフォルト（来ないはず） */
+			return { ok: false, status: 404 };
+		});
+	});
+
+  it('goalId が変わると再フェッチし、前回 state をリセットする', async () => {
+		const AppWrapped = ({ goalId }) => (
+			<Authenticator.Provider>
+				<TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+					<GoalPage />         {/* GoalPage 自体は useRouter から goalId を読み取る */}
+				</TicketsContext.Provider>
+			</Authenticator.Provider>
+		);
+
+		/* ---------------- ① useRouter を１つのオブジェクトでモック ---------------- */
+		const routerObj = {
+			query: { goalId: '123' },
+			push : jest.fn(),
+		};
+		useRouter.mockReturnValue(routerObj);
+
+		/* ---------------- ② 1 回目のレンダー ---------------- */
+		const view = render(<AppWrapped goalId="123" />);
+
+		expect(await screen.findByText(/目標\s*:\s*First\s*Goal/)).toBeInTheDocument();
+
+		/* ---------------- ③ goalId を書き換えて再レンダー ---------------- */
+		routerObj.query.goalId = '456';
+		view.rerender(<AppWrapped goalId="456" />);
+
+		expect(await screen.findByText(/目標\s*:\s*Second\s*Goal/)).toBeInTheDocument();
+		expect(screen.queryByText(/目標\s*:\s*First\s*Goal/)).not.toBeInTheDocument();
+
+  });
+});
