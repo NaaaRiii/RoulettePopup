@@ -8,6 +8,17 @@ import { fetchRouletteText } from '../components/utils';
 import * as utils from '../components/utils';
 
 
+jest.mock('../contexts/TicketsContext', () => {
+  const React = require('react');
+  return {
+    TicketsContext: React.createContext({
+      tickets: 0,
+      setTickets: jest.fn(),
+      fetchTickets: jest.fn(),
+    }),
+  };
+});
+
 jest.mock('../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
 }));
@@ -512,5 +523,119 @@ describe('モーダルの挙動', () => {
   
     Math.random.mockRestore();
   });
+
+  it('「Close」ボタン押下でモーダルが閉じ、スピン状態が解除され、fetchTickets() が呼ばれる', async () => {
+    // モック設定
+    window.confirm = jest.fn(() => true);
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ tickets: 5 }),
+    });
+    // fetchRouletteText の戻り値
+    jest.spyOn(utils, 'fetchRouletteText').mockResolvedValueOnce({ text: 'テストテキスト' });
+  
+    // randomAngle: 3° (除外) → 50° (有効)
+    const rands = [3 / 360, 50 / 360];
+    jest.spyOn(Math, 'random').mockImplementation(() => rands.shift());
+  
+    const mockFetchTickets = jest.fn();
+  
+    // レンダリング
+    render(
+      <TicketsContext.Provider
+        value={{
+          tickets: 5,
+          setTickets: jest.fn(),
+          fetchTickets: mockFetchTickets,
+        }}
+      >
+        <RoulettePopup spinDuration={0} />
+      </TicketsContext.Provider>
+    );
+  
+    // スピン開始してモーダルを開く
+    fireEvent.click(screen.getByTestId('start-button'));
+    await screen.findByTestId('modal');
+  
+    // モーダルの「Close」ボタンをクリック
+    fireEvent.click(screen.getByTestId('close-modal-button'));
+  
+    // モーダルが閉じていること
+    expect(screen.queryByTestId('modal')).toBeNull();
+  
+    // スピン解除でボタンが再び有効化されていること
+    const startButton = screen.getByTestId('start-button');
+    expect(startButton.disabled).toBe(false);
+  
+    // fetchTickets が呼ばれていること
+    expect(mockFetchTickets).toHaveBeenCalled();
+  
+    Math.random.mockRestore();
+    utils.fetchRouletteText.mockRestore();
+  });
+  
 });
 
+
+describe('プロパティ／外部依存', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+  });
+
+  it('props から短い spinDuration を渡し、setTimeout がその時間で発火する', async () => {
+    // --- モック設定 ---
+    window.confirm = jest.fn(() => true);
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ tickets: 1 }),
+    });
+    jest.spyOn(utils, 'fetchRouletteText').mockResolvedValueOnce({ text: 'OK' });
+
+    // randomAngle を有効値に
+    jest.spyOn(Math, 'random').mockReturnValue(45 / 360); // 45° → valid
+
+    // FakeTimers を有効化
+    jest.useFakeTimers();
+
+    const mockFetchTickets = jest.fn();
+
+    render(
+      <TicketsContext.Provider value={{ tickets: 1, setTickets: jest.fn(), fetchTickets: mockFetchTickets }}>
+        <RoulettePopup spinDuration={100} />
+      </TicketsContext.Provider>
+    );
+
+    // スピン開始
+    fireEvent.click(screen.getByTestId('start-button'));
+
+    // タイマー発火前はモーダルなし
+    expect(screen.queryByTestId('modal')).toBeNull();
+
+    // 99ms 経過 → まだモーダル出ない
+    jest.advanceTimersByTime(99);
+    expect(screen.queryByTestId('modal')).toBeNull();
+
+    // 残り 1ms 経過 → モーダルが出る
+    jest.advanceTimersByTime(1);
+
+    // API 呼び出し完了とテキスト取得を待ってモーダルがレンダリングされること
+    await waitFor(() => {
+      expect(utils.fetchRouletteText).toHaveBeenCalled();
+      expect(screen.getByTestId('modal')).toBeTruthy();
+      expect(screen.getByText('Matched text is: OK')).toBeTruthy();
+    });
+  });
+
+  it('TicketsContext がない場合でもクラッシュせずデフォルト tickets=0 でボタンが無効', () => {
+    render(<RoulettePopup spinDuration={0} />);
+
+    const startButton = screen.getByTestId('start-button');
+    expect(startButton).toBeTruthy(); 
+    expect(startButton.disabled).toBe(false);
+
+    window.alert = jest.fn();
+    fireEvent.click(startButton);
+    expect(window.alert).toHaveBeenCalledWith('チケットが不足しています');
+  });
+});
