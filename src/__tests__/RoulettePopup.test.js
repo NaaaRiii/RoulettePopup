@@ -4,6 +4,7 @@ import RoulettePopup from '../components/RoulettePopup';
 import { isValidAngle } from '../components/RoulettePopup';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { TicketsContext } from '../contexts/TicketsContext';
+import { fetchRouletteText } from '../components/utils';
 import * as utils from '../components/utils';
 
 
@@ -466,6 +467,49 @@ describe('モーダルの挙動', () => {
     await screen.findByText('Matched text is: テストテキスト');
     expect(screen.getByText('Matched text is: テストテキスト')).toBeTruthy();
 
+    Math.random.mockRestore();
+  });
+
+  it('API完了後に <Modal> が isOpen=true でレンダリングされ、テキストが表示される', async () => {
+  
+    // 確認ダイアログ／APIレスポンスをモック
+    window.confirm = jest.fn(() => true);
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ tickets: 5 }),
+    });
+
+    jest.spyOn(utils, 'fetchRouletteText')
+        .mockResolvedValueOnce({ text: 'テストテキスト' });
+  
+    // randomAngle: 3° (除外) → 50° (有効)
+    const rands = [3 / 360, 50 / 360];
+    jest.spyOn(Math, 'random').mockImplementation(() => rands.shift());
+  
+    // コンポーネントをレンダリング
+    render(
+      <TicketsContext.Provider value={{ tickets: 5, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+        <RoulettePopup spinDuration={0} />
+      </TicketsContext.Provider>
+    );
+  
+    // スピン開始
+    fireEvent.click(screen.getByTestId('start-button'));
+  
+    // fetchWithAuth と fetchRouletteText の呼び出しを待機
+    await waitFor(() => {
+      expect(fetchWithAuth).toHaveBeenCalledWith('/api/roulette_texts/spin', { method: 'PATCH' });
+    });
+    // matchNumber = ceil((360 - 50)/30) = 11
+    await waitFor(() => {
+      expect(fetchRouletteText).toHaveBeenCalledWith(11);
+    });
+  
+    // モーダル要素が出現し、テキストが表示されていることを確認
+    const modal = screen.getByTestId('modal');
+    expect(modal).toBeTruthy();
+    expect(modal.textContent).toContain('Matched text is: テストテキスト');
+  
     Math.random.mockRestore();
   });
 });
