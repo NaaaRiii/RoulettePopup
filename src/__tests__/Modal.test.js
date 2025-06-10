@@ -94,3 +94,100 @@ describe('遅延表示', () => {
     jest.useRealTimers();
   });
 });
+
+
+describe('即時非表示', () => {
+  it('isOpen=true → false に変更直後、要素が即座に消える／再描画されない', () => {
+    // ① isOpen=true でマウント
+    const { container, rerender } = render(
+      <Modal isOpen={true} onClose={() => {}}>
+        <div>テスト</div>
+      </Modal>
+    );
+
+    // マウント直後は表示されている
+    expect(container.querySelector('.modal-overlay')).not.toBeNull();
+
+    // ② isOpen=false に切り替え
+    rerender(
+      <Modal isOpen={false} onClose={() => {}}>
+        <div>テスト</div>
+      </Modal>
+    );
+
+    // 即座に非表示
+    expect(container.querySelector('.modal-overlay')).toBeNull();
+
+    // さらに 1000ms 経っても再描画されない
+    jest.advanceTimersByTime?.(1000);
+    expect(container.querySelector('.modal-overlay')).toBeNull();
+  });
+});
+
+
+describe('クリーンアップ', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it('isOpen=true → 800ms 未満でアンマウントしても act 警告／メモリリークが出ない', () => {
+    jest.useFakeTimers();
+
+    // React の警告を監視
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    // ① isOpen=true でマウント
+    const { container, unmount } = render(
+      <Modal isOpen={true} onClose={() => {}}>
+        <div>テスト</div>
+      </Modal>
+    );
+
+    // ② 400ms 経過時点でアンマウント（800ms 未満）
+    jest.advanceTimersByTime(400);
+    unmount();
+
+    // さらに 1 秒進めても何も起こらない（clearTimeout が効いている）
+    jest.advanceTimersByTime(1000);
+
+    // モーダルが残っていない
+    expect(container.querySelector('.modal-overlay')).toBeNull();
+
+    // React の act 警告やメモリリーク系エラーが出ていない
+    const errorCalls = consoleErrorSpy.mock.calls.flat().join('\n');
+    expect(errorCalls).not.toMatch(/act|not wrapped in act|memory leak/i);
+  });
+});
+
+
+describe('子要素', () => {
+  afterEach(() => jest.useRealTimers());
+
+  it('children に任意のノードを渡すと、遅延後にそのノードが DOM 内にある', async () => {
+    jest.useFakeTimers();
+
+    const { container, rerender } = render(
+      <Modal isOpen={false} onClose={() => {}}>
+        <div>テスト</div>
+      </Modal>
+    );
+
+    // isOpen=true に切り替え
+    rerender(
+      <Modal isOpen={true} onClose={() => {}}>
+        <div>テスト</div>
+      </Modal>
+    );
+
+    // 800ms 進める
+    jest.advanceTimersByTime(800);
+
+    // 挿入を待ってからアサーション
+    await waitFor(() => {
+      const content = container.querySelector('.modal-content');
+      expect(content).not.toBeNull();
+      expect(content.textContent).toContain('テスト');
+    });
+  });
+});
