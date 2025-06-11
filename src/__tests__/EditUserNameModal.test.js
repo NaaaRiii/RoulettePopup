@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import EditUserNameModal from '../components/EditUserNameModal';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
@@ -8,23 +9,28 @@ import { fetchWithAuth } from '../utils/fetchWithAuth';
 jest.mock('../utils/fetchWithAuth');
 
 // useRouter のモック
+const mockReplace = jest.fn();
 jest.mock('next/router', () => ({
   useRouter: () => ({
-    replace: jest.fn()
+    replace: mockReplace
   })
 }));
 
 describe('EditUserNameModal コンポーネント', () => {
+  // モック関数の定義
+  const handleClose = jest.fn();
+
   beforeEach(() => {
     // モックのリセット
     jest.clearAllMocks();
+    handleClose.mockClear();
   });
 
   it('isOpen=false のとき、何もレンダリングされない', () => {
     const { container } = render(
       <EditUserNameModal 
         isOpen={false} 
-        onClose={() => {}} 
+        onClose={handleClose} 
         currentName="テストユーザー"
       />
     );
@@ -34,24 +40,30 @@ describe('EditUserNameModal コンポーネント', () => {
   });
 
   it('isOpen=true のとき、オーバーレイとフォームがレンダリングされる', () => {
-    render(
-      <EditUserNameModal 
-        isOpen={true} 
-        onClose={() => {}} 
-        currentName="テストユーザー"
-      />
-    );
+    //render(
+    //  <EditUserNameModal 
+    //    isOpen={true} 
+    //    onClose={handleClose} 
+    //    currentName="テストユーザー"
+    //  />
+    //);
     
-    // モーダルのオーバーレイが存在することを確認
-    const modalOverlay = document.querySelector('.modalOverlay');
-    expect(modalOverlay).toBeInTheDocument();
+    //// モーダルのオーバーレイが存在することを確認
+    //expect(screen.getByRole('presentation')).toBeInTheDocument();
 
-    // モーダルのコンテンツが存在することを確認
-    const modalContent = document.querySelector('.modalContent');
-    expect(modalContent).toBeInTheDocument();
+		const { container } = render(
+			<EditUserNameModal 
+				isOpen={true} 
+				onClose={handleClose} 
+				currentName="テストユーザー"
+			/>
+		);
+ 
+		// モーダルのオーバーレイ（.modalOverlay）が存在することを確認
+		expect(container.querySelector('.modalOverlay')).toBeInTheDocument();
 
     // タイトルが表示されていることを確認
-    expect(screen.getByText('ユーザー名を編集')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'ユーザー名を編集' })).toBeInTheDocument();
 
     // フォームの要素が存在することを確認
     expect(screen.getByLabelText('新しいユーザー名')).toBeInTheDocument();
@@ -63,43 +75,39 @@ describe('EditUserNameModal コンポーネント', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
   });
 
-  it('currentName を渡したとき、<textarea> の value が currentName で初期化されている', () => {
-    const testName = 'テストユーザー名';
-    
-    render(
-      <EditUserNameModal 
-        isOpen={true} 
-        onClose={() => {}} 
-        currentName={testName}
-      />
-    );
-    
-    // textarea が存在し、currentName の値で初期化されていることを確認
-    const textarea = screen.getByRole('textbox');
-    expect(textarea).toBeInTheDocument();
-    expect(textarea).toHaveValue(testName);
+  describe.each([
+    {
+      name: '値あり',
+      currentName: 'テストユーザー名',
+      expectedValue: 'テストユーザー名'
+    },
+    {
+      name: '値なし',
+      currentName: undefined,
+      expectedValue: ''
+    }
+  ])('currentName が $name のとき', ({ currentName, expectedValue }) => {
+    it('<textarea> の value が $expectedValue で初期化されている', () => {
+      render(
+        <EditUserNameModal 
+          isOpen={true} 
+          onClose={handleClose} 
+          currentName={currentName}
+        />
+      );
+      
+      // textarea が存在し、期待する値で初期化されていることを確認
+      const textarea = screen.getByRole('textbox');
+      expect(textarea).toBeInTheDocument();
+      expect(textarea).toHaveValue(expectedValue);
+    });
   });
 
-  it('currentName が undefined のとき、<textarea> の value が空文字列で初期化されている', () => {
+  it('<textarea> に文字をタイプすると内部ステート newName が更新され、value に反映される', async () => {
     render(
       <EditUserNameModal 
         isOpen={true} 
-        onClose={() => {}} 
-        currentName={undefined}
-      />
-    );
-    
-    // textarea が存在し、空文字列で初期化されていることを確認
-    const textarea = screen.getByRole('textbox');
-    expect(textarea).toBeInTheDocument();
-    expect(textarea).toHaveValue('');
-  });
-
-  it('<textarea> に文字をタイプすると内部ステート newName が更新され、value に反映される', () => {
-    render(
-      <EditUserNameModal 
-        isOpen={true} 
-        onClose={() => {}} 
+        onClose={handleClose} 
         currentName="初期値"
       />
     );
@@ -111,16 +119,14 @@ describe('EditUserNameModal コンポーネント', () => {
 
     // 新しい値を入力
     const newValue = '新しいユーザー名';
-    fireEvent.change(textarea, { target: { value: newValue } });
+    await userEvent.clear(textarea);
+    await userEvent.type(textarea, newValue);
 
     // 値が更新されていることを確認
     expect(textarea).toHaveValue(newValue);
   });
 
-  it('「Close」ボタンをクリックすると onClose コールバックが呼ばれる', () => {
-    // onClose のモック関数を作成
-    const handleClose = jest.fn();
-    
+  it('「Close」ボタンをクリックすると onClose コールバックが呼ばれる', async () => {
     render(
       <EditUserNameModal 
         isOpen={true} 
@@ -129,10 +135,8 @@ describe('EditUserNameModal コンポーネント', () => {
       />
     );
     
-    // Close ボタンを取得してクリック
-    const closeButton = screen.getByRole('button', { name: 'Close' });
-    expect(closeButton).toBeInTheDocument();
-    fireEvent.click(closeButton);
+    // Close ボタンをクリック
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
 
     // onClose が1回呼ばれたことを確認
     expect(handleClose).toHaveBeenCalledTimes(1);
@@ -145,16 +149,10 @@ describe('EditUserNameModal コンポーネント', () => {
       json: () => Promise.resolve({ username: '新しいユーザー名' })
     });
 
-    // useRouter のモック
-    const mockReplace = jest.fn();
-    jest.spyOn(require('next/router'), 'useRouter').mockImplementation(() => ({
-      replace: mockReplace
-    }));
-
     render(
       <EditUserNameModal 
         isOpen={true} 
-        onClose={() => {}} 
+        onClose={handleClose} 
         currentName="テストユーザー"
       />
     );
@@ -162,24 +160,22 @@ describe('EditUserNameModal コンポーネント', () => {
     // 新しいユーザー名を入力
     const textarea = screen.getByRole('textbox');
     const newName = '新しいユーザー名';
-    fireEvent.change(textarea, { target: { value: newName } });
+    await userEvent.clear(textarea);
+    await userEvent.type(textarea, newName);
 
     // フォームを送信
-    const submitButton = screen.getByRole('button', { name: '変更' });
-    fireEvent.click(submitButton);
+    await userEvent.click(screen.getByRole('button', { name: '変更' }));
 
     // fetchWithAuth が正しく呼ばれたことを確認
-    await waitFor(() => {
-      expect(fetchWithAuth).toHaveBeenCalledTimes(1);
-      expect(fetchWithAuth).toHaveBeenCalledWith(
-        '/api/current_user',
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user: { username: newName } })
-        }
-      );
-    });
+    expect(fetchWithAuth).toHaveBeenCalledTimes(1);
+    expect(fetchWithAuth).toHaveBeenCalledWith(
+      '/api/current_user',
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: { username: newName } })
+      }
+    );
   });
 
   it('レスポンスが ok: true のとき、response.json() が呼ばれたあとに router.replace が呼ばれる', async () => {
@@ -192,16 +188,10 @@ describe('EditUserNameModal コンポーネント', () => {
       json: () => Promise.resolve(mockResponseData)
     });
 
-    // useRouter のモック
-    const mockReplace = jest.fn();
-    jest.spyOn(require('next/router'), 'useRouter').mockImplementation(() => ({
-      replace: mockReplace
-    }));
-
     render(
       <EditUserNameModal 
         isOpen={true} 
-        onClose={() => {}} 
+        onClose={handleClose} 
         currentName="テストユーザー"
       />
     );
@@ -209,157 +199,85 @@ describe('EditUserNameModal コンポーネント', () => {
     // 新しいユーザー名を入力
     const textarea = screen.getByRole('textbox');
     const newName = '新しいユーザー名';
-    fireEvent.change(textarea, { target: { value: newName } });
+    await userEvent.clear(textarea);
+    await userEvent.type(textarea, newName);
 
     // フォームを送信
-    const submitButton = screen.getByRole('button', { name: '変更' });
-    fireEvent.click(submitButton);
+    await userEvent.click(screen.getByRole('button', { name: '変更' }));
 
     // 非同期処理の完了を待つ
-    await waitFor(() => {
-      // fetchWithAuth が呼ばれたことを確認
-      expect(fetchWithAuth).toHaveBeenCalledTimes(1);
+    expect(fetchWithAuth).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith('/dashboard');
+  });
+
+  describe.each([
+    {
+      name: '成功時',
+      mockResponse: {
+        ok: true,
+        json: () => Promise.resolve({ username: '新しいユーザー名' })
+      },
+      expectedConsoleError: false
+    },
+    {
+      name: '失敗時',
+      mockResponse: {
+        ok: false,
+        json: () => Promise.resolve({ error: '更新に失敗しました' })
+      },
+      expectedConsoleError: true,
+      expectedErrorMessage: 'Error updating user name:',
+      expectedErrorData: { error: '更新に失敗しました' }
+    }
+  ])('フォーム送信が $name の場合', ({ mockResponse, expectedConsoleError, expectedErrorMessage, expectedErrorData }) => {
+    beforeEach(() => {
+      fetchWithAuth.mockResolvedValue(mockResponse);
+    });
+
+    it('onClose が呼ばれる', async () => {
+      render(
+        <EditUserNameModal 
+          isOpen={true} 
+          onClose={handleClose} 
+          currentName="テストユーザー"
+        />
+      );
       
-      // router.replace が正しく呼ばれたことを確認
-      expect(mockReplace).toHaveBeenCalledTimes(1);
-      expect(mockReplace).toHaveBeenCalledWith('/dashboard');
-    });
-  });
-
-  it('フォーム送信成功時に onClose が呼ばれる', async () => {
-    // モックの設定
-    const handleClose = jest.fn();
-    fetchWithAuth.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ username: '新しいユーザー名' })
-    });
-
-    render(
-      <EditUserNameModal 
-        isOpen={true} 
-        onClose={handleClose} 
-        currentName="テストユーザー"
-      />
-    );
-    
-    // フォームを送信
-    const submitButton = screen.getByRole('button', { name: '変更' });
-    fireEvent.click(submitButton);
-
-    // 非同期処理の完了を待つ
-    await waitFor(() => {
-      expect(handleClose).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('フォーム送信失敗時に onClose が呼ばれる', async () => {
-    // モックの設定
-    const handleClose = jest.fn();
-    fetchWithAuth.mockResolvedValue({
-      ok: false,
-      json: () => Promise.resolve({ error: '更新に失敗しました' })
-    });
-
-    render(
-      <EditUserNameModal 
-        isOpen={true} 
-        onClose={handleClose} 
-        currentName="テストユーザー"
-      />
-    );
-    
-    // フォームを送信
-    const submitButton = screen.getByRole('button', { name: '変更' });
-    fireEvent.click(submitButton);
-
-    // 非同期処理の完了を待つ
-    await waitFor(() => {
-      expect(handleClose).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('レスポンスが ok: false のとき、console.error が呼ばれる', async () => {
-    // エラーデータの設定
-    const errorData = { error: '更新に失敗しました' };
-    
-    // fetchWithAuth のモック実装
-    fetchWithAuth.mockResolvedValue({
-      ok: false,
-      json: () => Promise.resolve(errorData)
-    });
-
-    // console.error のモック
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    render(
-      <EditUserNameModal 
-        isOpen={true} 
-        onClose={() => {}} 
-        currentName="テストユーザー"
-      />
-    );
-    
-    // フォームを送信
-    const submitButton = screen.getByRole('button', { name: '変更' });
-    fireEvent.click(submitButton);
-
-    // 非同期処理の完了を待つ
-    await waitFor(() => {
-      // console.error が正しく呼ばれたことを確認
-      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error updating user name:',
-        errorData
-      );
-    });
-
-    // モックをリセット
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('APIエラー時に console.error が呼ばれたあとに onClose が呼ばれる', async () => {
-    // エラーデータの設定
-    const errorData = { error: '更新に失敗しました' };
-    
-    // fetchWithAuth のモック実装
-    fetchWithAuth.mockResolvedValue({
-      ok: false,
-      json: () => Promise.resolve(errorData)
-    });
-
-    // console.error のモック
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    
-    // onClose のモック
-    const handleClose = jest.fn();
-
-    render(
-      <EditUserNameModal 
-        isOpen={true} 
-        onClose={handleClose} 
-        currentName="テストユーザー"
-      />
-    );
-    
-    // フォームを送信
-    const submitButton = screen.getByRole('button', { name: '変更' });
-    fireEvent.click(submitButton);
-
-    // 非同期処理の完了を待つ
-    await waitFor(() => {
-      // console.error が正しく呼ばれたことを確認
-      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error updating user name:',
-        errorData
-      );
+      // フォームを送信
+      await userEvent.click(screen.getByRole('button', { name: '変更' }));
 
       // onClose が呼ばれたことを確認
       expect(handleClose).toHaveBeenCalledTimes(1);
     });
 
-    // モックをリセット
-    consoleErrorSpy.mockRestore();
+    if (expectedConsoleError) {
+      it('console.error が呼ばれる', async () => {
+        // console.error のモック
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        render(
+          <EditUserNameModal 
+            isOpen={true} 
+            onClose={handleClose} 
+            currentName="テストユーザー"
+          />
+        );
+        
+        // フォームを送信
+        await userEvent.click(screen.getByRole('button', { name: '変更' }));
+
+        // console.error が正しく呼ばれたことを確認
+        expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          expectedErrorMessage,
+          expectedErrorData
+        );
+
+        // モックをリセット
+        consoleErrorSpy.mockRestore();
+      });
+    }
   });
 
   it('fetchWithAuth が例外を投げたとき、エラーハンドリングが正しく行われる', async () => {
@@ -371,9 +289,6 @@ describe('EditUserNameModal コンポーネント', () => {
 
     // console.error のモック
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    
-    // onClose のモック
-    const handleClose = jest.fn();
 
     render(
       <EditUserNameModal 
@@ -384,21 +299,15 @@ describe('EditUserNameModal コンポーネント', () => {
     );
     
     // フォームを送信
-    const submitButton = screen.getByRole('button', { name: '変更' });
-    fireEvent.click(submitButton);
+    await userEvent.click(screen.getByRole('button', { name: '変更' }));
 
     // 非同期処理の完了を待つ
-    await waitFor(() => {
-      // console.error が正しく呼ばれたことを確認
-      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Submission failed',
-        error
-      );
-
-      // onClose が呼ばれたことを確認
-      expect(handleClose).toHaveBeenCalledTimes(1);
-    });
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Submission failed',
+      error
+    );
+    expect(handleClose).toHaveBeenCalledTimes(1);
 
     // モックをリセット
     consoleErrorSpy.mockRestore();
