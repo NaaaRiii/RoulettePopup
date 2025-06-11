@@ -64,7 +64,7 @@ const ExpLineChart = () => {
     );
   };
 
-  // カスタムツールチップコンポーネント
+  // カスタムツールチップコンポーネント(あとで独立コンポーネントに切り出して export する)
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (

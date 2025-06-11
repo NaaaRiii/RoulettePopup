@@ -287,6 +287,118 @@ describe('ExpLineChart コンポーネント', () => {
       });
     }, { timeout: 3000 });
   });
+
+  it('主要コンポーネントが正しい階層でレンダリングされる', async () => {
+    // モックデータの設定
+    const mockData = [
+      { date: '2024-03-01', exp: 100 },
+      { date: '2024-03-02', exp: 200 },
+      { date: '2024-03-03', exp: 300 }
+    ];
+
+    fetchWithAuth.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockData)
+    });
+
+    const { container } = render(<ExpLineChart />);
+
+    // 非同期処理の完了を待つ
+    await waitFor(() => {
+      // ResponsiveContainer の存在を確認
+      const responsiveContainer = container.querySelector('.recharts-responsive-container');
+      expect(responsiveContainer).toBeInTheDocument();
+
+      // LineChart の存在を確認
+      const lineChart = container.querySelector('.recharts-wrapper');
+      expect(lineChart).toBeInTheDocument();
+
+      // CartesianGrid の存在を確認
+      const cartesianGrid = container.querySelector('.recharts-cartesian-grid');
+      expect(cartesianGrid).toBeInTheDocument();
+
+      // XAxis の存在を確認
+      const xAxis = container.querySelector('.recharts-xAxis');
+      expect(xAxis).toBeInTheDocument();
+
+      // YAxis の存在を確認
+      const yAxis = container.querySelector('.recharts-yAxis');
+      expect(yAxis).toBeInTheDocument();
+
+      // Tooltip の存在を確認
+      const tooltip = container.querySelector('.recharts-tooltip-wrapper');
+      expect(tooltip).toBeInTheDocument();
+
+      // Line の存在を確認
+      const line = container.querySelector('.recharts-line');
+      expect(line).toBeInTheDocument();
+
+      // コンポーネントの階層関係を確認
+      expect(responsiveContainer).toContainElement(lineChart);
+      expect(lineChart).toContainElement(cartesianGrid);
+      expect(lineChart).toContainElement(xAxis);
+      expect(lineChart).toContainElement(yAxis);
+      expect(lineChart).toContainElement(tooltip);
+      expect(lineChart).toContainElement(line);
+    }, { timeout: 3000 });
+  });
+
+  it('XAxis に CustomTick が正しく渡され、日付が正しく表示される', async () => {
+    // モックデータの設定
+    const mockData = [
+      { date: '2024-03-01', exp: 100 },
+      { date: '2024-03-02', exp: 200 },
+      { date: '2024-03-03', exp: 300 }
+    ];
+
+    fetchWithAuth.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockData)
+    });
+
+    const { container } = render(<ExpLineChart />);
+
+    // 非同期処理の完了を待つ
+    await waitFor(() => {
+      // XAxis の tick 要素を取得
+      const tickElements = container.querySelectorAll('.recharts-cartesian-axis-tick text');
+      expect(tickElements.length).toBeGreaterThan(0);
+
+      // 今日の日付を取得
+      const today = new Date();
+      const todayFormatted = format(today, 'M/d');
+
+      // 各 tick の内容を確認
+      tickElements.forEach((tick) => {
+        const dateText = tick.textContent;
+        const style = tick.getAttribute('style');
+        const fillColor = style.match(/fill: ([^;]+)/)?.[1];
+
+        // 日付が M/d 形式で表示されていることを確認
+        expect(dateText).toMatch(/^\d{1,2}\/\d{1,2}$/);
+
+        // 今日の日付は赤色、それ以外は灰色で表示されることを確認
+        if (dateText === todayFormatted) {
+          expect(fillColor).toBe('red');
+        } else {
+          expect(fillColor).toBe('#666');
+        }
+      });
+
+      // CustomTick の実装を確認
+      const xAxis = container.querySelector('.recharts-xAxis');
+      expect(xAxis).toBeInTheDocument();
+
+      // tick 要素が正しく配置されていることを確認
+      const tickGroups = container.querySelectorAll('.recharts-cartesian-axis-tick');
+      expect(tickGroups.length).toBeGreaterThan(0);
+      tickGroups.forEach(tickGroup => {
+        const text = tickGroup.querySelector('text');
+        expect(text).toBeInTheDocument();
+        expect(text).toHaveAttribute('text-anchor', 'middle');
+      });
+    }, { timeout: 3000 });
+  });
 }); 
 
 
@@ -326,5 +438,25 @@ describe('CustomTooltip 単体で正しく描画される', () => {
   it('payload が空配列のとき何もレンダリングしない', () => {
     render(<MockCustomTooltip active payload={[]} />);
     expect(screen.queryByText(/^Exp:/)).toBeNull();
+  });
+
+  it('payload が undefined のとき何もレンダリングしない', () => {
+    render(<MockCustomTooltip active payload={undefined} />);
+    expect(screen.queryByText(/^Exp:/)).toBeNull();
+  });
+
+  it('payload が null のとき何もレンダリングしない', () => {
+    render(<MockCustomTooltip active payload={null} />);
+    expect(screen.queryByText(/^Exp:/)).toBeNull();
+  });
+
+  it('active が undefined のとき何もレンダリングしない', () => {
+    render(<MockCustomTooltip payload={[{ value: 999 }]} />);
+    expect(screen.queryByText('Exp: 999')).toBeNull();
+  });
+
+  it('active が null のとき何もレンダリングしない', () => {
+    render(<MockCustomTooltip active={null} payload={[{ value: 999 }]} />);
+    expect(screen.queryByText('Exp: 999')).toBeNull();
   });
 });
