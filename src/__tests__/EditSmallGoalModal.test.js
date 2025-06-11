@@ -310,4 +310,260 @@ describe('EditSmallGoalModal コンポーネント', () => {
       });
     });
   });
+
+  describe('入力フォームの要素確認', () => {
+    it('title の textarea が表示され、value にステート title が反映される', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: []
+      };
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // textarea が存在することを確認
+      const titleTextarea = screen.getByLabelText('Small Goalのタイトル');
+      expect(titleTextarea).toBeInTheDocument();
+      expect(titleTextarea.tagName).toBe('TEXTAREA');
+
+      // 初期値が正しく設定されていることを確認
+      expect(titleTextarea).toHaveValue(mockSmallGoal.title);
+
+      // 新しい値を入力
+      const newTitle = '更新されたSmall Goal';
+      await userEvent.clear(titleTextarea);
+      await userEvent.type(titleTextarea, newTitle);
+
+      // 入力された値が反映されていることを確認
+      await waitFor(() => {
+        expect(titleTextarea).toHaveValue(newTitle);
+      });
+    });
+
+    it('各タスク用 textarea が表示され、value に対応する task.content が入っている', () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: [
+          { id: 1, content: 'タスク1の内容' },
+          { id: 2, content: 'タスク2の内容' },
+          { id: 3, content: 'タスク3の内容' }
+        ]
+      };
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // タスク用の textarea が存在することを確認
+      const taskTextareas = screen.getAllByLabelText('Task');
+      expect(taskTextareas).toHaveLength(mockSmallGoal.tasks.length);
+
+      // 各 textarea の内容を確認
+      taskTextareas.forEach((textarea, index) => {
+        expect(textarea).toBeInTheDocument();
+        expect(textarea.tagName).toBe('TEXTAREA');
+        expect(textarea).toHaveValue(mockSmallGoal.tasks[index].content);
+      });
+
+      // 各 textarea の ID が正しい形式であることを確認
+      taskTextareas.forEach((textarea, index) => {
+        const taskId = mockSmallGoal.tasks[index].id;
+        expect(textarea.id).toBe(`task-${taskId}`);
+      });
+    });
+
+    it('Add Task と Remove Task ボタンが正しく動作する', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: [
+          { id: 1, content: 'タスク1の内容' },
+          { id: 2, content: 'タスク2の内容' }
+        ]
+      };
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // 初期状態の確認
+      let taskTextareas = screen.getAllByLabelText('Task');
+      expect(taskTextareas).toHaveLength(2);
+
+      // Add Task ボタンをクリック
+      const addTaskButton = screen.getByText('Add Task');
+      await userEvent.click(addTaskButton);
+
+      // タスクが追加されたことを確認
+      await waitFor(() => {
+        taskTextareas = screen.getAllByLabelText('Task');
+        expect(taskTextareas).toHaveLength(3);
+        expect(taskTextareas[2]).toHaveValue(''); // 新規タスクは空
+      });
+
+      // 新規タスクのIDが正しい形式であることを確認
+      const newTaskId = taskTextareas[2].id;
+      expect(newTaskId).toMatch(/^task-temp-\d+$/);
+
+      // Remove Task ボタンをクリック（2番目のタスクを削除）
+      const removeButtons = screen.getAllByText('Remove Task');
+      await userEvent.click(removeButtons[1]);
+
+      // タスクが削除されたことを確認
+      await waitFor(() => {
+        taskTextareas = screen.getAllByLabelText('Task');
+        expect(taskTextareas).toHaveLength(2);
+        
+        // 残っているタスクの内容を確認
+        expect(taskTextareas[0]).toHaveValue('タスク1の内容');
+        expect(taskTextareas[1]).toHaveValue(''); // 新規タスク
+      });
+
+      // 削除されたタスクが表示されていないことを確認
+      const taskContents = taskTextareas.map(input => input.value);
+      expect(taskContents).not.toContain('タスク2の内容');
+    });
+
+    it('difficulty の select が表示され、value にステート difficulty が反映される', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: []
+      };
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // select が存在することを確認
+      const difficultySelect = screen.getByLabelText('Difficulty');
+      expect(difficultySelect).toBeInTheDocument();
+      expect(difficultySelect.tagName).toBe('SELECT');
+      expect(difficultySelect.id).toBe('difficulty');
+
+      // 初期値が正しく設定されていることを確認
+      expect(difficultySelect).toHaveValue(mockSmallGoal.difficulty);
+
+      // 選択肢が正しく表示されていることを確認
+      const options = difficultySelect.querySelectorAll('option');
+      expect(options).toHaveLength(5);
+      expect(options[0]).toHaveValue('ものすごく簡単');
+      expect(options[1]).toHaveValue('簡単');
+      expect(options[2]).toHaveValue('普通');
+      expect(options[3]).toHaveValue('難しい');
+      expect(options[4]).toHaveValue('とても難しい');
+
+      // 新しい値を選択
+      await userEvent.selectOptions(difficultySelect, '難しい');
+
+      // 選択された値が反映されていることを確認
+      expect(difficultySelect).toHaveValue('難しい');
+    });
+
+    it('deadline の date input が表示され、value にステート deadline が反映される', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: []
+      };
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // date input が存在することを確認
+      const deadlineInput = screen.getByLabelText('期限');
+      expect(deadlineInput).toBeInTheDocument();
+      expect(deadlineInput.tagName).toBe('INPUT');
+      expect(deadlineInput.type).toBe('date');
+      expect(deadlineInput.id).toBe('deadline');
+
+      // 初期値が正しく設定されていることを確認
+      expect(deadlineInput).toHaveValue(mockSmallGoal.deadline);
+
+      // 新しい日付を入力
+      const newDate = '2024-04-01';
+      await userEvent.clear(deadlineInput);
+      await userEvent.type(deadlineInput, newDate);
+
+      // 入力された値が反映されていることを確認
+      expect(deadlineInput).toHaveValue(newDate);
+    });
+  });
+
+  describe('キャンセル操作', () => {
+    it('Close ボタンをクリックすると必ず onClose が呼ばれる', async () => {
+      const mockOnClose = jest.fn();
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: []
+      };
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={mockOnClose}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // Close ボタンが存在することを確認
+      const closeButton = screen.getByText('Close');
+      expect(closeButton).toBeInTheDocument();
+
+      // ボタンをクリック
+      await userEvent.click(closeButton);
+
+      // onClose が呼ばれたことを確認
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+  });
 }); 
