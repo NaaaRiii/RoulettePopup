@@ -869,4 +869,141 @@ describe('EditSmallGoalModal コンポーネント', () => {
       });
     });
   });
+
+  describe('API 成功時の挙動', () => {
+    beforeEach(() => {
+      fetchWithAuth.mockClear();
+    });
+
+    it('response.ok===true のとき、response.json() の結果を onSmallGoalUpdated に渡し、onClose が呼ばれる', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: [
+          { id: 1, content: 'タスク1の内容' }
+        ]
+      };
+
+      const mockOnClose = jest.fn();
+      const mockOnSmallGoalUpdated = jest.fn();
+      const mockResponseData = {
+        id: 1,
+        title: '更新されたSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: [
+          { id: 1, content: '更新されたタスク1' }
+        ]
+      };
+
+      // fetchWithAuth のモック実装
+      fetchWithAuth.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponseData)
+      });
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={mockOnClose}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={mockOnSmallGoalUpdated}
+        />
+      );
+
+      // タスクの内容を更新
+      const taskInputs = screen.getAllByLabelText('Task');
+      await userEvent.clear(taskInputs[0]);
+      await userEvent.type(taskInputs[0], '更新されたタスク1');
+
+      // フォームを送信
+      const submitButton = screen.getByText('Update Small Goal');
+      await userEvent.click(submitButton);
+
+      // API レスポンスの処理を待つ
+      await waitFor(() => {
+        // onSmallGoalUpdated が正しいデータで呼ばれたことを確認
+        expect(mockOnSmallGoalUpdated).toHaveBeenCalledWith(mockResponseData);
+        // onClose が呼ばれたことを確認
+        expect(mockOnClose).toHaveBeenCalledTimes(1);
+      });
+
+      // 呼び出しの順序を確認
+      const onSmallGoalUpdatedCall = mockOnSmallGoalUpdated.mock.invocationCallOrder[0];
+      const onCloseCall = mockOnClose.mock.invocationCallOrder[0];
+      expect(onSmallGoalUpdatedCall).toBeLessThan(onCloseCall);
+    });
+  });
+
+  describe('API エラー時の挙動', () => {
+    let consoleErrorSpy;
+    let alertSpy;
+
+    beforeEach(() => {
+      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+      fetchWithAuth.mockClear();
+    });
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+      alertSpy.mockRestore();
+    });
+
+    it('response.ok===false のとき、エラーメッセージがログされ、alert が表示され、onClose が呼ばれる', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: [
+          { id: 1, content: 'タスク1の内容' }
+        ]
+      };
+
+      const errorMessage = 'サーバーエラーが発生しました';
+      const mockOnClose = jest.fn();
+
+      // fetchWithAuth のモック実装
+      fetchWithAuth.mockResolvedValueOnce({
+        ok: false,
+        text: () => Promise.resolve(errorMessage)
+      });
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={mockOnClose}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // フォームを送信
+      const submitButton = screen.getByText('Update Small Goal');
+      await userEvent.click(submitButton);
+
+      // エラーメッセージがログされ、alert が表示され、onClose が呼ばれることを確認
+      await waitFor(() => {
+        // エラーログの確認
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to update small goal:', errorMessage);
+        // alert の確認
+        expect(alertSpy).toHaveBeenCalledWith('Failed to update small goal: ' + errorMessage);
+        // onClose の確認
+        expect(mockOnClose).toHaveBeenCalledTimes(1);
+      });
+
+      // 呼び出しの順序を確認
+      const consoleErrorCall = consoleErrorSpy.mock.invocationCallOrder[0];
+      const alertCall = alertSpy.mock.invocationCallOrder[0];
+      const onCloseCall = mockOnClose.mock.invocationCallOrder[0];
+
+      expect(consoleErrorCall).toBeLessThan(alertCall);
+      expect(alertCall).toBeLessThan(onCloseCall);
+    });
+  });
 }); 
