@@ -47,6 +47,55 @@ describe('Header コンポーネント', () => {
     expect(logoLink).toHaveAttribute('href', '/dashboard');
   });
 
+  describe('認証状態の管理', () => {
+    it('useAuthenticator フックが正しく使用されていること', () => {
+      render(<Header />);
+      expect(mockUseAuthenticator).toHaveBeenCalled();
+    });
+
+    it('route、user、signOut が正しく取得されていること', () => {
+      const mockUser = { username: 'testuser' };
+      mockUseAuthenticator.mockReturnValue({
+        route: 'authenticated',
+        user: mockUser,
+        signOut: mockSignOut,
+      });
+
+      render(<Header />);
+      
+      // コンポーネントが正しい値を取得していることを確認
+      expect(screen.getByText('You are Logged In')).toBeInTheDocument();
+      expect(screen.getByText('Log out')).toBeInTheDocument();
+    });
+
+    it('isLoggedIn の判定が正しく機能すること', () => {
+      // 未ログイン状態
+      mockUseAuthenticator.mockReturnValue({
+        route: 'unauthenticated',
+        user: null,
+        signOut: mockSignOut,
+      });
+      const { rerender } = render(<Header />);
+      expect(screen.getByText('Sign Up')).toBeInTheDocument();
+      expect(screen.getByText('Log In')).toBeInTheDocument();
+      expect(screen.queryByText('You are Logged In')).not.toBeInTheDocument();
+
+      // ログイン状態
+      mockUseAuthenticator.mockReturnValue({
+        route: 'authenticated',
+        user: { username: 'testuser' },
+        signOut: mockSignOut,
+      });
+      rerender(<Header />);
+      expect(screen.getByText('You are Logged In')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('How to Use')).toBeInTheDocument();
+      expect(screen.getByText('Log out')).toBeInTheDocument();
+      expect(screen.queryByText('Sign Up')).not.toBeInTheDocument();
+      expect(screen.queryByText('Log In')).not.toBeInTheDocument();
+    });
+  });
+
   describe('未ログイン状態', () => {
     beforeEach(() => {
       render(<Header />);
