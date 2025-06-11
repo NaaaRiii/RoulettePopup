@@ -3,6 +3,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import EditSmallGoalModal from '../components/EditSmallGoal';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+
+// fetchWithAuth のモック
+jest.mock('../utils/fetchWithAuth');
 
 describe('EditSmallGoalModal コンポーネント', () => {
   describe.each([
@@ -564,6 +568,305 @@ describe('EditSmallGoalModal コンポーネント', () => {
 
       // onClose が呼ばれたことを確認
       expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('フォーム送信前バリデーション', () => {
+    let consoleErrorSpy;
+
+    beforeEach(() => {
+      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      fetchWithAuth.mockClear();
+    });
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('goalId または smallGoal.id が falsy のとき、エラーがログされ、fetchWithAuth は呼ばれない', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: []
+      };
+
+      // goalId が undefined の場合
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={undefined}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // フォームを送信
+      const submitButton = screen.getByText('Update Small Goal');
+      await userEvent.click(submitButton);
+
+      // エラーログが出力されることを確認
+      expect(consoleErrorSpy).toHaveBeenCalledWith('goalId or smallGoal.id is undefined.');
+      // fetchWithAuth が呼ばれないことを確認
+      expect(fetchWithAuth).not.toHaveBeenCalled();
+
+      // コンポーネントを再レンダリング（smallGoal.id が undefined の場合）
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={{ ...mockSmallGoal, id: undefined }}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // フォームを送信
+      await userEvent.click(submitButton);
+
+      // エラーログが出力されることを確認
+      expect(consoleErrorSpy).toHaveBeenCalledWith('goalId or smallGoal.id is undefined.');
+      // fetchWithAuth が呼ばれないことを確認
+      expect(fetchWithAuth).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('送信データ整形の検証', () => {
+    beforeEach(() => {
+      fetchWithAuth.mockClear();
+    });
+
+    it('既存タスクは { id, content } で送られる', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: [
+          { id: 1, content: 'タスク1の内容' },
+          { id: 2, content: 'タスク2の内容' }
+        ]
+      };
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // タスクの内容を更新
+      const taskInputs = screen.getAllByLabelText('Task');
+      await userEvent.clear(taskInputs[0]);
+      await userEvent.type(taskInputs[0], '更新されたタスク1');
+
+      // フォームを送信
+      const submitButton = screen.getByText('Update Small Goal');
+      await userEvent.click(submitButton);
+
+      // fetchWithAuth が呼ばれたことを確認
+      await waitFor(() => {
+        expect(fetchWithAuth).toHaveBeenCalledTimes(1);
+      });
+
+      // 送信されたデータを確認
+      const [url, options] = fetchWithAuth.mock.calls[0];
+      const requestBody = JSON.parse(options.body);
+
+      // tasks_attributes の形式を確認
+      expect(requestBody.tasks_attributes).toHaveLength(2);
+      expect(requestBody.tasks_attributes).toEqual([
+        { id: 1, content: '更新されたタスク1' },
+        { id: 2, content: 'タスク2の内容' }
+      ]);
+    });
+
+    it('新規タスクは id を省略して { content } で送られる', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: [
+          { id: 1, content: 'タスク1の内容' }
+        ]
+      };
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // 新規タスクを追加
+      const addTaskButton = screen.getByText('Add Task');
+      await userEvent.click(addTaskButton);
+
+      // 新規タスクの内容を入力
+      const taskInputs = screen.getAllByLabelText('Task');
+      await userEvent.type(taskInputs[1], '新規タスクの内容');
+
+      // フォームを送信
+      const submitButton = screen.getByText('Update Small Goal');
+      await userEvent.click(submitButton);
+
+      // fetchWithAuth が呼ばれたことを確認
+      await waitFor(() => {
+        expect(fetchWithAuth).toHaveBeenCalledTimes(1);
+      });
+
+      // 送信されたデータを確認
+      const [url, options] = fetchWithAuth.mock.calls[0];
+      const requestBody = JSON.parse(options.body);
+
+      // tasks_attributes の形式を確認
+      expect(requestBody.tasks_attributes).toHaveLength(2);
+      expect(requestBody.tasks_attributes).toEqual([
+        { id: 1, content: 'タスク1の内容' }, // 既存タスク
+        { content: '新規タスクの内容' }      // 新規タスク（id なし）
+      ]);
+    });
+
+    it('削除フラグが立ったタスクは { id, _destroy: true } で送られる', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: [
+          { id: 1, content: 'タスク1の内容' },
+          { id: 2, content: 'タスク2の内容' },
+          { id: 3, content: 'タスク3の内容' }
+        ]
+      };
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={1}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // 2番目のタスクを削除
+      const removeButtons = screen.getAllByText('Remove Task');
+      await userEvent.click(removeButtons[1]);
+
+      // フォームを送信
+      const submitButton = screen.getByText('Update Small Goal');
+      await userEvent.click(submitButton);
+
+      // fetchWithAuth が呼ばれたことを確認
+      await waitFor(() => {
+        expect(fetchWithAuth).toHaveBeenCalledTimes(1);
+      });
+
+      // 送信されたデータを確認
+      const [url, options] = fetchWithAuth.mock.calls[0];
+      const requestBody = JSON.parse(options.body);
+
+      // tasks_attributes の形式を確認
+      expect(requestBody.tasks_attributes).toHaveLength(3);
+      expect(requestBody.tasks_attributes).toEqual([
+        { id: 1, content: 'タスク1の内容' },     // 既存タスク（変更なし）
+        { id: 2, _destroy: true },              // 削除フラグが立ったタスク
+        { id: 3, content: 'タスク3の内容' }      // 既存タスク（変更なし）
+      ]);
+    });
+  });
+
+  describe('API 通信', () => {
+    beforeEach(() => {
+      fetchWithAuth.mockClear();
+    });
+
+    it('正しい URL・メソッド・ボディで fetchWithAuth が一度だけ呼ばれる', async () => {
+      const mockSmallGoal = {
+        id: 1,
+        title: 'テストSmall Goal',
+        difficulty: '普通',
+        deadline: '2024-03-20',
+        tasks: [
+          { id: 1, content: 'タスク1の内容' },
+          { id: 2, content: 'タスク2の内容' }
+        ]
+      };
+
+      const goalId = 123;
+
+      render(
+        <EditSmallGoalModal
+          isOpen={true}
+          onClose={() => {}}
+          smallGoal={mockSmallGoal}
+          goalId={goalId}
+          onSmallGoalUpdated={() => {}}
+        />
+      );
+
+      // タスクの内容を更新
+      const taskInputs = screen.getAllByLabelText('Task');
+      await userEvent.clear(taskInputs[0]);
+      await userEvent.type(taskInputs[0], '更新されたタスク1');
+
+      // 2番目のタスクを削除
+      const removeButtons = screen.getAllByText('Remove Task');
+      await userEvent.click(removeButtons[1]);
+
+      // 新規タスクを追加
+      const addTaskButton = screen.getByText('Add Task');
+      await userEvent.click(addTaskButton);
+
+      // 新規タスクの内容を入力（非同期の更新を待つ）
+      await waitFor(() => {
+        const taskInputs = screen.getAllByLabelText('Task');
+        expect(taskInputs).toHaveLength(2); // 削除されたタスクは表示されない
+      });
+
+      const newTaskInput = screen.getAllByLabelText('Task')[1];
+      await userEvent.type(newTaskInput, '新規タスクの内容');
+
+      // フォームを送信
+      const submitButton = screen.getByText('Update Small Goal');
+      await userEvent.click(submitButton);
+
+      // fetchWithAuth が一度だけ呼ばれたことを確認
+      await waitFor(() => {
+        expect(fetchWithAuth).toHaveBeenCalledTimes(1);
+      });
+
+      // API 呼び出しの詳細を確認
+      const [url, options] = fetchWithAuth.mock.calls[0];
+
+      // URL の確認
+      expect(url).toBe(`/api/goals/${goalId}/small_goals/${mockSmallGoal.id}`);
+
+      // メソッドの確認
+      expect(options.method).toBe('PUT');
+
+      // リクエストボディの確認
+      const requestBody = JSON.parse(options.body);
+      expect(requestBody).toEqual({
+        title: mockSmallGoal.title,
+        difficulty: mockSmallGoal.difficulty,
+        deadline: mockSmallGoal.deadline,
+        tasks_attributes: [
+          { id: 1, content: '更新されたタスク1' },  // 更新された既存タスク
+          { id: 2, _destroy: true },               // 削除フラグが立ったタスク
+          { content: '新規タスクの内容' }           // 新規タスク
+        ]
+      });
     });
   });
 }); 
