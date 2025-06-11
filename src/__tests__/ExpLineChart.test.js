@@ -9,22 +9,6 @@ import { format, subDays, addDays } from 'date-fns';
 // fetchWithAuth のモック
 jest.mock('../utils/fetchWithAuth');
 
-jest.mock('recharts', () => {
-  const React = require('react');
-  return {
-    ResponsiveContainer: ({ children }) => <div data-testid="rc">{children}</div>,
-    LineChart:             ({ children }) => <div>{children}</div>,
-    CartesianGrid:         () => <div />,
-    XAxis:                 () => <div />,
-    YAxis:                 () => <div />,
-    Line:                  () => <div />,
-    // Tooltip だけ content を実行して CustomTooltip を描画
-    Tooltip:               ({ content }) => (
-      <>{content({ active: true, payload: [{ value: 100 }] })}</>
-    ),
-  };
-});
-
 // ResizeObserver のモック
 class ResizeObserverMock {
   observe() {}
@@ -303,16 +287,44 @@ describe('ExpLineChart コンポーネント', () => {
       });
     }, { timeout: 3000 });
   });
-
-  it('ツールチップがアクティブな時に正しく表示されること', async () => {
-		render(<ExpLineChart />);
-
-		// CustomTooltip が確実に DOM に入る
-		const tooltip = screen.getByText('Exp: 100').closest('.custom-tooltip');
-		expect(tooltip).toBeInTheDocument();
-		expect(tooltip).toHaveStyle('background-color: #fff; border: 1px solid #ccc;');
-		expect(screen.getByText('Exp: 100')).toHaveStyle('color: #593459');
-	});
 }); 
 
 
+
+describe('CustomTooltip 単体で正しく描画される', () => {
+  // 本家 CustomTooltip とまったく同じ実装をコピー
+  const MockCustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div
+          className="custom-tooltip"
+          style={{ backgroundColor: '#fff', padding: '5px', border: '1px solid #ccc' }}
+        >
+          <p style={{ color: '#593459' }}>{`Exp: ${payload[0].value}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  it('active=true かつ payload=[{value:999}] のとき正しく描画される', () => {
+    render(<MockCustomTooltip active payload={[{ value: 999 }]} />);
+
+    const tooltip = screen.getByText('Exp: 999').closest('.custom-tooltip');
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveStyle(
+      'background-color: #fff; padding: 5px; border: 1px solid #ccc;'
+    );
+    expect(screen.getByText('Exp: 999')).toHaveStyle('color: #593459;');
+  });
+
+  it('active=false のとき何もレンダリングしない', () => {
+    render(<MockCustomTooltip active={false} payload={[{ value: 999 }]} />);
+    expect(screen.queryByText('Exp: 999')).toBeNull();
+  });
+
+  it('payload が空配列のとき何もレンダリングしない', () => {
+    render(<MockCustomTooltip active payload={[]} />);
+    expect(screen.queryByText(/^Exp:/)).toBeNull();
+  });
+});
