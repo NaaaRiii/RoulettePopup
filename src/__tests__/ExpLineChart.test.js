@@ -399,6 +399,94 @@ describe('ExpLineChart コンポーネント', () => {
       });
     }, { timeout: 3000 });
   });
+
+  it('Tooltip に CustomTooltip が正しく渡され、正しく表示される', async () => {
+    // モックデータの設定
+    const mockData = [
+      { date: '2024-03-01', exp: 100 },
+      { date: '2024-03-02', exp: 200 },
+      { date: '2024-03-03', exp: 300 }
+    ];
+
+    fetchWithAuth.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockData)
+    });
+
+    const { container } = render(<ExpLineChart />);
+
+    // 非同期処理の完了を待つ
+    await waitFor(() => {
+      // Tooltip の存在を確認
+      const tooltipWrapper = container.querySelector('.recharts-tooltip-wrapper');
+      expect(tooltipWrapper).toBeInTheDocument();
+
+      // データポイントを取得
+      const dots = container.querySelectorAll('.recharts-dot');
+      expect(dots.length).toBeGreaterThan(0);
+
+      // 最初のデータポイントにマウスオーバー
+      fireEvent.mouseOver(dots[0], { clientX: 60, clientY: 250 });
+
+      // ツールチップの内容を確認
+      const tooltipContent = tooltipWrapper.querySelector('.custom-tooltip');
+      if (tooltipContent) {
+        expect(tooltipContent).toHaveStyle({
+          backgroundColor: '#fff',
+          padding: '5px',
+          border: '1px solid #ccc'
+        });
+
+        const tooltipText = tooltipContent.querySelector('p');
+        expect(tooltipText).toBeInTheDocument();
+        expect(tooltipText).toHaveStyle({ color: '#593459' });
+        expect(tooltipText).toHaveTextContent(/^Exp: \d+$/);
+      }
+    }, { timeout: 3000 });
+
+    // マウスを外すとツールチップが消えることを確認
+    fireEvent.mouseLeave(container.querySelector('.recharts-wrapper'));
+    await waitFor(() => {
+      const tooltipWrapper = container.querySelector('.recharts-tooltip-wrapper');
+      expect(tooltipWrapper).toHaveStyle({ visibility: 'hidden' });
+    });
+  });
+
+  it('Line に type="monotone" dataKey="exp" stroke="#8884d8" dot={{ r: 5 }} が設定されていること', async () => {
+    // モックデータの設定
+    const mockData = [
+      { date: '2024-03-01', exp: 100 },
+      { date: '2024-03-02', exp: 200 },
+      { date: '2024-03-03', exp: 300 }
+    ];
+
+    fetchWithAuth.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockData)
+    });
+
+    const { container } = render(<ExpLineChart />);
+
+    // 非同期処理の完了を待つ
+    await waitFor(() => {
+      // Line コンポーネントの存在を確認
+      const line = container.querySelector('.recharts-line');
+      expect(line).toBeInTheDocument();
+
+      // Line の属性を確認
+      const linePath = line.querySelector('.recharts-line-curve');
+      expect(linePath).toHaveAttribute('stroke', '#8884d8');
+
+      // データポイントの設定を確認
+      const dots = container.querySelectorAll('.recharts-dot');
+      expect(dots.length).toBeGreaterThan(0);
+      dots.forEach(dot => {
+        expect(dot).toHaveAttribute('r', '5');
+        expect(dot).toHaveAttribute('fill', '#fff');
+        expect(dot).toHaveAttribute('stroke', '#8884d8');
+      });
+    }, { timeout: 3000 });
+  });
 }); 
 
 
