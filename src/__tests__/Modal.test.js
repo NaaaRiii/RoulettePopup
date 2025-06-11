@@ -191,3 +191,49 @@ describe('子要素', () => {
     });
   });
 });
+
+
+describe('再表示', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('false→true→false→true の連続トグル 2 回目以降も遅延ロジックが正しく働く', async () => {
+    const { rerender } = render(
+      <Modal isOpen={false} onClose={() => {}}>
+        <div>テスト</div>
+      </Modal>
+    );
+
+    // 1 回目のトグル: OFF→ON
+    rerender(
+      <Modal isOpen={true} onClose={() => {}}>
+        <div>テスト</div>
+      </Modal>
+    );
+    // 800ms 経過で表示
+    jest.advanceTimersByTime(800);
+    await screen.findByText('テスト');
+
+    // OFF に切り替えたら即座に非表示
+    rerender(
+      <Modal isOpen={false} onClose={() => {}}>
+        <div>テスト</div>
+      </Modal>
+    );
+    expect(screen.queryByText('テスト')).toBeNull();
+
+    // 2 回目のトグル: OFF→ON
+    rerender(
+      <Modal isOpen={true} onClose={() => {}}>
+        <div>テスト</div>
+      </Modal>
+    );
+    jest.advanceTimersByTime(800);
+    await screen.findByText('テスト');
+  });
+});
