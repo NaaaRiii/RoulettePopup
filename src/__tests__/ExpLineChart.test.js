@@ -9,6 +9,22 @@ import { format, subDays, addDays } from 'date-fns';
 // fetchWithAuth のモック
 jest.mock('../utils/fetchWithAuth');
 
+jest.mock('recharts', () => {
+  const React = require('react');
+  return {
+    ResponsiveContainer: ({ children }) => <div data-testid="rc">{children}</div>,
+    LineChart:             ({ children }) => <div>{children}</div>,
+    CartesianGrid:         () => <div />,
+    XAxis:                 () => <div />,
+    YAxis:                 () => <div />,
+    Line:                  () => <div />,
+    // Tooltip だけ content を実行して CustomTooltip を描画
+    Tooltip:               ({ content }) => (
+      <>{content({ active: true, payload: [{ value: 100 }] })}</>
+    ),
+  };
+});
+
 // ResizeObserver のモック
 class ResizeObserverMock {
   observe() {}
@@ -288,60 +304,15 @@ describe('ExpLineChart コンポーネント', () => {
     }, { timeout: 3000 });
   });
 
-  //it('ツールチップがアクティブな時に正しく表示されること', async () => {
-  //  // ① モックデータ
-  //  const mockData = [
-  //    { date: '2024-03-01', exp: 100 },
-  //    { date: '2024-03-02', exp: 200 },
-  //    { date: '2024-03-03', exp: 300 }
-  //  ];
+  it('ツールチップがアクティブな時に正しく表示されること', async () => {
+		render(<ExpLineChart />);
 
-  //  fetchWithAuth.mockResolvedValue({
-  //    ok: true,
-  //    json: () => Promise.resolve(mockData)
-  //  });
-
-  //  const { container } = render(<ExpLineChart />);
-
-  //  // ② チャートのドットが描画されるまで待機
-  //  await waitFor(() => {
-  //    const dots = container.querySelectorAll('.recharts-dot');
-  //    expect(dots.length).toBe(mockData.length);
-  //  }, { timeout: 5000 });
-
-  //  // ③ 最初のドットにマウスイベントを発火
-  //  const firstDot = container.querySelector('.recharts-dot');
-  //  const cx = parseFloat(firstDot.getAttribute('cx'));
-  //  const cy = parseFloat(firstDot.getAttribute('cy'));
-
-  //  // mouseEnter イベントを発火
-  //  fireEvent.mouseEnter(firstDot, {
-  //    clientX: cx,
-  //    clientY: cy
-  //  });
-
-  //  // mouseMove イベントを発火
-  //  fireEvent.mouseMove(firstDot, {
-  //    clientX: cx,
-  //    clientY: cy
-  //  });
-
-  //  // ④ ツールチップ wrapper の style.visibility が "visible" になることをチェック
-  //  await waitFor(() => {
-  //    const tooltipWrapper = container.querySelector('.recharts-tooltip-wrapper');
-  //    expect(tooltipWrapper).toBeInTheDocument();
-  //    expect(tooltipWrapper).toHaveStyle('visibility: visible');
-  //  }, { timeout: 5000 });
-
-  //  // ⑤ カスタムツールチップ本体の検証
-  //  const tooltip = screen.getByText('Exp: 100').closest('.custom-tooltip');
-  //  expect(tooltip).toBeInTheDocument();
-  //  expect(tooltip).toBeVisible();
-  //  expect(tooltip).toHaveStyle('background-color: #fff; padding: 5px; border: 1px solid #ccc;');
-
-  //  // ⑥ ツールチップ内のテキスト色
-  //  expect(screen.getByText('Exp: 100')).toHaveStyle('color: #593459;');
-  //}, 10000);
+		// CustomTooltip が確実に DOM に入る
+		const tooltip = screen.getByText('Exp: 100').closest('.custom-tooltip');
+		expect(tooltip).toBeInTheDocument();
+		expect(tooltip).toHaveStyle('background-color: #fff; border: 1px solid #ccc;');
+		expect(screen.getByText('Exp: 100')).toHaveStyle('color: #593459');
+	});
 }); 
 
 
