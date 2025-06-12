@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import CreateSmallGoal from '../components/CreateSmallGoal';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@testing-library/jest-dom';
+import { act, waitFor } from '@testing-library/react';
 
 // fetchWithAuth のモック
 jest.mock('../utils/fetchWithAuth');
@@ -17,6 +18,11 @@ jest.mock('next/router', () => ({
     prefetch: jest.fn(),
   }),
 }));
+
+// バリデーションテスト
+beforeEach(() => {
+  fetchWithAuth.mockClear();
+});
 
 describe('初期表示', () => {
   it('isOpen=false のとき、何もレンダリングされない', () => {
@@ -325,4 +331,173 @@ describe('タスク管理機能', () => {
     const removeButtonsAfterSecondAdd = screen.getAllByText('タスクの削除');
     expect(removeButtonsAfterSecondAdd).toHaveLength(3);
   });
+
+  it('タスク削除ボタンをクリックすると該当のタスクフィールドが削除される', async () => {
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+    
+    // まず2つのタスクフィールドを追加
+    const addTaskButton = screen.getByText('タスクの追加');
+    
+    // 1つ目のタスクを追加
+    await act(async () => {
+      await userEvent.click(addTaskButton);
+    });
+    await waitFor(() => {
+      const taskInputs = screen.getAllByLabelText('Task');
+      expect(taskInputs).toHaveLength(2);
+    });
+    
+    // 2つ目のタスクを追加
+    await act(async () => {
+      await userEvent.click(addTaskButton);
+    });
+    await waitFor(() => {
+      const taskInputs = screen.getAllByLabelText('Task');
+      expect(taskInputs).toHaveLength(3);
+    });
+    
+    // 最新追加(3番目)のタスクフィールドに内容を入力
+    let taskInputs = screen.getAllByLabelText('Task');
+    await act(async () => {
+      await userEvent.type(taskInputs[2], 'テストタスク2');
+    });
+    
+    // 真ん中(2番目)のタスクフィールドの削除ボタンをクリック
+    const removeButtons = screen.getAllByText('タスクの削除');
+    await act(async () => {
+      await userEvent.click(removeButtons[1]);
+    });
+    
+    // タスクフィールドが2つに減ったことを確認
+    await waitFor(() => {
+      const taskInputsAfterRemoval = screen.getAllByLabelText('Task');
+      expect(taskInputsAfterRemoval).toHaveLength(2);
+    });
+    
+    // タスク削除ボタンも2つに減ったことを確認
+    const remainingRemoveButtons = screen.getAllByText('タスクの削除');
+    expect(remainingRemoveButtons).toHaveLength(2);
+    
+    // 残っているタスクのどちらかに入力した内容が保持されていることを確認
+    const remainingTaskWithValue = screen.getByDisplayValue('テストタスク2');
+    expect(remainingTaskWithValue).toBeInTheDocument();
+  });
+
+  it('最後の1つのタスクは削除できない', async () => {
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // 初期状態でタスクフィールドは1つ
+    let taskInputs = screen.getAllByLabelText('Task');
+    expect(taskInputs).toHaveLength(1);
+
+    const removeButton = screen.getByText('タスクの削除');
+
+    // 削除を試みる
+    await act(async () => {
+      await userEvent.click(removeButton);
+    });
+
+    // タスクフィールドが依然として1つであることを確認
+    taskInputs = screen.getAllByLabelText('Task');
+    expect(taskInputs).toHaveLength(1);
+
+    // 削除ボタンも1つのままであることを確認
+    const removeButtons = screen.getAllByText('タスクの削除');
+    expect(removeButtons).toHaveLength(1);
+  });
+
+  it('タスクの内容が正しく更新される', async () => {
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    const taskInput = screen.getByLabelText('Task');
+
+    await act(async () => {
+      await userEvent.type(taskInput, 'タスク更新テスト');
+    });
+
+    expect(taskInput).toHaveValue('タスク更新テスト');
+  });
+});
+
+describe('入力バリデーション', () => {
+  it('必須フィールドが空の場合は送信できない', async () => {
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // フォームの必須フィールドを確認
+    const titleInput = screen.getByLabelText('Small Goalのタイトル');
+    const taskInput = screen.getByLabelText('Task');
+    const difficultySelect = screen.getByLabelText('難易度の設定');
+    const deadlineInput = screen.getByLabelText('期限');
+
+    // required属性が設定されていることを確認
+    expect(titleInput).toBeRequired();
+    expect(taskInput).toBeRequired();
+    expect(difficultySelect).toBeRequired();
+    expect(deadlineInput).toBeRequired();
+
+    // 送信ボタンをクリック
+    const submitButton = screen.getByText('設定する');
+    await act(async () => {
+      await userEvent.click(submitButton);
+    });
+
+    // fetchWithAuthが呼び出されていないことを確認
+    expect(fetchWithAuth).not.toHaveBeenCalled();
+  });
+
+  it('タスクが空のままでは送信できない', async () => {
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // 必須フィールドを入力（タスクは空のまま）
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'タイトルテスト');
+      await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
+      const deadlineInput = screen.getByLabelText('期限');
+      const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0]; // 明日
+      await userEvent.type(deadlineInput, futureDate);
+    });
+
+    const submitButton = screen.getByText('設定する');
+    await act(async () => {
+      await userEvent.click(submitButton);
+    });
+
+    expect(fetchWithAuth).not.toHaveBeenCalled();
+  });
+
 }); 
