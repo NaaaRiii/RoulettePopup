@@ -256,3 +256,49 @@ describe('入力フォームの要素確認', () => {
 		expect(deadlineInput.value).toBe('2024-12-31');
 	});
 });
+
+
+describe('キャンセル操作', () => {
+	it('Close ボタンをクリックすると必ず onClose が呼ばれる', async () => {
+		// onClose のモック関数を作成
+		const mockOnClose = jest.fn();
+
+		// コンポーネントをレンダリング
+		render(
+			<EditGoal
+				isOpen={true}
+				onClose={mockOnClose}
+				goalId={1}
+				onGoalUpdated={() => {}}
+			/>
+		);
+
+		// Close ボタンを取得してクリック
+		const closeButton = await screen.findByText('Close');
+		fireEvent.click(closeButton);
+
+		// onClose が1回呼ばれたことを確認
+		expect(mockOnClose).toHaveBeenCalledTimes(1);
+	});
+});
+
+
+describe('フォーム送信前バリデーション', () => {
+	it('goalId が falsy のとき、fetch は呼ばれない', () => {
+		// fetch のモックをリセット
+		global.fetch = jest.fn();
+
+		// コンポーネントをレンダリング（goalId を null に設定）
+		render(
+			<EditGoal
+				isOpen={true}
+				onClose={() => {}}
+				goalId={null}
+				onGoalUpdated={() => {}}
+			/>
+		);
+		
+		// fetch が呼ばれていないことを確認
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+});
