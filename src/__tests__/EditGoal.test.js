@@ -302,3 +302,252 @@ describe('フォーム送信前バリデーション', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 });
+
+
+describe('API 通信', () => {
+	it('正しい URL・メソッド・ボディで fetchWithAuth が一度だけ呼ばれる', async () => {
+		// fetchWithAuth のモックをリセット
+		fetchWithAuth.mockClear();
+
+		// モックの戻り値を設定
+		fetchWithAuth.mockResolvedValueOnce({
+			ok: true,
+			json: () => Promise.resolve({ message: 'Goalを編集しました' })
+		});
+
+		// fetch のモックを設定
+		global.fetch = jest.fn().mockResolvedValueOnce({
+			json: () => Promise.resolve({
+				title: 'テスト目標',
+				content: 'テスト内容',
+				deadline: '2024-03-20'
+			})
+		});
+
+		// コンポーネントをレンダリング
+		render(
+			<EditGoal
+				isOpen={true}
+				onClose={() => {}}
+				goalId={1}
+				onGoalUpdated={() => {}}
+			/>
+		);
+
+		// フォームの入力値を設定
+		const titleInput = await screen.findByLabelText('目標のタイトル');
+		const contentInput = await screen.findByLabelText('詳細');
+		const deadlineInput = await screen.findByLabelText('期限');
+
+		fireEvent.change(titleInput, { target: { value: 'テスト目標' } });
+		fireEvent.change(contentInput, { target: { value: 'テスト内容' } });
+		fireEvent.change(deadlineInput, { target: { value: '2024-12-31' } });
+
+		// フォームを送信
+		const submitButton = screen.getByText('目標を更新する');
+		const form = submitButton.closest('form');
+		fireEvent.submit(form);
+
+		// fetchWithAuth が正しい引数で呼ばれたことを確認
+		expect(fetchWithAuth).toHaveBeenCalledTimes(1);
+		expect(fetchWithAuth).toHaveBeenCalledWith(
+			'/api/goals/1',
+			{
+				method: 'PUT',
+				body: JSON.stringify({
+					title: 'テスト目標',
+					content: 'テスト内容',
+					deadline: '2024-12-31'
+				})
+			}
+		);
+	});
+});
+
+
+describe('API 成功時の挙動', () => {
+	it('response.ok===true のとき、message が更新され、onGoalUpdated が呼ばれ、onClose が呼ばれる', async () => {
+		// モックの設定
+		const mockOnClose = jest.fn();
+		const mockOnGoalUpdated = jest.fn();
+		const mockResponse = {
+			ok: true,
+			json: () => Promise.resolve({ message: 'Goal updated successfully' })
+		};
+		fetchWithAuth.mockResolvedValueOnce(mockResponse);
+
+		// fetch のモックを設定
+		global.fetch = jest.fn().mockResolvedValueOnce({
+			json: () => Promise.resolve({
+				title: 'テスト目標',
+				content: 'テスト内容',
+				deadline: '2024-03-20'
+			})
+		});
+
+		// コンポーネントをレンダリング
+		render(
+			<EditGoal
+				isOpen={true}
+				onClose={mockOnClose}
+				goalId={1}
+				onGoalUpdated={mockOnGoalUpdated}
+			/>
+		);
+
+		// フォームの入力値を設定
+		const titleInput = await screen.findByLabelText('目標のタイトル');
+		const contentInput = await screen.findByLabelText('詳細');
+		const deadlineInput = await screen.findByLabelText('期限');
+
+		// 入力値を設定
+		fireEvent.change(titleInput, { target: { value: 'テスト目標' } });
+		fireEvent.change(contentInput, { target: { value: 'テスト内容' } });
+		fireEvent.change(deadlineInput, { target: { value: '2024-12-31' } });
+
+		// フォームを送信
+		const submitButton = screen.getByText('目標を更新する');
+		const form = submitButton.closest('form');
+		fireEvent.submit(form);
+
+		// 非同期処理の完了を待つ
+		await waitFor(() => {
+			// メッセージが表示されることを確認
+			expect(screen.getByText('Goalを編集しました')).toBeInTheDocument();
+		});
+
+		// onGoalUpdated が正しい引数で呼ばれたことを確認
+		expect(mockOnGoalUpdated).toHaveBeenCalledWith({
+			title: 'テスト目標',
+			content: 'テスト内容',
+			deadline: '2024-12-31'
+		});
+
+		// onClose が呼ばれたことを確認
+		expect(mockOnClose).toHaveBeenCalledTimes(1);
+	});
+});
+
+
+describe('API エラー時の挙動', () => {
+  it('response.ok===false のとき、エラーメッセージがログされる', async () => {
+    // モックの設定
+    const mockOnClose = jest.fn();
+    const mockOnGoalUpdated = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    // 初期データ取得用のfetchのモック
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      json: () => Promise.resolve({
+        title: 'テスト目標',
+        content: 'テスト内容',
+        deadline: '2024-03-20'
+      })
+    });
+
+    // fetchWithAuth のモック実装
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ error: '更新に失敗しました' })
+    });
+
+    render(
+      <EditGoal
+        isOpen={true}
+        onClose={mockOnClose}
+        goalId={1}
+        onGoalUpdated={mockOnGoalUpdated}
+      />
+    );
+
+    // フォームの入力値を設定
+    const titleInput = await screen.findByLabelText('目標のタイトル');
+    const contentInput = await screen.findByLabelText('詳細');
+    const deadlineInput = await screen.findByLabelText('期限');
+
+    // 入力値を設定
+    fireEvent.change(titleInput, { target: { value: 'テスト目標' } });
+    fireEvent.change(contentInput, { target: { value: 'テスト内容' } });
+    fireEvent.change(deadlineInput, { target: { value: '2024-12-31' } });
+
+    // フォームを送信
+    const submitButton = screen.getByText('目標を更新する');
+    const form = submitButton.closest('form');
+    fireEvent.submit(form);
+
+    // エラーメッセージがログされることを確認
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error updating goal:',
+        { error: '更新に失敗しました' }
+      );
+    });
+
+    // onClose と onGoalUpdated が呼ばれないことを確認
+    expect(mockOnClose).not.toHaveBeenCalled();
+    expect(mockOnGoalUpdated).not.toHaveBeenCalled();
+
+    // モックをリセット
+    consoleErrorSpy.mockRestore();
+  });
+
+	it('fetchWithAuth が例外を投げたとき、エラーメッセージがログされる', async () => {
+    // モックの設定
+    const mockOnClose = jest.fn();
+    const mockOnGoalUpdated = jest.fn();
+    
+    // 例外の設定
+    const error = new Error('Network error');
+    
+    // 初期データ取得用のfetchのモック
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      json: () => Promise.resolve({
+        title: 'テスト目標',
+        content: 'テスト内容',
+        deadline: '2024-03-20'
+      })
+    });
+    
+    // fetchWithAuth のモック実装（例外を投げる）
+    fetchWithAuth.mockRejectedValue(error);
+
+    // console.error のモック
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <EditGoal
+        isOpen={true}
+        onClose={mockOnClose}
+        goalId={1}
+        onGoalUpdated={mockOnGoalUpdated}
+      />
+    );
+
+    // フォームの入力値を設定
+    const titleInput = await screen.findByLabelText('目標のタイトル');
+    const contentInput = await screen.findByLabelText('詳細');
+    const deadlineInput = await screen.findByLabelText('期限');
+
+    // 入力値を設定
+    fireEvent.change(titleInput, { target: { value: 'テスト目標' } });
+    fireEvent.change(contentInput, { target: { value: 'テスト内容' } });
+    fireEvent.change(deadlineInput, { target: { value: '2024-12-31' } });
+
+    // フォームを送信
+    const submitButton = screen.getByText('目標を更新する');
+    const form = submitButton.closest('form');
+    fireEvent.submit(form);
+
+    // エラーメッセージがログされることを確認
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Update failed', error);
+    });
+
+    // onClose と onGoalUpdated が呼ばれないことを確認
+    expect(mockOnClose).not.toHaveBeenCalled();
+    expect(mockOnGoalUpdated).not.toHaveBeenCalled();
+
+    // モックをリセット
+    consoleErrorSpy.mockRestore();
+  });
+});
