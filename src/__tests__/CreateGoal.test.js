@@ -7,10 +7,11 @@ import styles from '../components/CreateGoal.module.css';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 // Next.js の useRouter をモック
+const mockPush = jest.fn();
 jest.mock('next/router', () => ({
   useRouter: () => ({
     query: {},
-    push: jest.fn(),
+    push: mockPush,
     replace: jest.fn(),
     prefetch: jest.fn(),
   }),
@@ -19,10 +20,19 @@ jest.mock('next/router', () => ({
 // fetchWithAuth をモック
 jest.mock('../utils/fetchWithAuth');
 
+// console.error をモック
+const originalConsoleError = console.error;
+console.error = jest.fn();
+
 describe('NewGoalModal', () => {
   beforeEach(() => {
     // 各テスト前にモックをリセット
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    // テスト終了後に console.error を元に戻す
+    console.error = originalConsoleError;
   });
 
   it('isOpen=false のとき、何もレンダリングされない', () => {
@@ -172,5 +182,180 @@ describe('NewGoalModal', () => {
 
     // fetchWithAuth が呼ばれていないことを確認
     expect(fetchWithAuth).not.toHaveBeenCalled();
+  });
+
+  it('必須フィールドを埋めて送信すると /api/goals へ POST される', async () => {
+    render(
+      <NewGoalModal
+        isOpen={true}
+        onClose={() => {}}
+      />
+    );
+
+    // 必須フィールドに入力
+    const titleInput = screen.getByLabelText('目標のタイトル');
+    const contentInput = screen.getByLabelText('Content');
+    const deadlineInput = screen.getByLabelText('期限');
+
+    await userEvent.type(titleInput, 'テスト目標');
+    await userEvent.type(contentInput, 'テストコンテンツ');
+    await userEvent.type(deadlineInput, '2024-12-31');
+
+    // フォームを送信
+    await userEvent.click(screen.getByText('設定する'));
+
+    // fetchWithAuth が1回だけ呼ばれたことを確認
+    expect(fetchWithAuth).toHaveBeenCalledTimes(1);
+
+    // 正しいエンドポイントとメソッドで呼ばれたことを確認
+    expect(fetchWithAuth).toHaveBeenCalledWith(
+      '/api/goals',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          title: 'テスト目標',
+          content: 'テストコンテンツ',
+          deadline: '2024-12-31'
+        })
+      })
+    );
+  });
+
+  it('response.ok=true の場合、router.push が正しいパラメータで呼ばれる', async () => {
+    // 成功レスポンスをモック
+    const mockResponse = {
+      ok: true,
+      json: async () => ({
+        id: 123,
+        message: '目標を作成しました'
+      })
+    };
+    fetchWithAuth.mockResolvedValueOnce(mockResponse);
+
+    render(
+      <NewGoalModal
+        isOpen={true}
+        onClose={() => {}}
+      />
+    );
+
+    // 必須フィールドに入力
+    const titleInput = screen.getByLabelText('目標のタイトル');
+    const contentInput = screen.getByLabelText('Content');
+    const deadlineInput = screen.getByLabelText('期限');
+
+    await userEvent.type(titleInput, 'テスト目標');
+    await userEvent.type(contentInput, 'テストコンテンツ');
+    await userEvent.type(deadlineInput, '2024-12-31');
+
+    // フォームを送信
+    await userEvent.click(screen.getByText('設定する'));
+
+    // router.push が正しいパラメータで呼ばれたことを確認
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/goals/123',
+      query: {
+        message: encodeURIComponent('目標を作成しました')
+      }
+    });
+  });
+
+  it('response.ok=false の場合、console.error が正しいエラーメッセージで呼ばれる', async () => {
+    // エラーレスポンスをモック
+    const errorData = { message: 'バリデーションエラー' };
+    const mockResponse = {
+      ok: false,
+      json: async () => errorData
+    };
+    fetchWithAuth.mockResolvedValueOnce(mockResponse);
+
+    render(
+      <NewGoalModal
+        isOpen={true}
+        onClose={() => {}}
+      />
+    );
+
+    // 必須フィールドに入力
+    const titleInput = screen.getByLabelText('目標のタイトル');
+    const contentInput = screen.getByLabelText('Content');
+    const deadlineInput = screen.getByLabelText('期限');
+
+    await userEvent.type(titleInput, 'テスト目標');
+    await userEvent.type(contentInput, 'テストコンテンツ');
+    await userEvent.type(deadlineInput, '2024-12-31');
+
+    // フォームを送信
+    await userEvent.click(screen.getByText('設定する'));
+
+    // console.error が正しいエラーメッセージで呼ばれたことを確認
+    expect(console.error).toHaveBeenCalledWith('Error submitting form:', errorData);
+  });
+
+  it('fetchWithAuth が例外を投げた場合、console.error が正しいエラーメッセージで呼ばれる', async () => {
+    // 例外を投げるようにモックを設定
+    const error = new Error('ネットワークエラー');
+    fetchWithAuth.mockRejectedValueOnce(error);
+
+    render(
+      <NewGoalModal
+        isOpen={true}
+        onClose={() => {}}
+      />
+    );
+
+    // 必須フィールドに入力
+    const titleInput = screen.getByLabelText('目標のタイトル');
+    const contentInput = screen.getByLabelText('Content');
+    const deadlineInput = screen.getByLabelText('期限');
+
+    await userEvent.type(titleInput, 'テスト目標');
+    await userEvent.type(contentInput, 'テストコンテンツ');
+    await userEvent.type(deadlineInput, '2024-12-31');
+
+    // フォームを送信
+    await userEvent.click(screen.getByText('設定する'));
+
+    // console.error が正しいエラーメッセージで呼ばれたことを確認
+    expect(console.error).toHaveBeenCalledWith('Submission failed', error);
+  });
+
+  it('モーダルに role="dialog"、タイトルに aria-labelledby が正しく付与されている', () => {
+    render(
+      <NewGoalModal
+        isOpen={true}
+        onClose={() => {}}
+      />
+    );
+
+    // モーダルが role="dialog" を持っていることを確認
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toBeInTheDocument();
+
+    // モーダルが aria-labelledby を持っていることを確認
+    expect(dialog).toHaveAttribute('aria-labelledby');
+
+    // タイトル要素が存在し、aria-labelledby で参照されていることを確認
+    const titleId = dialog.getAttribute('aria-labelledby');
+    const title = document.getElementById(titleId);
+    expect(title).toBeInTheDocument();
+    expect(title).toHaveTextContent('目標を設定する');
+  });
+
+  it('オーバーレイに styles.modalOverlay、内容に styles.modalContent が付いていること', () => {
+    render(
+      <NewGoalModal
+        isOpen={true}
+        onClose={() => {}}
+      />
+    );
+
+    // オーバーレイに正しいクラスが付いていることを確認
+    const overlay = screen.getByRole('dialog');
+    expect(overlay).toHaveClass(styles.modalOverlay);
+
+    // モーダルの内容に正しいクラスが付いていることを確認
+    const content = overlay.querySelector(`.${styles.modalContent}`);
+    expect(content).toBeInTheDocument();
   });
 }); 
