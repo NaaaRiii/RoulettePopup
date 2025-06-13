@@ -39,9 +39,9 @@ export default function NewGoalModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay}>
+    <div className={styles.modalOverlay} role="dialog" aria-labelledby="modal-title">
       <div className={styles.modalContent}>
-        <h2>目標を設定する</h2>
+        <h2 id="modal-title">目標を設定する</h2>
         <form onSubmit={handleSubmit}>
           <label htmlFor="title">目標のタイトル</label>
           <textarea
