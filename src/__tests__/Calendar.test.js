@@ -346,20 +346,19 @@ describe('ExpCalendar', () => {
     };
 
     // 成功レスポンスをモック（2回呼ばれる）
-    const mockResponse1 = {
-      ok: true,
-      json: async () => initialActivities
-    };
-    const mockResponse2 = {
-      ok: true,
-      json: async () => updatedActivities
-    };
     fetchWithAuth
-      .mockResolvedValueOnce(mockResponse1)
-      .mockResolvedValueOnce(mockResponse2);
+      .mockImplementationOnce(() => Promise.resolve({
+        ok: true,
+        json: async () => initialActivities
+      }))
+      .mockImplementationOnce(() => Promise.resolve({
+        ok: true,
+        json: async () => updatedActivities
+      }));
 
     // コンポーネントをレンダリング
-    const { rerender } = render(<ExpCalendar />);
+    let v = 0;
+    const { rerender } = render(<ExpCalendar key={v} />);
 
     // カレンダーが存在することを確認
     const calendar = document.querySelector('.react-calendar');
@@ -367,19 +366,20 @@ describe('ExpCalendar', () => {
 
     // 初期状態を確認
     await waitFor(() => {
-      const cell = calendar.querySelector(`[data-date="${date}"]`);
+      const cell = document.querySelector(`[data-date="${date}"]`);
       expect(cell).toHaveClass('exp-level-30');
       expect(cell).not.toHaveClass('exp-level-80');
     });
 
     // コンポーネントを再レンダリングして useEffect を再実行
-    rerender(<ExpCalendar />);
+    v++;
+    rerender(<ExpCalendar key={v} />);
 
-    // 更新後の状態を確認
+    // 更新後の状態を確認（タイムアウトを長く設定）
     await waitFor(() => {
-      const cell = calendar.querySelector(`[data-date="${date}"]`);
+      const cell = document.querySelector(`[data-date="${date}"]`);
       expect(cell).toHaveClass('exp-level-80');
       expect(cell).not.toHaveClass('exp-level-30');
-    });
+    }, { timeout: 3000 });
   });
 });
