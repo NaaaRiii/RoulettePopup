@@ -14,13 +14,6 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const messageFromQuery = router.query.message;
-    if (messageFromQuery) {
-      setMessage(decodeURIComponent(messageFromQuery));
-    }
-  }, [router.query]);
-
-  useEffect(() => {
     if (isOpen) {
       setTitle('');
       setTasks([{ id: Date.now(), content: '' }]);
@@ -29,6 +22,13 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
       setMessage('');
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const messageFromQuery = router.query.message;
+    if (messageFromQuery) {
+      setMessage(decodeURIComponent(messageFromQuery));
+    }
+  }, [router.query]);
 
   const handleTaskChange = (index, value) => {
     const newTasks = tasks.map((task, i) => {
@@ -98,7 +98,8 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
         <h2>Small Goalを設定しよう!</h2>
 
         {message && (
-          <div className={styles.errorMessage}>
+          //<div className={styles.errorMessage}>
+          <div role="alert" className={styles.errorMessage}>
             {message}
           </div>
         )}

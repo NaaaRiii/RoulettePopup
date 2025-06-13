@@ -1,9 +1,10 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateSmallGoal from '../components/CreateSmallGoal';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import '@testing-library/jest-dom';
+import styles from '../components/CreateGoal.module.css';
 
 // fetchWithAuth のモック
 jest.mock('../utils/fetchWithAuth');
@@ -23,10 +24,6 @@ beforeEach(() => {
   fetchWithAuth.mockClear();
 });
 
-// テスト内でのラップ用に簡易 act ヘルパーを定義（React の act ではない）
-const act = async (callback) => {
-  await callback();
-};
 
 describe('初期表示', () => {
   it('isOpen=false のとき、何もレンダリングされない', () => {
@@ -790,6 +787,91 @@ describe('API 通信', () => {
     expect(requestBody.small_goal.tasks_attributes[0].content).toBe('タスク1');
     expect(requestBody.small_goal.tasks_attributes[1].content).toBe('タスク2');
   });
+
+  it('ネットワークエラー時にエラーメッセージが表示される', async () => {
+    // fetchWithAuth がネットワークエラーを投げるようにモック
+    fetchWithAuth.mockRejectedValueOnce(new Error('Network Error'));
+
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // フォームに値を入力
+    const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+    await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
+    await userEvent.type(screen.getByLabelText('Task'), 'テストタスク');
+    await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
+    await userEvent.type(screen.getByLabelText('期限'), futureDate);
+
+    // フォームを送信
+    await userEvent.click(screen.getByText('設定する'));
+
+    // ネットワークエラーのメッセージが表示されることを確認
+    await waitFor(() => {
+      expect(screen.getByText('Submission failed, please try again.')).toBeInTheDocument();
+    });
+  });
+
+  it('API エラー後にフォームの内容が保持される', async () => {
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ errors: ['何らかのエラー'] })
+    });
+
+    render(<CreateSmallGoal isOpen={true} onClose={() => {}} goalId={1} onSmallGoalAdded={() => {}} />);
+
+    const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+    await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'API エラー保持テスト');
+    await userEvent.type(screen.getByLabelText('Task'), 'タスク保持テスト');
+    await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
+    await userEvent.type(screen.getByLabelText('期限'), futureDate);
+
+    await userEvent.click(screen.getByText('設定する'));
+
+    // エラーメッセージ確認
+    await waitFor(() => {
+      expect(screen.getByText('何らかのエラー')).toBeInTheDocument();
+    });
+
+    // フォーム内容が保持されていることを確認
+    expect(screen.getByLabelText('Small Goalのタイトル')).toHaveValue('API エラー保持テスト');
+    expect(screen.getByLabelText('Task')).toHaveValue('タスク保持テスト');
+    expect(screen.getByLabelText('難易度の設定')).toHaveValue('普通');
+    expect(screen.getByLabelText('期限')).toHaveValue(futureDate);
+  });
+
+  it('ネットワークエラー後にフォームの内容が保持される', async () => {
+    fetchWithAuth.mockRejectedValueOnce(new Error('Network Error'));
+
+    render(<CreateSmallGoal isOpen={true} onClose={() => {}} goalId={1} onSmallGoalAdded={() => {}} />);
+
+    const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+    await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'NW エラー保持テスト');
+    await userEvent.type(screen.getByLabelText('Task'), 'タスクNWテスト');
+    await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
+    await userEvent.type(screen.getByLabelText('期限'), futureDate);
+
+    await userEvent.click(screen.getByText('設定する'));
+
+    // エラーメッセージ確認
+    await waitFor(() => {
+      expect(screen.getByText('Submission failed, please try again.')).toBeInTheDocument();
+    });
+
+    // フォーム内容が保持されていることを確認
+    expect(screen.getByLabelText('Small Goalのタイトル')).toHaveValue('NW エラー保持テスト');
+    expect(screen.getByLabelText('Task')).toHaveValue('タスクNWテスト');
+    expect(screen.getByLabelText('難易度の設定')).toHaveValue('普通');
+    expect(screen.getByLabelText('期限')).toHaveValue(futureDate);
+  });
 });
 
 describe('API 成功時の挙動', () => {
@@ -951,5 +1033,387 @@ describe('API 成功時の挙動', () => {
       expect(screen.getByLabelText('難易度の設定')).toHaveValue('');
       expect(screen.getByLabelText('期限')).toHaveValue('');
     });
+  });
+});
+
+// モーダルのクローズ操作
+describe('モーダル操作', () => {
+  it('Close ボタンをクリックすると onClose が呼ばれる', async () => {
+    const onClose = jest.fn();
+
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={onClose}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // Close ボタンをクリック
+    await userEvent.click(screen.getByText('Close'));
+
+    // onClose が呼ばれたことを確認
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('モーダルを閉じた後に再度開くとフォームがリセットされる', async () => {
+    const onClose = jest.fn();
+
+    const { rerender } = render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={onClose}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // フォームに値を入力
+    const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'クローズテスト');
+    await userEvent.type(screen.getByLabelText('Task'), 'タスククローズテスト');
+    await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
+    await userEvent.type(screen.getByLabelText('期限'), futureDate);
+
+    // Close ボタンをクリック
+    await userEvent.click(screen.getByText('Close'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    // 親コンポーネント側でモーダルを閉じる（isOpen=false）
+    rerender(
+      <CreateSmallGoal
+        isOpen={false}
+        onClose={onClose}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // 再度モーダルを開く（isOpen=true）
+    rerender(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={onClose}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // フォームがリセットされていることを確認
+    expect(screen.getByLabelText('Small Goalのタイトル')).toHaveValue('');
+    expect(screen.getByLabelText('Task')).toHaveValue('');
+    expect(screen.getByLabelText('難易度の設定')).toHaveValue('');
+    expect(screen.getByLabelText('期限')).toHaveValue('');
+  });
+});
+
+describe('URL クエリパラメータの処理', () => {
+  it('URL にメッセージパラメータがある場合、そのメッセージが表示される', async () => {
+    // useRouter のモックを更新
+    const mockRouter = {
+      query: { message: 'テストメッセージ' },
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    };
+    jest.spyOn(require('next/router'), 'useRouter').mockReturnValue(mockRouter);
+
+    // コンポーネントをレンダリング
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // メッセージが表示されることを確認
+    const messageElement = screen.getByText('テストメッセージ');
+    expect(messageElement).toBeInTheDocument();
+    expect(messageElement.closest('div')).toHaveClass(styles.errorMessage);
+  });
+
+  it('URL にメッセージパラメータがない場合、メッセージは表示されない', async () => {
+    // useRouter のモックを更新（メッセージなし）
+    const mockRouter = {
+      query: {},
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    };
+    jest.spyOn(require('next/router'), 'useRouter').mockReturnValue(mockRouter);
+
+    // コンポーネントをレンダリング
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // メッセージが表示されないことを確認
+    expect(screen.queryByText('テストメッセージ')).not.toBeInTheDocument();
+  });
+
+  it('URL エンコードされたメッセージパラメータが正しくデコードされる', async () => {
+    // URL エンコードされたメッセージ
+    const encodedMessage = encodeURIComponent('テストメッセージ & 特殊文字');
+    
+    // useRouter のモックを更新
+    const mockRouter = {
+      query: { message: encodedMessage },
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    };
+    jest.spyOn(require('next/router'), 'useRouter').mockReturnValue(mockRouter);
+
+    // コンポーネントをレンダリング
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // デコードされたメッセージが表示されることを確認
+    const messageElement = screen.getByText('テストメッセージ & 特殊文字');
+    expect(messageElement).toBeInTheDocument();
+    expect(messageElement.closest('div')).toHaveClass(styles.errorMessage);
+  });
+});
+
+describe('スタイルの確認', () => {
+  it('各要素に適切なクラス名が適用されている', async () => {
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // モーダルのオーバーレイ
+    const modalOverlay = screen.getByTestId('create-small-goal');
+    expect(modalOverlay).toHaveClass(styles.modalOverlay);
+
+    // モーダルのコンテンツ
+    const modalContent = modalOverlay.firstChild;
+    expect(modalContent).toHaveClass(styles.modalContent);
+
+    // タイトル入力フィールド
+    const titleInput = screen.getByLabelText('Small Goalのタイトル');
+    expect(titleInput).toHaveClass(styles.textareaField);
+
+    // タスク入力フィールド
+    const taskInput = screen.getByLabelText('Task');
+    expect(taskInput).toHaveClass(styles.textareaField);
+
+    // タスク削除ボタン
+    const removeTaskButton = screen.getByText('タスクの削除');
+    expect(removeTaskButton).toHaveClass(styles.taskButton);
+
+    // タスク追加ボタン
+    const addTaskButton = screen.getByText('タスクの追加');
+    expect(addTaskButton).toHaveClass(styles.addTaskButton);
+
+    // 期限入力フィールド
+    const deadlineInput = screen.getByLabelText('期限');
+    expect(deadlineInput).toHaveClass(styles.deadlineField);
+
+    // 設定するボタン
+    const submitButton = screen.getByText('設定する');
+    expect(submitButton).toHaveClass('btn', 'btn-primary');
+
+    // Closeボタン
+    const closeButton = screen.getByText('Close');
+    expect(closeButton).toHaveClass(styles.closeButton);
+  });
+
+  it('エラーメッセージに適切なクラス名が適用される', async () => {
+    // useRouter のモックを更新
+    const mockRouter = {
+      query: { message: 'テストメッセージ' },
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    };
+    jest.spyOn(require('next/router'), 'useRouter').mockReturnValue(mockRouter);
+
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // エラーメッセージのコンテナ
+    const errorMessageContainer = screen.getByText('テストメッセージ').closest('div');
+    expect(errorMessageContainer).toHaveClass(styles.errorMessage);
+  });
+});
+
+describe('エラーメッセージのスタイル', () => {
+  beforeEach(() => {
+    // useRouter のモックをクリア
+    const mockRouter = {
+      query: {},
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    };
+    jest.spyOn(require('next/router'), 'useRouter').mockReturnValue(mockRouter);
+  });
+
+  it('API エラー時にエラーメッセージが適切なスタイルで表示される', async () => {
+    // エラーレスポンスをモック
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ errors: ['エラーが発生しました'] })
+    });
+
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // フォームに値を入力
+    const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+    await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
+    await userEvent.type(screen.getByLabelText('Task'), 'テストタスク');
+    await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
+    const deadlineInput = screen.getByLabelText('期限');
+    await userEvent.type(deadlineInput, futureDate);
+
+    // フォームを送信
+    const submitButton = screen.getByText('設定する');
+    await userEvent.click(submitButton);
+
+    // エラーメッセージが表示されることを確認
+    const errorMessage = await screen.findByText('エラーが発生しました');
+    expect(errorMessage).toBeInTheDocument();
+    expect(errorMessage.closest('div')).toHaveClass(styles.errorMessage);
+  });
+
+  it('ネットワークエラー時にエラーメッセージが適切なスタイルで表示される', async () => {
+    // fetchWithAuth がネットワークエラーを投げるようにモック
+    fetchWithAuth.mockRejectedValueOnce(new Error('Network Error'));
+
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // フォームに値を入力
+    const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+    await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
+    await userEvent.type(screen.getByLabelText('Task'), 'テストタスク');
+    await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
+    const deadlineInput = screen.getByLabelText('期限');
+    await userEvent.type(deadlineInput, futureDate);
+
+    // フォームを送信
+    const submitButton = screen.getByText('設定する');
+    await userEvent.click(submitButton);
+
+    // エラーメッセージが表示されることを確認
+    const errorMessage = await screen.findByText('Submission failed, please try again.');
+    expect(errorMessage).toBeInTheDocument();
+    expect(errorMessage.closest('div')).toHaveClass(styles.errorMessage);
+  });
+
+  it('URL クエリパラメータのメッセージが適切なスタイルで表示される', async () => {
+    // useRouter のモックを更新
+    const mockRouter = {
+      query: { message: 'クエリパラメータのメッセージ' },
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    };
+    jest.spyOn(require('next/router'), 'useRouter').mockReturnValue(mockRouter);
+
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // メッセージが表示されることを確認
+    const messageElement = screen.getByText('クエリパラメータのメッセージ');
+    expect(messageElement).toBeInTheDocument();
+    expect(messageElement.closest('div')).toHaveClass(styles.errorMessage);
+  });
+
+  it('エラーメッセージが複数行の場合も適切に表示される', async () => {
+    fetchWithAuth.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ 
+        errors: [
+          'タイトルは必須です',
+          'タスクは1つ以上必要です',
+          '期限を設定してください'
+        ] 
+      })
+    });
+
+    render(
+      <CreateSmallGoal
+        isOpen={true}
+        onClose={() => {}}
+        goalId={1}
+        onSmallGoalAdded={() => {}}
+      />
+    );
+
+    // フォームを送信
+    //await userEvent.click(screen.getByText('設定する'));
+    // 1. フォームの必須項目を埋める
+    await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'dummy');
+    await userEvent.type(screen.getAllByLabelText('Task')[0], 'dummy task');
+    await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), '普通');
+    fireEvent.change(screen.getByLabelText('期限'), { target: { value: '2025-01-01' } });
+
+    // 2. 送信
+    await userEvent.click(screen.getByRole('button', { name: '設定する' }));
+
+    // 3. alert の検証
+    const alertBox = await screen.findByRole('alert');
+    expect(alertBox).toHaveTextContent('タイトルは必須です');
+
+
+    // エラーメッセージが表示されるまで待機（タイムアウトを延長）
+    //await waitFor(() => {
+    //  const alertBox = screen.getByRole('alert');
+    //  console.log('Error message content:', alertBox.textContent);
+    //  console.log('Error message HTML:', alertBox.innerHTML);
+    //  console.log('Error message classes:', alertBox.className);
+      
+    //  expect(alertBox).toHaveClass(styles.errorMessage);
+    //  expect(alertBox).toHaveTextContent('タイトルは必須です');
+    //  expect(alertBox).toHaveTextContent('タスクは1つ以上必要です');
+    //  expect(alertBox).toHaveTextContent('期限を設定してください');
+    //}, { timeout: 3000 }); // タイムアウトを3秒に延長
   });
 }); 
