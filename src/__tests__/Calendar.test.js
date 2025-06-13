@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ExpCalendar from '../components/Calendar';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
@@ -10,21 +10,38 @@ jest.mock('../utils/fetchWithAuth', () => ({
 }));
 
 let capturedProps = {};
+const mockTileClassNameCalls = [];
 jest.mock('react-calendar', () => {
   return function MockCalendar(props) {
-    capturedProps = props;
+    // 新しい props オブジェクトを作成
+    const newProps = {
+      ...props,
+      tileClassName: (tileProps) => {
+        mockTileClassNameCalls.push(tileProps);
+        return props.tileClassName(tileProps);
+      }
+    };
+    capturedProps = newProps;
+
+    // テスト用の日付を生成して tileClassName を呼び出す
+    const today = new Date();
+    const dates = Array.from({ length: 31 }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      return date;
+    });
+
     return (
       <div className="react-calendar">
         <div className="react-calendar__navigation" />
         <div className="react-calendar__viewContainer">
           <div className="react-calendar__month-view">
-            {props.tileClassName && (
-              <>
-                <div className="exp-level-50" />
-                <div className="exp-level-80" />
-                <div className="exp-level-30" />
-              </>
-            )}
+            {dates.map((date, index) => {
+              const className = newProps.tileClassName({ date, view: 'month' });
+              return (
+                <div key={index} className={className || 'no-exp'} data-date={date.toLocaleDateString('sv-SE')} />
+              );
+            })}
           </div>
         </div>
       </div>
@@ -40,6 +57,7 @@ describe('ExpCalendar', () => {
   beforeEach(() => {
     // 各テスト前にモックをリセット
     jest.clearAllMocks();
+    mockTileClassNameCalls.length = 0;
   });
 
   afterAll(() => {
@@ -169,5 +187,199 @@ describe('ExpCalendar', () => {
     // キャプチャした props を検証
     expect(capturedProps.locale).toBe('en-US');
     expect(capturedProps.calendarType).toBe('iso8601');
+  });
+
+  it('tileClassName は経験値に応じたクラスを返す', async () => {
+    // 各経験値レベルのテストデータを用意
+    const today = new Date();
+    const yyyymmdd = (d) => d.toLocaleDateString('sv-SE');
+    const dates = {
+      d0: yyyymmdd(today),                    // 2025-06-13
+      d1: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d2: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d3: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d4: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d5: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d6: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d7: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d8: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d9: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+    };
+
+    const mockActivities = {
+      [dates.d0]: 0,      // クラスなし
+      [dates.d1]: 5,      // exp-level-1
+      [dates.d2]: 15,     // exp-level-10
+      [dates.d3]: 25,     // exp-level-20
+      [dates.d4]: 35,     // exp-level-30
+      [dates.d5]: 45,     // exp-level-40
+      [dates.d6]: 55,     // exp-level-50
+      [dates.d7]: 65,     // exp-level-60
+      [dates.d8]: 75,     // exp-level-70
+      [dates.d9]: 85,     // exp-level-80
+    };
+
+    // 成功レスポンスをモック
+    const mockResponse = {
+      ok: true,
+      json: async () => mockActivities
+    };
+    fetchWithAuth.mockResolvedValueOnce(mockResponse);
+
+    // コンポーネントをレンダリング
+    render(<ExpCalendar />);
+
+    // カレンダーが存在することを確認
+    const calendar = document.querySelector('.react-calendar');
+    expect(calendar).toBeInTheDocument();
+
+    await waitFor(() => {
+      // 各経験値レベルに対応するクラスが存在することを確認
+      expect(calendar.querySelectorAll('.exp-level-1')).toHaveLength(1);
+      expect(calendar.querySelectorAll('.exp-level-10')).toHaveLength(1);
+      expect(calendar.querySelectorAll('.exp-level-20')).toHaveLength(1);
+      expect(calendar.querySelectorAll('.exp-level-30')).toHaveLength(1);
+      expect(calendar.querySelectorAll('.exp-level-40')).toHaveLength(1);
+      expect(calendar.querySelectorAll('.exp-level-50')).toHaveLength(1);
+      expect(calendar.querySelectorAll('.exp-level-60')).toHaveLength(1);
+      expect(calendar.querySelectorAll('.exp-level-70')).toHaveLength(1);
+      expect(calendar.querySelectorAll('.exp-level-80')).toHaveLength(1);
+      
+      const totalTiles      = 31;                   // MockCalendar で生成した数
+      const positiveExpDays = Object.values(mockActivities)
+                                  .filter(v => v > 0).length;   // 9
+      const expectedNoExp   = totalTiles - positiveExpDays;        // 22
+      expect(calendar.querySelectorAll('.no-exp')).toHaveLength(expectedNoExp);
+    });
+  });
+
+  it('tileClassName は date.toLocaleDateString("sv-SE") で日付キーを作成する', async () => {
+    // テスト用の日付を用意
+    const testDate = new Date('2025-06-14');
+    const expectedKey = testDate.toLocaleDateString('sv-SE'); // '2025-06-14'
+
+    // テスト用の活動データを用意
+    const mockActivities = {
+      [expectedKey]: 50 // exp-level-50
+    };
+
+    // 成功レスポンスをモック
+    const mockResponse = {
+      ok: true,
+      json: async () => mockActivities
+    };
+    fetchWithAuth.mockResolvedValueOnce(mockResponse);
+
+    // コンポーネントをレンダリング
+    render(<ExpCalendar />);
+
+    // tileClassName が呼ばれるのを待つ
+    await waitFor(() => {
+      expect(mockTileClassNameCalls.length).toBeGreaterThan(0);
+    });
+
+    // tileClassName の呼び出しを確認
+    const tileCall = mockTileClassNameCalls.find(call => 
+      call.date.toLocaleDateString('sv-SE') === expectedKey
+    );
+    expect(tileCall).toBeDefined();
+    expect(tileCall.date).toBeInstanceOf(Date);
+    expect(tileCall.date.toLocaleDateString('sv-SE')).toBe(expectedKey);
+  });
+
+  it('setActivities 後に特定日付セルへ対応クラスが付与される', async () => {
+    // テスト用の日付と活動データを用意
+    const today = new Date();
+    const yyyymmdd = (d) => d.toLocaleDateString('sv-SE');
+    const dates = {
+      d0: yyyymmdd(today),                    // 2025-06-13
+      d1: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d2: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+    };
+
+    const mockActivities = {
+      [dates.d0]: 30,     // exp-level-30
+      [dates.d1]: 50,     // exp-level-50
+      [dates.d2]: 80,     // exp-level-80
+    };
+
+    // 成功レスポンスをモック
+    const mockResponse = {
+      ok: true,
+      json: async () => mockActivities
+    };
+    fetchWithAuth.mockResolvedValueOnce(mockResponse);
+
+    // コンポーネントをレンダリング
+    render(<ExpCalendar />);
+
+    // カレンダーが存在することを確認
+    const calendar = document.querySelector('.react-calendar');
+    expect(calendar).toBeInTheDocument();
+
+    await waitFor(() => {
+      // 各日付に対応するクラスが正しく付与されていることを確認
+      const cell30 = calendar.querySelector(`[data-date="${dates.d0}"]`);
+      const cell50 = calendar.querySelector(`[data-date="${dates.d1}"]`);
+      const cell80 = calendar.querySelector(`[data-date="${dates.d2}"]`);
+
+      expect(cell30).toHaveClass('exp-level-30');
+      expect(cell50).toHaveClass('exp-level-50');
+      expect(cell80).toHaveClass('exp-level-80');
+    });
+  });
+
+  it('activities 更新で Calendar が再描画され、古いクラスが置き換わる', async () => {
+    // テスト用の日付を用意
+    const today = new Date();
+    const yyyymmdd = (d) => d.toLocaleDateString('sv-SE');
+    const date = yyyymmdd(today);
+
+    // 初期の活動データ
+    const initialActivities = {
+      [date]: 30 // exp-level-30
+    };
+
+    // 更新後の活動データ
+    const updatedActivities = {
+      [date]: 80 // exp-level-80
+    };
+
+    // 成功レスポンスをモック（2回呼ばれる）
+    const mockResponse1 = {
+      ok: true,
+      json: async () => initialActivities
+    };
+    const mockResponse2 = {
+      ok: true,
+      json: async () => updatedActivities
+    };
+    fetchWithAuth
+      .mockResolvedValueOnce(mockResponse1)
+      .mockResolvedValueOnce(mockResponse2);
+
+    // コンポーネントをレンダリング
+    const { rerender } = render(<ExpCalendar />);
+
+    // カレンダーが存在することを確認
+    const calendar = document.querySelector('.react-calendar');
+    expect(calendar).toBeInTheDocument();
+
+    // 初期状態を確認
+    await waitFor(() => {
+      const cell = calendar.querySelector(`[data-date="${date}"]`);
+      expect(cell).toHaveClass('exp-level-30');
+      expect(cell).not.toHaveClass('exp-level-80');
+    });
+
+    // コンポーネントを再レンダリングして useEffect を再実行
+    rerender(<ExpCalendar />);
+
+    // 更新後の状態を確認
+    await waitFor(() => {
+      const cell = calendar.querySelector(`[data-date="${date}"]`);
+      expect(cell).toHaveClass('exp-level-80');
+      expect(cell).not.toHaveClass('exp-level-30');
+    });
   });
 });
