@@ -35,7 +35,7 @@ jest.mock('react-calendar', () => {
       <div className="react-calendar">
         <div className="react-calendar__navigation" />
         <div className="react-calendar__viewContainer">
-          <div className="react-calendar__month-view">
+          <div className="react-calendar__month-view" role="grid">
             {dates.map((date, index) => {
               const className = newProps.tileClassName({ date, view: 'month' });
               return (
@@ -381,5 +381,10 @@ describe('ExpCalendar', () => {
       expect(cell).toHaveClass('exp-level-80');
       expect(cell).not.toHaveClass('exp-level-30');
     }, { timeout: 3000 });
+  });
+
+  it('react-calendar が role="grid" を持つ', () => {
+    render(<ExpCalendar />);
+    expect(screen.getByRole('grid')).toBeInTheDocument();
   });
 });
