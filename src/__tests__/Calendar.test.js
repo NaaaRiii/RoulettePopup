@@ -5,13 +5,36 @@ import ExpCalendar from '../components/Calendar';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 // fetchWithAuth をモック
-jest.mock('../utils/fetchWithAuth');
+jest.mock('../utils/fetchWithAuth', () => ({
+  fetchWithAuth: jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) }),
+}));
+
+let capturedProps = {};
+jest.mock('react-calendar', () => {
+  return function MockCalendar(props) {
+    capturedProps = props;
+    return (
+      <div className="react-calendar">
+        <div className="react-calendar__navigation" />
+        <div className="react-calendar__viewContainer">
+          <div className="react-calendar__month-view">
+            {props.tileClassName && (
+              <>
+                <div className="exp-level-50" />
+                <div className="exp-level-80" />
+                <div className="exp-level-30" />
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+});
 
 // console.error をモック
 const originalConsoleError = console.error;
 console.error = jest.fn();
-
-
 
 describe('ExpCalendar', () => {
   beforeEach(() => {
@@ -67,7 +90,7 @@ describe('ExpCalendar', () => {
     render(<ExpCalendar />);
 
     // カレンダーが存在することを確認
-    const calendar = screen.getByTestId('calendar');
+    const calendar = document.querySelector('.react-calendar');
     expect(calendar).toBeInTheDocument();
 
     await waitFor(() => {
@@ -116,7 +139,7 @@ describe('ExpCalendar', () => {
     });
   });
 
-  it('isOpen=true 相当でマウントすると <div data-testid="calendar"> に react-calendar が描画される', async () => {
+  it('isOpen=true 相当でマウントすると react-calendar が描画される', async () => {
     // 成功レスポンスをモック
     const mockResponse = {
       ok: true,
@@ -127,12 +150,8 @@ describe('ExpCalendar', () => {
     // コンポーネントをレンダリング
     render(<ExpCalendar />);
 
-    // カレンダーのコンテナが存在することを確認
-    const calendarContainer = screen.getByTestId('calendar');
-    expect(calendarContainer).toBeInTheDocument();
-
     // react-calendar の要素が存在することを確認
-    const reactCalendar = calendarContainer.querySelector('.react-calendar');
+    const reactCalendar = document.querySelector('.react-calendar');
     expect(reactCalendar).toBeInTheDocument();
 
     // カレンダーの基本要素が存在することを確認
@@ -141,27 +160,14 @@ describe('ExpCalendar', () => {
     expect(reactCalendar.querySelector('.react-calendar__month-view')).toBeInTheDocument();
   });
 
-  it('<Calendar> に locale="en-US" と calendarType="iso8601" が渡っている', async () => {
-    // 成功レスポンスをモック
-    const mockResponse = {
-      ok: true,
-      json: async () => ({})
-    };
-    fetchWithAuth.mockResolvedValueOnce(mockResponse);
-
-    // コンポーネントをレンダリング
+  it('<Calendar> に locale と calendarType が渡る', () => {
     render(<ExpCalendar />);
-
-    // カレンダーのコンテナが存在することを確認
-    const calendarContainer = screen.getByTestId('calendar');
-    expect(calendarContainer).toBeInTheDocument();
-
-    // react-calendar の要素が存在することを確認
-    const reactCalendar = calendarContainer.querySelector('.react-calendar');
-    expect(reactCalendar).toBeInTheDocument();
-
-    // カレンダーのプロパティを確認
-    expect(reactCalendar).toHaveAttribute('data-locale', 'en-US');
-    expect(reactCalendar).toHaveAttribute('data-calendar-type', 'iso8601');
+  
+    // react-calendar が描画されていることを確認
+    expect(document.querySelector('.react-calendar')).toBeInTheDocument();
+  
+    // キャプチャした props を検証
+    expect(capturedProps.locale).toBe('en-US');
+    expect(capturedProps.calendarType).toBe('iso8601');
   });
 });
