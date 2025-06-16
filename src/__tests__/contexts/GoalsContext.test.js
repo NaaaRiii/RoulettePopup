@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, renderHook } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { GoalsContext, GoalsProvider, useGoals } from '../../contexts/GoalsContext';
 
@@ -343,8 +343,9 @@ describe('GoalsContext', () => {
       expect(getByTestId('context-keys')).toHaveTextContent('refresh,refreshGoals,goalsState,setGoalsState');
     });
 
+  describe('エラーケース', () => {
     it('コンテキストの外で useGoals を使用すると undefined が返ること', () => {
-      // テスト用のコンポーネント
+    // テスト用のコンポーネント
       const TestComponent = () => {
         const context = useGoals();
         return <div>{String(context)}</div>;
@@ -355,6 +356,77 @@ describe('GoalsContext', () => {
 
       // useGoals が undefined を返すことを確認
       expect(container.textContent).toBe('undefined');
+    });
+
+    it('配列以外を渡すとエラーを出し、state は変わらない', () => {
+      /* ───── console.error を監視 ───── */
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+  
+      /* ───── Provider でフックを実行 ───── */
+      const { result } = renderHook(() => useGoals(), {
+        wrapper: GoalsProvider,
+      });
+  
+      /* 初期 state は [] */
+      expect(result.current.goalsState).toEqual([]);
+  
+      /* ───── 不正な値をセット ───── */
+      // 文字列を渡してみる（配列でない）
+      result.current.setGoalsState('bad value');
+  
+      /* (1) console.error が呼ばれたか？ */
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'goalsState must be an array:',
+        'bad value'
+      );
+  
+      /* (2) state が更新されていないか？ */
+      expect(result.current.goalsState).toEqual([]);
+  
+      consoleSpy.mockRestore();
+    });
+
+      it('refreshGoals を連続で呼び出してもエラーにならないこと', async () => {
+        // テスト用のコンポーネント
+        const TestComponent = () => {
+          const { refresh, refreshGoals } = useGoals();
+          return (
+            <div>
+              <div data-testid="refresh">{refresh.toString()}</div>
+              <button 
+                onClick={() => {
+                  refreshGoals();
+                  refreshGoals();
+                  refreshGoals();
+                }} 
+                data-testid="multiple-refresh-button"
+              >
+                Multiple Refresh
+              </button>
+            </div>
+          );
+        };
+
+        // プロバイダーでラップしてレンダリング
+        const { getByTestId } = render(
+          <GoalsProvider>
+            <TestComponent />
+          </GoalsProvider>
+        );
+
+        // 初期状態を確認
+        expect(getByTestId('refresh')).toHaveTextContent('false');
+
+        // 連続で refreshGoals を呼び出す
+        getByTestId('multiple-refresh-button').click();
+
+        // 最後の状態が正しいことを確認
+        await waitFor(() => {
+          expect(getByTestId('refresh')).toHaveTextContent('true');
+        });
+      });
     });
   });
 });

@@ -8,10 +8,18 @@ export function useGoals() {
 
 export const GoalsProvider = ({ children }) => {
   const [refresh, setRefresh] = useState(false);
-  const [goalsState, setGoalsState] = useState([]);
+  const [goalsState, _setGoalsState] = useState([]);
 
   const refreshGoals = () => {
     setRefresh(!refresh);
+  };
+
+  const setGoalsState = (value) => {
+    if (!Array.isArray(value)) {
+      console.error('goalsState must be an array:', value);
+      return;
+    }
+    _setGoalsState(value);
   };
 
   return (
