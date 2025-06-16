@@ -29,10 +29,7 @@
   "devDependencies": {
     "@aws-amplify/backend": "^1.9.0",
     "@aws-amplify/backend-cli": "^1.4.3",
-    "@babel/core": "^7.27.4",
-    "@babel/preset-env": "^7.27.2",
-    "@babel/preset-react": "^7.27.1",
-    "@babel/preset-typescript": "^7.27.1",
+    "@swc/jest": "^0.2.38",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.2",
@@ -43,7 +40,6 @@
     "autoprefixer": "^10.4.21",
     "aws-cdk": "^2.173.0",
     "aws-cdk-lib": "^2.173.0",
-    "babel-jest": "^29.7.0",
     "constructs": "^10.4.2",
     "esbuild": "^0.24.0",
     "eslint": "^8",
@@ -61,11 +57,5 @@
     "ts-jest": "^29.3.4",
     "tsx": "^4.19.2",
     "typescript": "^5.8.3"
-  },
-  "babel": {
-    "presets": [
-      "@babel/preset-env",
-      "@babel/preset-react"
-    ]
   }
 }

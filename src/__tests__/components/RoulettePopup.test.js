@@ -25,10 +25,21 @@ jest.mock('../../utils/fetchWithAuth', () => ({
 
 jest.mock('../../components/Modal', () => {
   const React = require('react');
+  /*
+    モック Modal
+    - isOpen===true なら <div role="dialog"> を返す
+    - data-testid は付けない（付いていても構わない）
+    これにより、実装側で data-testid を外してもテストが role="dialog" で通る
+  */
   return function MockedModal({ isOpen, children }) {
-    return isOpen ? <div data-testid="modal">{children}</div> : null;
+    return isOpen ? <div role="dialog">{children}</div> : null;
   };
 });
+
+jest.mock('../../components/utils', () => ({
+  ...jest.requireActual('../../components/utils'),
+  fetchRouletteText: jest.fn()
+}));
 
 
 describe('ユーティリティ関数 isValidAngle', () => {
@@ -286,6 +297,8 @@ describe('ルーレット回転処理', () => {
       json: async () => ({ tickets: 5 }),
     });
     jest.spyOn(Math, 'random').mockReturnValue(100 / 360);
+    // fetchRouletteText のデフォルト戻り値
+    utils.fetchRouletteText.mockResolvedValue({ text: 'テストテキスト' });
   });
 
   afterEach(() => {
@@ -402,6 +415,9 @@ describe('ルーレット回転処理', () => {
       json: async () => ({ tickets: 5 }),
     });
 
+    // fetchRouletteText のモックを追加
+    utils.fetchRouletteText.mockResolvedValueOnce({ text: 'テストテキスト' });
+
     // 最初 randomAngle=3（除外範囲内）、次に randomAngle=50（有効）
     const randomValues = [3 / 360, 50 / 360];
     jest.spyOn(Math, 'random').mockImplementation(() => randomValues.shift());
@@ -431,6 +447,12 @@ describe('ルーレット回転処理', () => {
       expect(wheel.style.transform).toBe('rotate(1940deg)');
     });
 
+    // モーダルが表示されることを確認
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeTruthy();
+      expect(screen.getByText('Matched text is: テストテキスト')).toBeTruthy();
+    });
+
     // cleanup
     Math.random.mockRestore();
   });
@@ -448,9 +470,8 @@ describe('モーダルの挙動', () => {
       json: async () => ({ tickets: 5 }),
     });
 
-    // ここで “実装版” を spy して戻り値を差し替える
-    jest.spyOn(utils, 'fetchRouletteText')
-        .mockResolvedValueOnce({ text: 'テストテキスト' });
+    // ここで "実装版" を spy して戻り値を差し替える
+    utils.fetchRouletteText.mockResolvedValueOnce({ text: 'テストテキスト' });
 
     // randomAngle: 3° (除外) → 60° (有効)
     const rands = [3 / 360, 50 / 360];
@@ -475,8 +496,9 @@ describe('モーダルの挙動', () => {
       expect(utils.fetchRouletteText).toHaveBeenCalledWith(11)
     );
 
-    await screen.findByText('Matched text is: テストテキスト');
-    expect(screen.getByText('Matched text is: テストテキスト')).toBeTruthy();
+    const modal = await screen.findByRole('dialog');
+    expect(modal).toBeTruthy();
+    expect(modal.textContent).toContain('Matched text is: テストテキスト');
 
     Math.random.mockRestore();
   });
@@ -490,8 +512,7 @@ describe('モーダルの挙動', () => {
       json: async () => ({ tickets: 5 }),
     });
 
-    jest.spyOn(utils, 'fetchRouletteText')
-        .mockResolvedValueOnce({ text: 'テストテキスト' });
+    utils.fetchRouletteText.mockResolvedValueOnce({ text: 'テストテキスト' });
   
     // randomAngle: 3° (除外) → 50° (有効)
     const rands = [3 / 360, 50 / 360];
@@ -513,11 +534,11 @@ describe('モーダルの挙動', () => {
     });
     // matchNumber = ceil((360 - 50)/30) = 11
     await waitFor(() => {
-      expect(fetchRouletteText).toHaveBeenCalledWith(11);
+      expect(utils.fetchRouletteText).toHaveBeenCalledWith(11);
     });
   
     // モーダル要素が出現し、テキストが表示されていることを確認
-    const modal = screen.getByTestId('modal');
+    const modal = await screen.findByRole('dialog');
     expect(modal).toBeTruthy();
     expect(modal.textContent).toContain('Matched text is: テストテキスト');
   
@@ -532,7 +553,7 @@ describe('モーダルの挙動', () => {
       json: async () => ({ tickets: 5 }),
     });
     // fetchRouletteText の戻り値
-    jest.spyOn(utils, 'fetchRouletteText').mockResolvedValueOnce({ text: 'テストテキスト' });
+    utils.fetchRouletteText.mockResolvedValueOnce({ text: 'テストテキスト' });
   
     // randomAngle: 3° (除外) → 50° (有効)
     const rands = [3 / 360, 50 / 360];
@@ -555,13 +576,13 @@ describe('モーダルの挙動', () => {
   
     // スピン開始してモーダルを開く
     fireEvent.click(screen.getByTestId('start-button'));
-    await screen.findByTestId('modal');
+    await screen.findByRole('dialog');
   
     // モーダルの「Close」ボタンをクリック
     fireEvent.click(screen.getByTestId('close-modal-button'));
   
     // モーダルが閉じていること
-    expect(screen.queryByTestId('modal')).toBeNull();
+    expect(screen.queryByRole('dialog')).toBeNull();
   
     // スピン解除でボタンが再び有効化されていること
     const startButton = screen.getByTestId('start-button');
@@ -571,7 +592,6 @@ describe('モーダルの挙動', () => {
     expect(mockFetchTickets).toHaveBeenCalled();
   
     Math.random.mockRestore();
-    utils.fetchRouletteText.mockRestore();
   });
   
 });
@@ -590,7 +610,7 @@ describe('プロパティ／外部依存', () => {
       ok: true,
       json: async () => ({ tickets: 1 }),
     });
-    jest.spyOn(utils, 'fetchRouletteText').mockResolvedValueOnce({ text: 'OK' });
+    utils.fetchRouletteText.mockResolvedValueOnce({ text: 'OK' });
 
     // randomAngle を有効値に
     jest.spyOn(Math, 'random').mockReturnValue(45 / 360); // 45° → valid
@@ -610,11 +630,11 @@ describe('プロパティ／外部依存', () => {
     fireEvent.click(screen.getByTestId('start-button'));
 
     // タイマー発火前はモーダルなし
-    expect(screen.queryByTestId('modal')).toBeNull();
+    expect(screen.queryByRole('dialog')).toBeNull();
 
     // 99ms 経過 → まだモーダル出ない
     jest.advanceTimersByTime(99);
-    expect(screen.queryByTestId('modal')).toBeNull();
+    expect(screen.queryByRole('dialog')).toBeNull();
 
     // 残り 1ms 経過 → モーダルが出る
     jest.advanceTimersByTime(1);
@@ -622,7 +642,7 @@ describe('プロパティ／外部依存', () => {
     // API 呼び出し完了とテキスト取得を待ってモーダルがレンダリングされること
     await waitFor(() => {
       expect(utils.fetchRouletteText).toHaveBeenCalled();
-      expect(screen.getByTestId('modal')).toBeTruthy();
+      expect(screen.getByRole('dialog')).toBeTruthy();
       expect(screen.getByText('Matched text is: OK')).toBeTruthy();
     });
   });

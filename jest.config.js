@@ -5,7 +5,6 @@ module.exports = {
   coverageProvider: 'v8',
   collectCoverage: false,
 
-
   // CSS / 画像などをスタブ
   moduleNameMapper: {
     '\\.(css|scss|sass|less)$': 'identity-obj-proxy',
@@ -13,8 +12,7 @@ module.exports = {
   },
 
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',   // TS 系を ts-jest
-    '^.+\\.jsx?$': 'babel-jest' // JS 系を babel-jest
+    '^.+\\.(t|j)sx?$': '@swc/jest'
   },
 
   // 扱う拡張子
