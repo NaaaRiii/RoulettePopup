@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ExpLineChart from '../components/ExpLineChart';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import ExpLineChart from '../../components/ExpLineChart';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import { format, subDays, addDays } from 'date-fns';
 
 
 // fetchWithAuth のモック
-jest.mock('../utils/fetchWithAuth');
+jest.mock('../../utils/fetchWithAuth');
 
 // ResizeObserver のモック
 class ResizeObserverMock {

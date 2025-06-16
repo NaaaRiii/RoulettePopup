@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import Modal from '../components/Modal';
+import Modal from '../../components/Modal';
 
 
 describe('初期レンダリング', () => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import { useRouter } from 'next/router';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import '@testing-library/jest-dom';
 
 beforeAll(() => {
@@ -20,27 +20,27 @@ global.ResizeObserver = class {
 };
 
 // 子コンポーネントをモック
-jest.mock('../components/Calendar', () => {
+jest.mock('../../components/Calendar', () => {
   const MockedExpCalendar = () => <div>Mocked ExpCalendar</div>;
   MockedExpCalendar.displayName = 'MockedExpCalendar';
   return MockedExpCalendar;
 });
 
-jest.mock('../components/ExpLineChart', () => {
+jest.mock('../../components/ExpLineChart', () => {
   const MockedExpLineChart = () => <div>Mocked ExpLineChart</div>;
   MockedExpLineChart.displayName = 'MockedExpLineChart';
   return MockedExpLineChart;
 });
 
-jest.mock('../components/Layout', () => {
+jest.mock('../../components/Layout', () => {
   const MockedLayout = ({ children }) => <div data-testid="layout">{children}</div>;
   MockedLayout.displayName = 'MockedLayout';
   return MockedLayout;
 });
 
-jest.mock('../utils/fetchWithAuth');
+jest.mock('../../utils/fetchWithAuth');
 
-jest.mock('../utils/getIdToken');
+jest.mock('../../utils/getIdToken');
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -240,7 +240,7 @@ describe('Dashboard page', () => {
         json: async () => ({}),
       });
 
-		Dashboard = require('../pages/dashboard').default;
+		Dashboard = require('../../pages/dashboard').default;
   });
 	
 	// console.log の出力を抑制できるコード
@@ -251,7 +251,7 @@ describe('Dashboard page', () => {
 	});
 
   it('renders the dashboard with user profile and goals', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
     const mockRouter = {
       query: { message: 'Goal completed successfully' },
       push: jest.fn(),
@@ -269,7 +269,7 @@ describe('Dashboard page', () => {
 	});
 
 	it('calls updateLastRouletteRank when rank increases past a multiple of 10', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// 何か 1 つ描画されるまでアンカーで待機
@@ -290,7 +290,7 @@ describe('Dashboard page', () => {
 	});
 
 	it('updates lastRouletteRank when rank increases past a multiple of 10', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 
 	 // 非同期にレンダリングされる要素をfindByで取得
@@ -299,7 +299,7 @@ describe('Dashboard page', () => {
  });
 	
 	it('opens and closes the goal creation modal when the respective buttons are clicked', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// "目標を設定する"ボタンを取得してクリック
@@ -321,7 +321,7 @@ describe('Dashboard page', () => {
 	});	
 
 	it('renders the completed goals link with correct href', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
     render(<Dashboard />);
 
     const completedGoalLink = await screen.findByText('達成した目標');
@@ -329,7 +329,7 @@ describe('Dashboard page', () => {
   });
 	
 	it('should render the latest completed Small-Goals', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
     render(<Dashboard />);
 
     await waitFor(() => {
@@ -343,7 +343,7 @@ describe('Dashboard page', () => {
   });
 
 	it('should render the Calendar component', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// Calendarコンポーネントがモックされたテキストを持つかどうかを確認
@@ -352,7 +352,7 @@ describe('Dashboard page', () => {
 	});
 	
 	it('should render the ExpLineChart component', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// ExpLineChartコンポーネントがモックされたテキストを持つかどうかを確認
@@ -361,7 +361,7 @@ describe('Dashboard page', () => {
 	});
 
 	it('should render unmet goals in the correct order by deadline', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
     render(<Dashboard />);
 
     // 進行中の目標のタイトルを取得
@@ -375,7 +375,7 @@ describe('Dashboard page', () => {
 	
 	// 進行中のSmall Goalが表示され、遷移できるかを確認
   it('should render ongoing Small Goals and allow navigation upon clicking "確認" button', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// "進行中のSmall Goal" セクションの見出しを取得
@@ -399,7 +399,7 @@ describe('Dashboard page', () => {
 	});
 	
 	it('should render the Layout component correctly', async () => {
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 		console.log(document.body.innerHTML);
 
@@ -417,7 +417,7 @@ describe('Dashboard page', () => {
 			.mockResolvedValueOnce({ ok:true, json:async()=>({...mockUserData, rank:10}) }) // second /api/current_user
 			.mockResolvedValue({ ok:true, json:async()=>({}) });
 
-			const Dashboard = require('../pages/dashboard').default;
+			const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		// rank が反映されるまで適当なアンカーで待つ
@@ -440,7 +440,7 @@ describe('Dashboard page', () => {
 			.mockResolvedValueOnce({ ok: true, json: async () => mockGoalsData })
 			.mockResolvedValueOnce({ ok: true, json: async () => ({ ...mockUserData, rank: 10 }) })
 			.mockResolvedValue({ ok: true, json: async () => ({}) });
-			const Dashboard = require('../pages/dashboard').default;
+			const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 
 		/* ③ 何か1つ描画されるまで待つ */
@@ -459,7 +459,7 @@ describe('Dashboard page', () => {
       isLoggedIn: true,
       userRank: 9,
     });
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
     render(<Dashboard />);
 
     // 「ごほうびルーレット」リンクが表示されていないことを確認
@@ -486,7 +486,7 @@ describe('Dashboard page', () => {
 			replace: mockReplace
 		});
 
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 
 		await waitFor(() => {
@@ -504,7 +504,7 @@ describe('Dashboard page', () => {
 			.mockResolvedValueOnce({ ok: true, json: async () => mockUserData })  // /api/current_user
 			// それ以降は空レスポンスで十分
 			.mockResolvedValue({ ok: true, json: async () => ({}) });
-			const Dashboard = require('../pages/dashboard').default;
+			const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		/* 1) いずれかのゴールタイトルが描画されるまで待つ */
@@ -543,7 +543,7 @@ describe('Dashboard page', () => {
 			.mockResolvedValueOnce({ ok: true, json: async () => mockUserData })
 			/** 3️⃣ それ以降は空でも OK */
 			.mockResolvedValue({ ok: true, json: async () => ({}) });
-			const Dashboard = require('../pages/dashboard').default;
+			const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
 		/** 4️⃣ Small-Goal が 1 件でも DOM に現れるまで待つ */
@@ -592,7 +592,7 @@ describe('Dashboard page', () => {
 			// 以降は空でも可
 			.mockResolvedValue({ ok: true, json: async () => ({}) });
 	
-		const Dashboard = require('../pages/dashboard').default;
+		const Dashboard = require('../../pages/dashboard').default;
 		const { unmount } = render(<Dashboard />);
 	
 		// Small Goal が表示されていることを確認

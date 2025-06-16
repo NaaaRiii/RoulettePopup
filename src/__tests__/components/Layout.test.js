@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Layout from '../components/Layout';
+import Layout from '../../components/Layout';
 import '@testing-library/jest-dom';
 
 
@@ -10,7 +10,7 @@ jest.mock('next/head', () => {
   return HeadMock;
 });
 
-jest.mock('../components/Header', () => {
+jest.mock('../../components/Header', () => {
   const React = require('react');
   function HeaderMock() {
     return <div data-testid="header-mock" />;
@@ -21,7 +21,7 @@ jest.mock('../components/Header', () => {
   };
 });
 
-jest.mock('../components/Footer', () => {
+jest.mock('../../components/Footer', () => {
   const React = require('react');
   function FooterMock() {
     return <div data-testid="footer-mock" />;

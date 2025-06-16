@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import RoulettePopup from '../components/RoulettePopup';
-import { isValidAngle } from '../components/RoulettePopup';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
-import { TicketsContext } from '../contexts/TicketsContext';
-import { fetchRouletteText } from '../components/utils';
-import * as utils from '../components/utils';
+import RoulettePopup from '../../components/RoulettePopup';
+import { isValidAngle } from '../../components/RoulettePopup';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
+import { TicketsContext } from '../../contexts/TicketsContext';
+import { fetchRouletteText } from '../../components/utils';
+import * as utils from '../../components/utils';
 
 
-jest.mock('../contexts/TicketsContext', () => {
+jest.mock('../../contexts/TicketsContext', () => {
   const React = require('react');
   return {
     TicketsContext: React.createContext({
@@ -19,11 +19,11 @@ jest.mock('../contexts/TicketsContext', () => {
   };
 });
 
-jest.mock('../utils/fetchWithAuth', () => ({
+jest.mock('../../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
 }));
 
-jest.mock('../components/Modal', () => {
+jest.mock('../../components/Modal', () => {
   const React = require('react');
   return function MockedModal({ isOpen, children }) {
     return isOpen ? <div data-testid="modal">{children}</div> : null;

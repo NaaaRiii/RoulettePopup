@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import EditRouletteText from '../pages/edit-roulette-text';
-import { TicketsContext } from '../contexts/TicketsContext';
+import EditRouletteText from '../../pages/edit-roulette-text';
+import { TicketsContext } from '../../contexts/TicketsContext';
 import { useRouter } from 'next/router';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@testing-library/jest-dom';
 
@@ -19,7 +19,7 @@ const mockRouletteTexts = [
 ];
 
 // `useFetchRouletteTexts` のモック
-jest.mock('../hooks/useFetchRouletteTexts', () => {
+jest.mock('../../hooks/useFetchRouletteTexts', () => {
   const React = require('react');
   return {
     useFetchRouletteTexts: () => {
@@ -29,7 +29,7 @@ jest.mock('../hooks/useFetchRouletteTexts', () => {
   };
 });
 
-jest.mock('../utils/fetchWithAuth', () => {
+jest.mock('../../utils/fetchWithAuth', () => {
   const fetchWithAuth = jest.fn((url, opts = {}) => {
     return global.fetch(url, {
       credentials: 'include',
@@ -40,7 +40,7 @@ jest.mock('../utils/fetchWithAuth', () => {
   return { __esModule: true, default: fetchWithAuth, fetchWithAuth };
 });
 
-jest.mock('../utils/getIdToken');
+jest.mock('../../utils/getIdToken');
 
 const fetchTicketsMock = jest.fn();
 

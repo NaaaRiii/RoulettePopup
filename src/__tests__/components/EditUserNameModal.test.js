@@ -2,11 +2,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import EditUserNameModal from '../components/EditUserNameModal';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import EditUserNameModal from '../../components/EditUserNameModal';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 
 // fetchWithAuth のモック
-jest.mock('../utils/fetchWithAuth');
+jest.mock('../../utils/fetchWithAuth');
 
 // useRouter のモック
 const mockReplace = jest.fn();

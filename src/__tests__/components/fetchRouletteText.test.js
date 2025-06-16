@@ -1,7 +1,7 @@
-import { fetchRouletteText } from '../components/utils';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchRouletteText } from '../../components/utils';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 
-jest.mock('../utils/fetchWithAuth', () => ({
+jest.mock('../../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
 }));
 

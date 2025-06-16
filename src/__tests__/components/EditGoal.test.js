@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import EditGoal from '../components/EditGoal';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import EditGoal from '../../components/EditGoal';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import '@testing-library/jest-dom';
 
 // fetchWithAuth のモック
-jest.mock('../utils/fetchWithAuth');
+jest.mock('../../utils/fetchWithAuth');
 
 // Next.js の useRouter をモック
 jest.mock('next/router', () => ({

@@ -1,10 +1,10 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { useFetchRouletteTexts } from '../hooks/useFetchRouletteTexts';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { useFetchRouletteTexts } from '../../hooks/useFetchRouletteTexts';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 
 // fetchWithAuth をモック
-jest.mock('../utils/fetchWithAuth', () => ({
+jest.mock('../../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
 }));
 

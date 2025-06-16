@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NewGoalModal from '../components/CreateGoal';
+import NewGoalModal from '../../components/CreateGoal';
 import '@testing-library/jest-dom';
 import styles from '../components/CreateGoal.module.css';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 
 // Next.js の useRouter をモック
 const mockPush = jest.fn();
@@ -18,7 +18,7 @@ jest.mock('next/router', () => ({
 }));
 
 // fetchWithAuth をモック
-jest.mock('../utils/fetchWithAuth');
+jest.mock('../../utils/fetchWithAuth');
 
 // console.error をモック
 const originalConsoleError = console.error;

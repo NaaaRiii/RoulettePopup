@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 
 // Next.js の useRouter のモック
 const mockPush = jest.fn();

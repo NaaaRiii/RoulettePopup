@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import CompletedGoal from '../pages/completed-goal';
-import { useGoals } from '../contexts/GoalsContext';
+import CompletedGoal from '../../pages/completed-goal';
+import { useGoals } from '../../contexts/GoalsContext';
 import '@testing-library/jest-dom';
 import { useRouter } from 'next/router';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 
 // 1. `next/router`のモックを最初に設定
 jest.mock('next/router', () => ({
@@ -38,18 +38,18 @@ jest.mock('next/image', () => ({
   default: ({ src, alt, ...props }) => <img src={src} alt={alt} {...props} />,
 }));
 
-jest.mock('../contexts/GoalsContext', () => ({
+jest.mock('../../contexts/GoalsContext', () => ({
   useGoals: jest.fn(),
 }));
 
-jest.mock('../components/Layout', () => {
+jest.mock('../../components/Layout', () => {
   const MockedLayout = ({ children }) => <div data-testid="layout">{children}</div>;
   return MockedLayout;
 });
 
-jest.mock('../utils/fetchWithAuth');
+jest.mock('../../utils/fetchWithAuth');
 
-jest.mock('../utils/getIdToken');
+jest.mock('../../utils/getIdToken');
 
 // 4. グローバルの`fetch`をモック
 global.fetch = jest.fn();

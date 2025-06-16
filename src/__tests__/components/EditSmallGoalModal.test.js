@@ -2,11 +2,11 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import EditSmallGoalModal from '../components/EditSmallGoal';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import EditSmallGoalModal from '../../components/EditSmallGoal';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 
 // fetchWithAuth のモック
-jest.mock('../utils/fetchWithAuth');
+jest.mock('../../utils/fetchWithAuth');
 
 describe('EditSmallGoalModal コンポーネント', () => {
   describe.each([

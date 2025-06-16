@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ExpCalendar from '../components/Calendar';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import ExpCalendar from '../../components/Calendar';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 
 // fetchWithAuth をモック
-jest.mock('../utils/fetchWithAuth', () => ({
+jest.mock('../../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) }),
 }));
 
@@ -23,11 +23,11 @@ jest.mock('react-calendar', () => {
     };
     capturedProps = newProps;
 
-    // テスト用の日付を生成して tileClassName を呼び出す
-    const today = new Date();
+    // テスト用の固定日付を生成
+    const baseDate = new Date('2025-06-01');
     const dates = Array.from({ length: 31 }, (_, i) => {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
+      const date = new Date(baseDate);
+      date.setDate(baseDate.getDate() + i);
       return date;
     });
 
@@ -282,6 +282,13 @@ describe('ExpCalendar', () => {
     const tileCall = mockTileClassNameCalls.find(call => 
       call.date.toLocaleDateString('sv-SE') === expectedKey
     );
+
+    // デバッグ情報を出力
+    console.log('Expected key:', expectedKey);
+    console.log('Available dates:', mockTileClassNameCalls.map(call => 
+      call.date.toLocaleDateString('sv-SE')
+    ));
+
     expect(tileCall).toBeDefined();
     expect(tileCall.date).toBeInstanceOf(Date);
     expect(tileCall.date.toLocaleDateString('sv-SE')).toBe(expectedKey);

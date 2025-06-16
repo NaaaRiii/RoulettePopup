@@ -1,25 +1,25 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import GoalPage from '../pages/goals/[goalId]';
-import EditRouletteText        from '../pages/edit-roulette-text'; 
+import GoalPage from '../../pages/goals/[goalId]';
+import EditRouletteText        from '../../pages/edit-roulette-text'; 
 import { useRouter } from 'next/router';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import { Authenticator } from '@aws-amplify/ui-react';
-import { useGoals } from '../contexts/GoalsContext';
-import { TicketsContext } from '../contexts/TicketsContext';
+import { useGoals } from '../../contexts/GoalsContext';
+import { TicketsContext } from '../../contexts/TicketsContext';
 import '@testing-library/jest-dom';
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }));
 
-jest.mock('../utils/fetchWithAuth');
-jest.mock('../contexts/GoalsContext', () => ({
+jest.mock('../../utils/fetchWithAuth');
+jest.mock('../../contexts/GoalsContext', () => ({
   useGoals: jest.fn(),
 }));
 
-jest.mock('../components/EditGoal', () => {
+jest.mock('../../components/EditGoal', () => {
   const React = require('react');
   const MockEditGoal = props => {
     const { isOpen, onGoalUpdated } = props;
@@ -31,7 +31,7 @@ jest.mock('../components/EditGoal', () => {
   return MockEditGoal;
 });
 
-jest.mock('../components/EditSmallGoal', () => {
+jest.mock('../../components/EditSmallGoal', () => {
   const React = require('react');
   const MockEditSmallGoal = props => {
     const { isOpen, onSmallGoalUpdated } = props;
@@ -43,7 +43,7 @@ jest.mock('../components/EditSmallGoal', () => {
   return MockEditSmallGoal;
 });
 
-jest.mock('../hooks/useFetchRouletteTexts', () => ({
+jest.mock('../../hooks/useFetchRouletteTexts', () => ({
   useFetchRouletteTexts: () => ({
     // map できるように最低限の配列を渡す
     rouletteTexts: [
