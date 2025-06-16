@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, renderHook, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { TicketsContext, TicketsProvider } from '../contexts/TicketsContext';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { TicketsContext, TicketsProvider } from '../../contexts/TicketsContext';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 
 // fetchWithAuth をモック
-jest.mock('../utils/fetchWithAuth', () => ({
+jest.mock('../../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
 }));
 
