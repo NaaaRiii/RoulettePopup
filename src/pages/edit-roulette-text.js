@@ -102,8 +102,14 @@ const EditRouletteText = () => {
       const data = await response.json();
       console.log("Updated Data:", data);
 
-      if (data.roulette_text && typeof data.roulette_text === 'object' && 'number' in data.roulette_text) {
-        const { roulette_text: updatedRouletteText } = data;
+      //if (data.roulette_text && typeof data.roulette_text === 'object' && 'number' in data.roulette_text) {
+      //  const { roulette_text: updatedRouletteText } = data;
+      const updatedRouletteText =
+        (data.roulette_text && typeof data.roulette_text === 'object')
+          ? data.roulette_text   // 旧 API 形式 { roulette_text: {...} }
+          : data;                // 新 API 形式 { id, number, text, ... }
+          
+        if (updatedRouletteText && 'number' in updatedRouletteText) {
         setRouletteTexts(prevTexts => prevTexts.map(text => text.number === updatedRouletteText.number ? updatedRouletteText : text));
         fetchTickets(); 
         setShowForm(false);

@@ -468,55 +468,119 @@ describe('EditRouletteText Component', () => {
       window.confirm.mockRestore();
     });
 
-  it('displays a flash message after successful edit', async () => {
-    jest.spyOn(window, 'confirm').mockReturnValue(true);
-    global.fetch.mockClear();
-  
-    render(
-      <Authenticator.Provider>
-        <TestWrapper>
-          <EditRouletteText />
-        </TestWrapper>
-      </Authenticator.Provider>
-    );
+    it('displays a flash message after successful edit', async () => {
+      jest.spyOn(window, 'confirm').mockReturnValue(true);
+      global.fetch.mockClear();
     
-    // フォームを開く
-    await userEvent.click(await screen.findByText('ルーレットを編集する'));
-    
-    // 数字選択して初期値が入るまで待つ
-    const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
-    userEvent.selectOptions(numberSelect, '1');
-    const textInput = screen.getByLabelText('Edit text');
-    await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
-  
-    // 新しいテキストを入れて
-    await userEvent.clear(textInput);
-    await userEvent.type(textInput, 'Updated Prize 1');
-  
-    // 送信→PATCH
-    userEvent.click(screen.getByText('内容を保存する'));
-    
-    // ―― ① PATCH リクエストが行われたかを待機
-    await waitFor(() => {
-      const patchCall = global.fetch.mock.calls.find(([url, opts]) =>
-        url.endsWith('/api/roulette_texts/1') &&
-        opts.method === 'PATCH'
+      render(
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
       );
-      expect(patchCall).toBeDefined();
       
-      const [, options] = patchCall;
-      expect(options).toMatchObject({
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roulette_text: { text: 'Updated Prize 1' } }),
-      });
-    });
+      // フォームを開く
+      await userEvent.click(await screen.findByText('ルーレットを編集する'));
+      
+      // 数字選択して初期値が入るまで待つ
+      const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
+      userEvent.selectOptions(numberSelect, '1');
+      const textInput = screen.getByLabelText('Edit text');
+      await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
     
-    await waitFor(() => {
-      expect(fetchTicketsMock).toHaveBeenCalled();
-      expect(screen.getByText('Number: 1 を Updated Prize 1 に変更しました。')).toBeInTheDocument();
-    });
+      // 新しいテキストを入れて
+      await userEvent.clear(textInput);
+      await userEvent.type(textInput, 'Updated Prize 1');
+    
+      // 送信→PATCH
+      userEvent.click(screen.getByText('内容を保存する'));
+      
+      // ―― ① PATCH リクエストが行われたかを待機
+      await waitFor(() => {
+        const patchCall = global.fetch.mock.calls.find(([url, opts]) =>
+          url.endsWith('/api/roulette_texts/1') &&
+          opts.method === 'PATCH'
+        );
+        expect(patchCall).toBeDefined();
+        
+        const [, options] = patchCall;
+        expect(options).toMatchObject({
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roulette_text: { text: 'Updated Prize 1' } }),
+        });
+      });
+      
+      await waitFor(() => {
+        expect(fetchTicketsMock).toHaveBeenCalled();
+        expect(screen.getByText('Number: 1 を Updated Prize 1 に変更しました。')).toBeInTheDocument();
+      });
+    
+        window.confirm.mockRestore();
+      });
+    
+    it('handles *new* API format without roulette_text wrapper', async () => {
+      // confirm を常に YES
+      jest.spyOn(window, 'confirm').mockReturnValue(true);
+  
+      // ------- fetch をこのテスト専用で差し替え -------
+      global.fetch.mockImplementationOnce((url, opts) => {
+        // GET /api/roulette_texts (初期一覧) は既存モックに任せる
+        if (opts?.method === 'GET') {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve(mockRouletteTexts),
+          });
+        }
+        // PATCH /api/roulette_texts/1 だけ新形式を返す
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              id: 1,
+              number: 1,
+              text: 'Brand-new Prize 1',
+            }),
+        });
+      });
+  
+      render(
+        <Authenticator.Provider>
+          <TestWrapper>
+            <EditRouletteText />
+          </TestWrapper>
+        </Authenticator.Provider>
+      );
+  
+      // ------ フォームを開いて編集操作 ------
+      await userEvent.click(screen.getByRole('button', { name: /ルーレットを編集する/i }));
+      await userEvent.selectOptions(
+        screen.getByLabelText('編集したい数字を選んでください。'),
+        '1'
+      );
+      const textInput = screen.getByLabelText('Edit text');
+      // 初期値は API 取得に失敗した場合は空文字の可能性があるため、値を直接入力
+      await userEvent.clear(textInput);
+      await userEvent.type(textInput, 'Brand-new Prize 1');
+  
+      // ------ 送信 ------
+      await userEvent.click(screen.getByText('内容を保存する'));
+  
+      // ------ 検証 ------
+      await waitFor(() => {
+        // flash
+        expect(
+          screen.getByText('Number: 1 を Brand-new Prize 1 に変更しました。')
+        ).toBeInTheDocument();
+        // list 書き換え
+        expect(screen.getByTestId('roulette-text-item-1')).toHaveTextContent('Brand-new Prize 1');
+        // fetchTickets()
+        expect(fetchTicketsMock).toHaveBeenCalled();
+      });
   
       window.confirm.mockRestore();
     });
