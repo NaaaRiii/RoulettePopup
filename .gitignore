@@ -41,3 +41,7 @@ node_modules
 .amplify
 amplifyconfiguration*
 amplify_outputs(backup).json
+
+# cypress environment variables
+cypress.env.json
+cypress.env.example.json

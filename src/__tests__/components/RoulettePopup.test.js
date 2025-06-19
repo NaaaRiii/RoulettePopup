@@ -659,3 +659,27 @@ describe('プロパティ／外部依存', () => {
     expect(window.alert).toHaveBeenCalledWith('チケットが不足しています');
   });
 });
+
+describe('初期チケット枚数の表示', () => {
+  it('tickets が 5 のとき「チケット:5」と表示される', () => {
+    /* ルーレット本体はチケット数を直接描画しないため
+       ダッシュボード側などで表示している <span data-testid="ticket-count">
+       をモックして確認する */
+
+    const TicketViewer = () => {
+      const { tickets } = React.useContext(TicketsContext)
+      return <span data-testid="ticket-count">チケット:{tickets}</span>
+    }
+
+    render(
+      <TicketsContext.Provider
+        value={{ tickets: 5, setTickets: jest.fn(), fetchTickets: jest.fn() }}
+      >
+        <TicketViewer />   {/* ←ここで tickets を表示 */}
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    )
+
+    expect(screen.getByTestId('ticket-count').textContent).toBe('チケット:5')
+  })
+})

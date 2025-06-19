@@ -8,7 +8,17 @@
     "export": "next export",
     "start": "next start -p 4000",
     "lint": "next lint",
-    "test": "jest --verbose"
+    "test": "jest --verbose",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "cypress run --spec 'cypress/e2e/roulette_spin.cy.js'",
+    "test:e2e:debug": "cypress run --spec 'cypress/e2e/roulette_spin_debug.cy.js'",
+    "test:e2e:prod": "cypress run --spec 'cypress/e2e/roulette_spin_production.cy.js'",
+    "test:e2e:prod:open": "cypress open --config-file cypress.config.ts",
+    "test:e2e:amplify": "cypress run --spec 'cypress/e2e/roulette_spin_amplify.cy.js'",
+    "test:e2e:amplify:debug": "cypress run --spec 'cypress/e2e/roulette_spin_amplify_debug.cy.js'",
+    "test:e2e:amplify:simple": "cypress run --spec 'cypress/e2e/roulette_spin_amplify_simple.cy.js'",
+    "cypress:setup": "cp cypress.env.example.json cypress.env.json && echo 'cypress.env.json を作成しました。必要に応じて編集してください.'"
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.8.2",
@@ -41,6 +51,8 @@
     "aws-cdk": "^2.173.0",
     "aws-cdk-lib": "^2.173.0",
     "constructs": "^10.4.2",
+    "cypress": "^14.5.0",
+    "dotenv": "^16.5.0",
     "esbuild": "^0.24.0",
     "eslint": "^8",
     "eslint-config-next": "14.0.3",
