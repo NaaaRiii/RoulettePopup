@@ -4,7 +4,7 @@ import styles from '../components/CreateGoal.module.css';
 
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
-export default function EditUserNameModal({ isOpen, onClose, currentName }) {
+export default function EditUserNameModal({ isOpen, onClose, currentName, onUserUpdate }) {
   const router = useRouter();
 
   const [newName, setNewName] = useState(currentName || '');
@@ -15,8 +15,10 @@ export default function EditUserNameModal({ isOpen, onClose, currentName }) {
     event.preventDefault();
 
     const body = JSON.stringify({
-      user: { username: newName }
+      user: { name: newName }
     });
+
+    console.log("Sending request with body:", body);
 
     try {
       const response = await fetchWithAuth(
@@ -28,13 +30,22 @@ export default function EditUserNameModal({ isOpen, onClose, currentName }) {
         // 更新に成功したら、レスポンスを取得
         const data = await response.json();
         console.log("Updated user name:", data);
+        console.log("Response user data:", data.user);
+        console.log("New name in response:", data.user?.name);
 
-        // 例: ダッシュボードにリロード・遷移
-        router.replace('/dashboard');
+        // 親コンポーネントに新しいユーザー名を渡す
+        if (onUserUpdate && data.user) {
+          onUserUpdate(data.user);
+        }
+
+        // モーダルを閉じる
+        onClose();
 
       } else {
         const errorData = await response.json();
         console.error("Error updating user name:", errorData);
+        console.error("Response status:", response.status);
+        console.error("Response status text:", response.statusText);
       }
     } catch (error) {
       console.error("Submission failed", error);

@@ -60,6 +60,15 @@ function Dashboard() {
     setIsEditNameOpen(false);
   };
 
+  const handleUserUpdate = (updatedUser) => {
+    // ユーザーデータを更新
+    setUserData(prevData => ({
+      ...prevData,
+      name: updatedUser.name || prevData.name,
+      email: updatedUser.email || prevData.email
+    }));
+  };
+
   const deleteGoal = async (goalId) => {
     if (window.confirm('Are you sure?')) {
       try {
@@ -253,7 +262,7 @@ return (
                           <FaPen />
                         </Link>
                       </div>
-                      <EditUserNameModal isOpen={isEditNameOpen} onClose={closeEditName}/>
+                      <EditUserNameModal isOpen={isEditNameOpen} onClose={closeEditName} onUserUpdate={handleUserUpdate}/>
                       
                       <div className='user-profile__roulette'>
                         {userRank >= 10 && <Link href="/edit-roulette-text">ごほうびルーレット</Link>}

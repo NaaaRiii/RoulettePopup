@@ -39,6 +39,7 @@
   "devDependencies": {
     "@aws-amplify/backend": "^1.9.0",
     "@aws-amplify/backend-cli": "^1.4.3",
+    "@mermaid-js/mermaid-cli": "^11.6.0",
     "@swc/jest": "^0.2.38",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.1.2",
