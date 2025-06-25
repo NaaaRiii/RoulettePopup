@@ -11,6 +11,7 @@ import ExpCalendar from '../../components/Calendar';
 import CreateSmallGoal from '../../components/CreateSmallGoal';
 import EditGoalModal from '../../components/EditGoal';
 import EditSmallGoalModal from '../../components/EditSmallGoal';
+import { useModalState } from '../../hooks/useModalState';
 import '../../components/styles.css';
 
 
@@ -22,41 +23,21 @@ function GoalPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [smallGoalsError, setSmallGoalsError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
-  const [isEditSmallGoalModalOpen, setIsEditSmallGoalModalOpen] = useState(false);
-  const [selectedSmallGoal, setSelectedSmallGoal] = useState(null);
 
   const { fetchTickets } = useContext(TicketsContext);
-
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const openEditGoalModal = () => {
-    setIsEditGoalModalOpen(true);
-  };
-
-  const closeEditGoalModal = () => {
-    setIsEditGoalModalOpen(false);
-  };
-
-  const openEditSmallGoalModal = (smallGoal) => {
-    if (smallGoal && goalId) {
-      setSelectedSmallGoal(smallGoal);
-      setIsEditSmallGoalModalOpen(true);
-    } else {
-      console.error("Small Goal or Goal ID is missing");
-    }
-  };
-
-  const closeEditSmallGoalModal = () => {
-    setIsEditSmallGoalModalOpen(false);
-  };
+  
+  const {
+    isCreateSmallGoalModalOpen,
+    isEditGoalModalOpen,
+    isEditSmallGoalModalOpen,
+    selectedSmallGoal,
+    openCreateSmallGoalModal,
+    closeCreateSmallGoalModal,
+    openEditGoalModal,
+    closeEditGoalModal,
+    openEditSmallGoalModal,
+    closeEditSmallGoalModal,
+  } = useModalState();
 
   const handleGoalUpdated = async (updatedGoal) => {
     await fetchGoalData();
@@ -77,7 +58,6 @@ function GoalPage() {
     setLoading(true);
 
     try {
-      // goalDetails
       const goalDetailsResponse = await fetchWithAuth(
         `/api/goals/${goalId}`
       );
@@ -91,7 +71,6 @@ function GoalPage() {
         return;
       }
 
-      // small_goals
       const smallGoalsResponse = await fetchWithAuth(
         `/api/goals/${goalId}/small_goals`
       );
@@ -117,11 +96,11 @@ function GoalPage() {
           tasks: smallGoal.tasks
         }))
       });
-      setSmallGoalsError(null); // エラーが解消された場合
+      setSmallGoalsError(null);
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch goal data', error);
-      setGoal(null); // エラーハンドリングとして goal を null に設定
+      setGoal(null);
       setLoading(false);
     }
   }, [goalId]);
@@ -162,8 +141,7 @@ function GoalPage() {
   };
 
   const deleteGoal = (event) => {
-    event.preventDefault(); // デフォルトのリンク動作を防止
-    console.log('deleteGoal function called'); // デバッグ用ログ
+    event.preventDefault();
   
     if (window.confirm('Are you sure ?')) {
       fetchWithAuth(`/api/goals/${goalId}`, {
@@ -171,13 +149,9 @@ function GoalPage() {
       })
         .then(response => {
           if (response.ok) {
-            // goalが削除されたことを確認するアラートを表示
             alert('Goalが削除されました。');
-  
-            // 最新の目標データを取得して更新
             refreshGoals();
   
-            // アラートのOKボタンを押した後にdashboardに遷移
             router.push('/dashboard');
           } else {
             console.error(`Error: ${response.statusText}`);
@@ -334,29 +308,22 @@ function GoalPage() {
                     )}
 
                     <div className='add-small-goal-button'>
-                      <Link href={`#`} onClick={openModal}>
+                      <Link href={`#`} onClick={openCreateSmallGoalModal}>
                       <div
                           className="add-small-goal-button-link"
-                          //role="button"
-                          //tabIndex={0}
                         >
                           Small Goalの作成
                         </div>
                       </Link>
                       <CreateSmallGoal
-                        isOpen={isModalOpen}
-                        onClose={closeModal}
+                        isOpen={isCreateSmallGoalModalOpen}
+                        onClose={closeCreateSmallGoalModal}
                         goalId={goalId}
                         onSmallGoalAdded={handleSmallGoalAdded}
                       />
                     </div>
                   </div>
 
-                  {/*<Link href={`#`} onClick={(event) => deleteGoal(event)}>
-                    <div className='delete-goal-link' data-testid="delete-goal-link">
-                      Delete Goal
-                    </div>
-                  </Link>*/}
                   <a href="#" onClick={deleteGoal} data-testid="delete-goal-link" className='delete-goal-link'>
                     Goalを削除する
                   </a>
