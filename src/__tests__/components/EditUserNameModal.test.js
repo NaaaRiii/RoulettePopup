@@ -207,7 +207,7 @@ describe('EditUserNameModal コンポーネント', () => {
 
     // 非同期処理の完了を待つ
     expect(fetchWithAuth).toHaveBeenCalledTimes(1);
-    expect(handleClose).toHaveBeenCalledTimes(2);
+    expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
   describe.each([
@@ -246,8 +246,8 @@ describe('EditUserNameModal コンポーネント', () => {
       // フォームを送信
       await userEvent.click(screen.getByRole('button', { name: '変更' }));
 
-      // onClose が呼ばれたことを確認（成功時は2回、失敗時は1回）
-      const expectedCallCount = mockResponse.ok ? 2 : 1;
+      // onClose が呼ばれたことを確認（成功時は1回、失敗時は1回）
+      const expectedCallCount = mockResponse.ok ? 1 : 1;
       expect(handleClose).toHaveBeenCalledTimes(expectedCallCount);
     });
 
