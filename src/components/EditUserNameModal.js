@@ -38,9 +38,6 @@ export default function EditUserNameModal({ isOpen, onClose, currentName, onUser
           onUserUpdate(data.user);
         }
 
-        // モーダルを閉じる
-        onClose();
-
       } else {
         const errorData = await response.json();
         console.error("Error updating user name:", errorData);
@@ -50,7 +47,7 @@ export default function EditUserNameModal({ isOpen, onClose, currentName, onUser
     } catch (error) {
       console.error("Submission failed", error);
     } finally {
-      // 1回の呼び出しでも良いかを確認
+      // 成功・失敗・例外に関係なく、モーダルを閉じる
       onClose();
     }
   };
