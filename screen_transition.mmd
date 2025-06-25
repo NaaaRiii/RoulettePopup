@@ -1,0 +1,55 @@
+graph TD
+    Start([ユーザーアクセス]) --> Home[ホーム画面]
+    Home --> Login[ログイン画面]
+    Home --> Signup[サインアップ画面]
+
+    %% 認証チェック
+    Login --> Auth{認証チェック}
+    Signup --> Auth
+
+    Auth -->|成功| Dashboard[ダッシュボード]
+    Auth -->|失敗| Login
+
+    %% Dashboard -> ごほうびルーレット フロー
+    Dashboard --> GR[ごほうびルーレット]
+    GR --> Spin[ルーレットを回す]
+    GR --> EditRoulette[ルーレットテキストの編集]
+
+    %% Dashboard -> ニックネームの変更モーダル
+    Dashboard --> Nick[ニックネームの変更モーダル]
+
+    %% Dashboard -> 目標を設定する フロー
+    Dashboard --> SetGoal[目標を設定する]
+    SetGoal --> GoalModal[目標設定モーダル]
+    GoalModal --> GoalPage[goalIdページ]
+
+    %% Dashboard -> 達成した目標 一覧フロー
+    Dashboard --> CompletedLink[達成した目標]
+    CompletedLink --> CompletedPage[達成した目標一覧]
+
+    %% Dashboard -> 進行中のSmall Goal -> goalIdページ
+    Dashboard --> SmallGoalLink[進行中のSmall Goal]
+    SmallGoalLink --> GoalPage
+
+    %% Dashboard -> 進行中のGoal -> goalIdページ
+    Dashboard --> InProgressGoalLink[進行中のGoal]
+    InProgressGoalLink --> GoalPage
+
+    %% goalIdページ 内操作
+    GoalPage --> GoalEdit[Goalの編集]
+    GoalPage --> SmallGoalEdit[Small Goalの編集]
+    GoalPage --> GoalComplete[Goalの完了]
+    GoalComplete --> ExpGain[Expの付与]
+    GoalPage --> SmallGoalComplete[Small Goalの完了]
+    SmallGoalComplete --> ExpGain
+
+    %% auth & error
+    %%Login --> AuthFail[認証失敗]
+    %%Dashboard --> AuthError[認証エラー]
+    %%GoalPage --> DataError[データエラー]
+
+    %% (class 定義は任意で使用する場合のみコメントを外してください)
+    %% classDef main fill:#e1f5fe
+    %% classDef modal fill:#fff3e0
+    %% classDef auth  fill:#f3e5f5
+    %% classDef err   fill:#ffebee

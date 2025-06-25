@@ -1,0 +1,44 @@
+graph TD
+    Start([ユーザーアクセス]) --> Home[ホーム画面]
+    Home --> Login[ログイン画面]
+    Home --> Signup[サインアップ画面]
+    
+    Login --> Auth{認証チェック}
+    Signup --> Auth
+    
+    Auth -->|成功| Dashboard[ダッシュボード]
+    Auth -->|失敗| Login
+    
+    Dashboard --> GoalList[目標一覧表示]
+    Dashboard --> Roulette[ルーレット機能]
+    Dashboard --> Stats[統計表示]
+    
+    GoalList --> GoalDetail[目標詳細]
+    GoalDetail --> TaskComplete[タスク完了]
+    TaskComplete --> ExpGain[経験値獲得]
+    ExpGain --> LevelUp{レベルアップ?}
+    
+    LevelUp -->|Yes| RouletteTrigger[ルーレット起動]
+    LevelUp -->|No| Dashboard
+    
+    RouletteTrigger --> RouletteSpin[ルーレット回転]
+    RouletteSpin --> Reward[報酬獲得]
+    Reward --> Dashboard
+    
+    Roulette --> RouletteEdit[ルーレット編集]
+    RouletteEdit --> Dashboard
+    
+    Stats --> Dashboard
+    
+    %% スタイル定義
+    classDef start fill:#e8f5e8,stroke:#4caf50,stroke-width:3px
+    classDef page fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    classDef modal fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef decision fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+    classDef action fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    
+    class Start start
+    class Home,Login,Signup,Dashboard,GoalList,GoalDetail,RouletteEdit,Stats page
+    class RouletteTrigger,RouletteSpin,Reward modal
+    class Auth,LevelUp decision
+    class TaskComplete,ExpGain action
