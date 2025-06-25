@@ -66,11 +66,11 @@ describe('初期表示', () => {
 		// 各ステートが正しく初期化されることを確認
 		await waitFor(() => {
 			// title の初期化を確認
-			const titleInput = screen.getByLabelText('目標のタイトル');
+			const titleInput = screen.getByLabelText('Goalのタイトル');
 			expect(titleInput).toHaveValue(mockGoal.title);
 
 			// content の初期化を確認
-			const contentInput = screen.getByLabelText('詳細');
+			const contentInput = screen.getByLabelText('Goalの詳細');
 			expect(contentInput).toHaveValue(mockGoal.content);
 
 			// deadline の初期化を確認
@@ -199,7 +199,7 @@ describe('入力フォームの要素確認', () => {
 		);
 
 		// title の textarea を取得
-		const titleInput = await screen.findByLabelText('目標のタイトル');
+		const titleInput = await screen.findByLabelText('Goalのタイトル');
 		expect(titleInput).toBeInTheDocument();
 		expect(titleInput.tagName).toBe('TEXTAREA');
 
@@ -222,7 +222,7 @@ describe('入力フォームの要素確認', () => {
 		);
 
 		// content の textarea を取得
-		const contentInput = await screen.findByLabelText('詳細');
+		const contentInput = await screen.findByLabelText('Goalの詳細');
 		expect(contentInput).toBeInTheDocument();
 		expect(contentInput.tagName).toBe('TEXTAREA');
 
@@ -335,8 +335,8 @@ describe('API 通信', () => {
 		);
 
 		// フォームの入力値を設定
-		const titleInput = await screen.findByLabelText('目標のタイトル');
-		const contentInput = await screen.findByLabelText('詳細');
+		const titleInput = await screen.findByLabelText('Goalのタイトル');
+		const contentInput = await screen.findByLabelText('Goalの詳細');
 		const deadlineInput = await screen.findByLabelText('期限');
 
 		fireEvent.change(titleInput, { target: { value: 'テスト目標' } });
@@ -344,7 +344,7 @@ describe('API 通信', () => {
 		fireEvent.change(deadlineInput, { target: { value: '2024-12-31' } });
 
 		// フォームを送信
-		const submitButton = screen.getByText('目標を更新する');
+		const submitButton = screen.getByText('Goalを更新する');
 		const form = submitButton.closest('form');
 		fireEvent.submit(form);
 
@@ -396,8 +396,8 @@ describe('API 成功時の挙動', () => {
 		);
 
 		// フォームの入力値を設定
-		const titleInput = await screen.findByLabelText('目標のタイトル');
-		const contentInput = await screen.findByLabelText('詳細');
+		const titleInput = await screen.findByLabelText('Goalのタイトル');
+		const contentInput = await screen.findByLabelText('Goalの詳細');
 		const deadlineInput = await screen.findByLabelText('期限');
 
 		// 入力値を設定
@@ -406,7 +406,7 @@ describe('API 成功時の挙動', () => {
 		fireEvent.change(deadlineInput, { target: { value: '2024-12-31' } });
 
 		// フォームを送信
-		const submitButton = screen.getByText('目標を更新する');
+		const submitButton = screen.getByText('Goalを更新する');
 		const form = submitButton.closest('form');
 		fireEvent.submit(form);
 
@@ -461,8 +461,8 @@ describe('API エラー時の挙動', () => {
     );
 
     // フォームの入力値を設定
-    const titleInput = await screen.findByLabelText('目標のタイトル');
-    const contentInput = await screen.findByLabelText('詳細');
+    const titleInput = await screen.findByLabelText('Goalのタイトル');
+    const contentInput = await screen.findByLabelText('Goalの詳細');
     const deadlineInput = await screen.findByLabelText('期限');
 
     // 入力値を設定
@@ -471,7 +471,7 @@ describe('API エラー時の挙動', () => {
     fireEvent.change(deadlineInput, { target: { value: '2024-12-31' } });
 
     // フォームを送信
-    const submitButton = screen.getByText('目標を更新する');
+    const submitButton = screen.getByText('Goalを更新する');
     const form = submitButton.closest('form');
     fireEvent.submit(form);
 
@@ -524,8 +524,8 @@ describe('API エラー時の挙動', () => {
     );
 
     // フォームの入力値を設定
-    const titleInput = await screen.findByLabelText('目標のタイトル');
-    const contentInput = await screen.findByLabelText('詳細');
+    const titleInput = await screen.findByLabelText('Goalのタイトル');
+    const contentInput = await screen.findByLabelText('Goalの詳細');
     const deadlineInput = await screen.findByLabelText('期限');
 
     // 入力値を設定
@@ -534,7 +534,7 @@ describe('API エラー時の挙動', () => {
     fireEvent.change(deadlineInput, { target: { value: '2024-12-31' } });
 
     // フォームを送信
-    const submitButton = screen.getByText('目標を更新する');
+    const submitButton = screen.getByText('Goalを更新する');
     const form = submitButton.closest('form');
     fireEvent.submit(form);
 

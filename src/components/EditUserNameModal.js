@@ -50,7 +50,7 @@ export default function EditUserNameModal({ isOpen, onClose, currentName, onUser
     } catch (error) {
       console.error("Submission failed", error);
     } finally {
-      // 失敗でも成功でもモーダルは閉じる
+      // 1回の呼び出しでも良いかを確認
       onClose();
     }
   };
@@ -58,9 +58,9 @@ export default function EditUserNameModal({ isOpen, onClose, currentName, onUser
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h2>ユーザー名を編集</h2>
+        <h2>ユーザー名を編集する</h2>
         <form onSubmit={handleSubmit}>
-          <label htmlFor="username">新しいユーザー名</label>
+          <label htmlFor="username">新しいユーザー名を入力してください。</label>
           <textarea
             id="username"
             name="username"

@@ -23,9 +23,9 @@ jest.mock('react-calendar', () => {
     };
     capturedProps = newProps;
 
-    // テスト用の固定日付を生成
+    // テスト用の固定日付を生成（より多くの日付を含む）
     const baseDate = new Date('2025-06-01');
-    const dates = Array.from({ length: 31 }, (_, i) => {
+    const dates = Array.from({ length: 35 }, (_, i) => { // 35日分に拡張
       const date = new Date(baseDate);
       date.setDate(baseDate.getDate() + i);
       return date;
@@ -85,11 +85,11 @@ describe('ExpCalendar', () => {
 
   it('response.ok=true なら response.json() の戻り値がそのまま activities state に入る', async () => {
     // 「今日」を含む3日分を用意
-    const today     = new Date();                        // 例: 2025-06-13
+    const baseDate = new Date('2025-06-25'); // 固定の基準日を使用
     const yyyymmdd  = (d) => d.toLocaleDateString('sv-SE');
-    const d0        = yyyymmdd(today);                   // 2025-06-13
-    const d1        = yyyymmdd(new Date(today.setDate(today.getDate()+1)));
-    const d2        = yyyymmdd(new Date(today.setDate(today.getDate()+1)));
+    const d0        = yyyymmdd(new Date(baseDate));                   // 2025-06-25
+    const d1        = yyyymmdd(new Date(baseDate.getTime() + 1 * 24 * 60 * 60 * 1000)); // 2025-06-26
+    const d2        = yyyymmdd(new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000)); // 2025-06-27
 
     const mockActivities = {
       [d0]: 50,     // exp-level-50
@@ -191,19 +191,19 @@ describe('ExpCalendar', () => {
 
   it('tileClassName は経験値に応じたクラスを返す', async () => {
     // 各経験値レベルのテストデータを用意
-    const today = new Date();
+    const baseDate = new Date('2025-06-25'); // 固定の基準日を使用
     const yyyymmdd = (d) => d.toLocaleDateString('sv-SE');
     const dates = {
-      d0: yyyymmdd(today),                    // 2025-06-13
-      d1: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
-      d2: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
-      d3: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
-      d4: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
-      d5: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
-      d6: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
-      d7: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
-      d8: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
-      d9: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d0: yyyymmdd(new Date(baseDate)),                    // 2025-06-25
+      d1: yyyymmdd(new Date(baseDate.getTime() + 1 * 24 * 60 * 60 * 1000)), // 2025-06-26
+      d2: yyyymmdd(new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000)), // 2025-06-27
+      d3: yyyymmdd(new Date(baseDate.getTime() + 3 * 24 * 60 * 60 * 1000)), // 2025-06-28
+      d4: yyyymmdd(new Date(baseDate.getTime() + 4 * 24 * 60 * 60 * 1000)), // 2025-06-29
+      d5: yyyymmdd(new Date(baseDate.getTime() + 5 * 24 * 60 * 60 * 1000)), // 2025-06-30
+      d6: yyyymmdd(new Date(baseDate.getTime() + 6 * 24 * 60 * 60 * 1000)), // 2025-07-01
+      d7: yyyymmdd(new Date(baseDate.getTime() + 7 * 24 * 60 * 60 * 1000)), // 2025-07-02
+      d8: yyyymmdd(new Date(baseDate.getTime() + 8 * 24 * 60 * 60 * 1000)), // 2025-07-03
+      d9: yyyymmdd(new Date(baseDate.getTime() + 9 * 24 * 60 * 60 * 1000)), // 2025-07-04
     };
 
     const mockActivities = {
@@ -245,10 +245,10 @@ describe('ExpCalendar', () => {
       expect(calendar.querySelectorAll('.exp-level-70')).toHaveLength(1);
       expect(calendar.querySelectorAll('.exp-level-80')).toHaveLength(1);
       
-      const totalTiles      = 31;                   // MockCalendar で生成した数
+      const totalTiles      = 35;                   // MockCalendar で生成した数
       const positiveExpDays = Object.values(mockActivities)
                                   .filter(v => v > 0).length;   // 9
-      const expectedNoExp   = totalTiles - positiveExpDays;        // 22
+      const expectedNoExp   = totalTiles - positiveExpDays;        // 26
       expect(calendar.querySelectorAll('.no-exp')).toHaveLength(expectedNoExp);
     });
   });
@@ -296,12 +296,12 @@ describe('ExpCalendar', () => {
 
   it('setActivities 後に特定日付セルへ対応クラスが付与される', async () => {
     // テスト用の日付と活動データを用意
-    const today = new Date();
+    const baseDate = new Date('2025-06-25'); // 固定の基準日を使用
     const yyyymmdd = (d) => d.toLocaleDateString('sv-SE');
     const dates = {
-      d0: yyyymmdd(today),                    // 2025-06-13
-      d1: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
-      d2: yyyymmdd(new Date(today.setDate(today.getDate()+1))),
+      d0: yyyymmdd(new Date(baseDate)),                    // 2025-06-25
+      d1: yyyymmdd(new Date(baseDate.getTime() + 1 * 24 * 60 * 60 * 1000)), // 2025-06-26
+      d2: yyyymmdd(new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000)), // 2025-06-27
     };
 
     const mockActivities = {
@@ -338,9 +338,9 @@ describe('ExpCalendar', () => {
 
   it('activities 更新で Calendar が再描画され、古いクラスが置き換わる', async () => {
     // テスト用の日付を用意
-    const today = new Date();
+    const baseDate = new Date('2025-06-25'); // 固定の基準日を使用
     const yyyymmdd = (d) => d.toLocaleDateString('sv-SE');
-    const date = yyyymmdd(today);
+    const date = yyyymmdd(new Date(baseDate));
 
     // 初期の活動データ
     const initialActivities = {

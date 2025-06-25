@@ -143,7 +143,7 @@ describe('CompletedGoal Component', () => {
 		render(<CompletedGoal />);
 	
 		// 正しいタイトルが表示されていることを確認
-		const titleElement = screen.getByText(/These are your Completed Goals!/i);
+		const titleElement = screen.getByText(/達成したGoal/i);
 		expect(titleElement).toBeInTheDocument();
 	
 		// completed: true のゴールのみが表示されていることを確認
@@ -253,18 +253,18 @@ describe('CompletedGoal Component', () => {
 	
 	it('displays completion dates in the correct format for each completed goal', async () => {
 		render(<CompletedGoal />);
-	
+
 		// 達成済みのゴールのみを取得
 		const completedGoals = mockGoals.filter(goal => goal.completed);
-	
+
 		for (const goal of completedGoals) {
 			// コンポーネントと同じロケールとオプションで日付をフォーマット
-			const expectedDate = new Date(goal.completed_time).toLocaleDateString('en-US', {
+			const expectedDate = new Date(goal.completed_time).toLocaleDateString('ja-JP', {
 				year: 'numeric',
-				month: 'numeric',
-				day: 'numeric',
+				month: '2-digit',
+				day: '2-digit',
 			});
-	
+
 			// ゴールの達成日が表示されているか確認
 			const dateElement = await screen.findByText(`達成日: ${expectedDate}`);
 			expect(dateElement).toBeInTheDocument();

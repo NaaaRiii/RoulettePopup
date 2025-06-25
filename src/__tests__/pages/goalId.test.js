@@ -150,11 +150,11 @@ describe('Data Fetching', () => {
     );
 
     // ローディングが消えて、goal title が表示されるまで待機
-    const titleEl = await screen.findByText('目標 : Test Goal Title');
+    const titleEl = await screen.findByText('Goal : Test Goal Title');
     expect(titleEl).toBeInTheDocument();
 
     // 内容が表示されていることを確認
-    expect(screen.getByText('内容 : Test Content')).toBeInTheDocument();
+    expect(screen.getByText('Goalの詳細 : Test Content')).toBeInTheDocument();
 
     // 未完了の small goal セクションに "Small Goal 1" が表示されている
     expect(screen.getByText('Small Goal 1')).toBeInTheDocument();
@@ -318,7 +318,7 @@ describe('Display Logic', () => {
       expect(screen.getByText('Small Goal 1')).toBeInTheDocument();
     });
 
-    const button = screen.getByRole('button', { name: /Completed Goal/i });
+    const button = screen.getByRole('button', { name: /Goalを完了する/i });
     expect(button).toBeDisabled();
   });
 
@@ -356,7 +356,7 @@ describe('Display Logic', () => {
 			expect(screen.getByText('SG1')).toBeInTheDocument();
 		});
 
-    const button = screen.getByRole('button', { name: /Completed Goal/i });
+    const button = screen.getByRole('button', { name: /Goalを完了する/i });
     expect(button).toBeEnabled();
   });
 
@@ -479,7 +479,7 @@ describe('Modal Operations', () => {
     );
 
     // 目標タイトルが表示されるまで待つ
-    await screen.findByText('目標 : Test Goal');
+    await screen.findByText('Goal : Test Goal');
 
     // 「Small Goalの作成」を含む div を取得し、そこから <a> を探してクリック
     const labelDiv = await screen.findByText(/Small\s*Goalの作成/);
@@ -516,9 +516,9 @@ describe('Modal Operations', () => {
       </Authenticator.Provider>
     );
 
-    await screen.findByText('目標 : Test Goal');
+    await screen.findByText('Goal : Test Goal');
 
-		const goalLink = screen.getByRole('link', { name: /目標を編集する/ });
+		const goalLink = screen.getByRole('link', { name: /Goalを編集する/ });
 		fireEvent.click(goalLink);
 	
 		expect(await screen.findByTestId('mock-edit-goal')).toBeInTheDocument();
@@ -544,8 +544,7 @@ describe('Modal Operations', () => {
 
 		await screen.findByText(/Small\s*Goal\s*1/);
 
-
-		const editTrigger = await screen.findByText(/^Edit$/);
+		const editTrigger = await screen.findByText(/^編集$/);
 		fireEvent.click(editTrigger);  
 
 		expect(await screen.findByTestId('mock-edit-small-goal')).toBeInTheDocument();
@@ -652,7 +651,7 @@ describe('Small Goal 完了', () => {
     });
   });
 
-  it('“完了” ボタン → POST /complete → smallGoal.completed が true になり dashboard に遷移する', async () => {
+  it('"完了" ボタン → POST /complete → smallGoal.completed が true になり dashboard に遷移する', async () => {
     render(
       <Authenticator.Provider>
         <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
@@ -664,8 +663,8 @@ describe('Small Goal 完了', () => {
     /* ① Small Goal が描画されるまで待機 */
     await screen.findByText(/Small\s*Goal\s*1/i);
 
-    /* ② “完了” ボタンをクリック */
-    const completeBtn = screen.getByRole('button', { name: /完了/i });
+    /* ② "完了" ボタンをクリック */
+    const completeBtn = screen.getByRole('button', { name: /^完了$/ });
     const user = userEvent.setup();
     await user.click(completeBtn);
 
@@ -708,7 +707,7 @@ describe('Goal 完了', () => {
       completed: false,
       deadline: null,
     };
-    // すべて completed:true ⇒ “Completed Goal” ボタンが有効になる
+    // すべて completed:true ⇒ "Completed Goal" ボタンが有効になる
     const smallGoals = [
       { id:1, title:'SG1', completed:true,  difficulty:'Easy', deadline:null, tasks:[] },
       { id:2, title:'SG2', completed:true,  difficulty:'Easy', deadline:null, tasks:[] },
@@ -728,7 +727,7 @@ describe('Goal 完了', () => {
     });
   });
 
-  it('未完了 small goal が無いとき “Completed Goal” で Goal 完了 & ダッシュボード遷移', async () => {
+  it('未完了 small goal が無いとき "Completed Goal" で Goal 完了 & ダッシュボード遷移', async () => {
     render(
       <Authenticator.Provider>
         <TicketsContext.Provider
@@ -740,15 +739,15 @@ describe('Goal 完了', () => {
     );
 
     /* ① Goal & Small Goals の描画を待つ */
-    await screen.findByText('目標 : Test Goal');
+    await screen.findByText('Goal : Test Goal');
 
-    /* “Completed Goal” ボタンが有効になっているはず */
-    const completeBtn = screen.getByRole('button', { name:/Completed Goal/i });
-    expect(completeBtn).toBeEnabled();
+    /* "Completed Goal" ボタンが有効になっているはず */
+    const goalCompleteBtn = screen.getByRole('button', { name:/Goalを完了する/i });
+    expect(goalCompleteBtn).toBeEnabled();
 
     /* ② クリック */
     const user = userEvent.setup();
-    await user.click(completeBtn);
+    await user.click(goalCompleteBtn);
 
     /* ③ /api/goals/:id/complete が POST されたか */
     await waitFor(() =>
@@ -882,7 +881,7 @@ describe('削除操作', () => {
 		);
 	
 		/* ---- ② Goal が表示されるまで待機 ---- */
-		await screen.findByText('目標 : Test Goal');
+		await screen.findByText('Goal : Test Goal');
 	
 		/* ---- ③ 「Delete Goal」リンクをクリック ---- */
 		const deleteLink = screen.getByTestId('delete-goal-link');
@@ -990,14 +989,14 @@ describe('副作用フック', () => {
 		/* ---------------- ② 1 回目のレンダー ---------------- */
 		const view = render(<AppWrapped goalId="123" />);
 
-		expect(await screen.findByText(/目標\s*:\s*First\s*Goal/)).toBeInTheDocument();
+		expect(await screen.findByText(/Goal\s*:\s*First\s*Goal/)).toBeInTheDocument();
 
 		/* ---------------- ③ goalId を書き換えて再レンダー ---------------- */
 		routerObj.query.goalId = '456';
 		view.rerender(<AppWrapped goalId="456" />);
 
-		expect(await screen.findByText(/目標\s*:\s*Second\s*Goal/)).toBeInTheDocument();
-		expect(screen.queryByText(/目標\s*:\s*First\s*Goal/)).not.toBeInTheDocument();
+		expect(await screen.findByText(/Goal\s*:\s*Second\s*Goal/)).toBeInTheDocument();
+		expect(screen.queryByText(/Goal\s*:\s*First\s*Goal/)).not.toBeInTheDocument();
 
   });
 });
@@ -1038,7 +1037,7 @@ describe('UI コンポーネント存在', () => {
     );
 
     /* Goal データが表示されるのを待ってから Calendar を検証 */
-    await screen.findByText(/目標\s*:\s*Test\s*Goal/);
+    await screen.findByText(/Goal\s*:\s*Test\s*Goal/);
 
     expect(screen.getByTestId('calendar')).toBeInTheDocument();
   });

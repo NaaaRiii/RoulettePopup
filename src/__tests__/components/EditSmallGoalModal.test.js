@@ -73,7 +73,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
       expect(titleInput).toHaveValue(mockSmallGoal.title);
 
       // difficulty の初期化を確認
-      const difficultySelect = screen.getByLabelText('Difficulty');
+      const difficultySelect = screen.getByLabelText('難易度');
       expect(difficultySelect).toHaveValue(mockSmallGoal.difficulty);
 
       // deadline の初期化を確認
@@ -81,7 +81,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
       expect(deadlineInput).toHaveValue(mockSmallGoal.deadline);
 
       // tasks の初期化を確認
-      const taskInputs = screen.getAllByLabelText('Task');
+      const taskInputs = screen.getAllByLabelText('タスク');
       expect(taskInputs).toHaveLength(mockSmallGoal.tasks.length);
       
       mockSmallGoal.tasks.forEach((task, index) => {
@@ -171,7 +171,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
       render(<EditSmallGoalModal {...defaultProps} />);
 
       // タスク入力フィールドを取得
-      const taskInputs = screen.getAllByLabelText('Task');
+      const taskInputs = screen.getAllByLabelText('タスク');
       expect(taskInputs).toHaveLength(3);
 
       // 2番目のタスクの内容を更新
@@ -190,15 +190,15 @@ describe('EditSmallGoalModal コンポーネント', () => {
       render(<EditSmallGoalModal {...defaultProps} />);
 
       // 初期状態のタスク数を確認
-      let taskInputs = screen.getAllByLabelText('Task');
+      let taskInputs = screen.getAllByLabelText('タスク');
       expect(taskInputs).toHaveLength(3);
 
       // Add Task ボタンをクリック
-      const addTaskButton = screen.getByText('Add Task');
+      const addTaskButton = screen.getByText('タスクを追加');
       await userEvent.click(addTaskButton);
 
       // タスクが追加されたことを確認
-      taskInputs = screen.getAllByLabelText('Task');
+      taskInputs = screen.getAllByLabelText('タスク');
       expect(taskInputs).toHaveLength(4);
 
       // 新規タスクの内容が空であることを確認
@@ -214,15 +214,15 @@ describe('EditSmallGoalModal コンポーネント', () => {
       render(<EditSmallGoalModal {...defaultProps} />);
 
       // 初期状態のタスク数を確認
-      let taskInputs = screen.getAllByLabelText('Task');
+      let taskInputs = screen.getAllByLabelText('タスク');
       expect(taskInputs).toHaveLength(3);
 
       // 2番目のタスクの Remove Task ボタンをクリック
-      const removeButtons = screen.getAllByText('Remove Task');
-      await userEvent.click(removeButtons[1]); // 2番目のタスクの削除ボタン
-
+      const removeButtons = screen.getAllByText('タスクを削除');
+      await userEvent.click(removeButtons[1]);
+      
       // タスクが1つ減ったことを確認
-      taskInputs = screen.getAllByLabelText('Task');
+      taskInputs = screen.getAllByLabelText('タスク');
       expect(taskInputs).toHaveLength(2);
 
       // 残っているタスクの内容を確認
@@ -247,7 +247,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
         render(<EditSmallGoalModal {...singleTaskProps} />);
 
         // Remove Task ボタンが表示されていないことを確認
-        const removeButtons = screen.queryAllByText('Remove Task');
+        const removeButtons = screen.queryAllByText('タスクを削除');
         expect(removeButtons).toHaveLength(0);
       });
 
@@ -255,7 +255,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
         render(<EditSmallGoalModal {...defaultProps} />);
 
         // Remove Task ボタンが表示されていることを確認
-        const removeButtons = screen.getAllByText('Remove Task');
+        const removeButtons = screen.getAllByText('タスクを削除');
         expect(removeButtons).toHaveLength(3); // 3つのタスクそれぞれに表示される
 
         // タスクを1つ削除
@@ -263,7 +263,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
 
         // タスクが2つになった後も Remove Task ボタンが表示されていることを確認
         await waitFor(() => {
-          const remainingRemoveButtons = screen.getAllByText('Remove Task');
+          const remainingRemoveButtons = screen.getAllByText('タスクを削除');
           expect(remainingRemoveButtons).toHaveLength(2);
         });
       });
@@ -274,27 +274,27 @@ describe('EditSmallGoalModal コンポーネント', () => {
         render(<EditSmallGoalModal {...defaultProps} />);
 
         // 初期状態の確認
-        let taskInputs = screen.getAllByLabelText('Task');
+        let taskInputs = screen.getAllByLabelText('タスク');
         expect(taskInputs).toHaveLength(3);
 
         // タスクを追加
-        const addTaskButton = screen.getByText('Add Task');
+        const addTaskButton = screen.getByText('タスクを追加');
         await userEvent.click(addTaskButton);
 
         // タスクが追加されたことを確認
         await waitFor(() => {
-          taskInputs = screen.getAllByLabelText('Task');
+          taskInputs = screen.getAllByLabelText('タスク');
           expect(taskInputs).toHaveLength(4);
           expect(taskInputs[3]).toHaveValue(''); // 新規タスクは空
         });
 
         // 2番目のタスクを削除
-        const removeButtons = screen.getAllByText('Remove Task');
+        const removeButtons = screen.getAllByText('タスクを削除');
         await userEvent.click(removeButtons[1]);
 
         // タスクが削除されたことを確認
         await waitFor(() => {
-          taskInputs = screen.getAllByLabelText('Task');
+          taskInputs = screen.getAllByLabelText('タスク');
           expect(taskInputs).toHaveLength(3);
           
           // 残っているタスクの内容を確認
@@ -378,7 +378,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // タスク用の textarea が存在することを確認
-      const taskTextareas = screen.getAllByLabelText('Task');
+      const taskTextareas = screen.getAllByLabelText('タスク');
       expect(taskTextareas).toHaveLength(mockSmallGoal.tasks.length);
 
       // 各 textarea の内容を確認
@@ -418,16 +418,16 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // 初期状態の確認
-      let taskTextareas = screen.getAllByLabelText('Task');
+      let taskTextareas = screen.getAllByLabelText('タスク');
       expect(taskTextareas).toHaveLength(2);
 
       // Add Task ボタンをクリック
-      const addTaskButton = screen.getByText('Add Task');
+      const addTaskButton = screen.getByText('タスクを追加');
       await userEvent.click(addTaskButton);
 
       // タスクが追加されたことを確認
       await waitFor(() => {
-        taskTextareas = screen.getAllByLabelText('Task');
+        taskTextareas = screen.getAllByLabelText('タスク');
         expect(taskTextareas).toHaveLength(3);
         expect(taskTextareas[2]).toHaveValue(''); // 新規タスクは空
       });
@@ -437,12 +437,12 @@ describe('EditSmallGoalModal コンポーネント', () => {
       expect(newTaskId).toMatch(/^task-temp-\d+$/);
 
       // Remove Task ボタンをクリック（2番目のタスクを削除）
-      const removeButtons = screen.getAllByText('Remove Task');
+      const removeButtons = screen.getAllByText('タスクを削除');
       await userEvent.click(removeButtons[1]);
 
       // タスクが削除されたことを確認
       await waitFor(() => {
-        taskTextareas = screen.getAllByLabelText('Task');
+        taskTextareas = screen.getAllByLabelText('タスク');
         expect(taskTextareas).toHaveLength(2);
         
         // 残っているタスクの内容を確認
@@ -475,7 +475,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // select が存在することを確認
-      const difficultySelect = screen.getByLabelText('Difficulty');
+      const difficultySelect = screen.getByLabelText('難易度');
       expect(difficultySelect).toBeInTheDocument();
       expect(difficultySelect.tagName).toBe('SELECT');
       expect(difficultySelect.id).toBe('difficulty');
@@ -604,7 +604,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // フォームを送信
-      const submitButton = screen.getByText('Update Small Goal');
+      const submitButton = screen.getByText('Small Goalを更新する');
       await userEvent.click(submitButton);
 
       // エラーログが出力されることを確認
@@ -661,12 +661,12 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // タスクの内容を更新
-      const taskInputs = screen.getAllByLabelText('Task');
+      const taskInputs = screen.getAllByLabelText('タスク');
       await userEvent.clear(taskInputs[0]);
       await userEvent.type(taskInputs[0], '更新されたタスク1');
 
       // フォームを送信
-      const submitButton = screen.getByText('Update Small Goal');
+      const submitButton = screen.getByText('Small Goalを更新する');
       await userEvent.click(submitButton);
 
       // fetchWithAuth が呼ばれたことを確認
@@ -708,15 +708,15 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // 新規タスクを追加
-      const addTaskButton = screen.getByText('Add Task');
+      const addTaskButton = screen.getByText('タスクを追加');
       await userEvent.click(addTaskButton);
 
       // 新規タスクの内容を入力
-      const taskInputs = screen.getAllByLabelText('Task');
+      const taskInputs = screen.getAllByLabelText('タスク');
       await userEvent.type(taskInputs[1], '新規タスクの内容');
 
       // フォームを送信
-      const submitButton = screen.getByText('Update Small Goal');
+      const submitButton = screen.getByText('Small Goalを更新する');
       await userEvent.click(submitButton);
 
       // fetchWithAuth が呼ばれたことを確認
@@ -760,11 +760,11 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // 2番目のタスクを削除
-      const removeButtons = screen.getAllByText('Remove Task');
+      const removeButtons = screen.getAllByText('タスクを削除');
       await userEvent.click(removeButtons[1]);
 
       // フォームを送信
-      const submitButton = screen.getByText('Update Small Goal');
+      const submitButton = screen.getByText('Small Goalを更新する');
       await userEvent.click(submitButton);
 
       // fetchWithAuth が呼ばれたことを確認
@@ -816,29 +816,29 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // タスクの内容を更新
-      const taskInputs = screen.getAllByLabelText('Task');
+      const taskInputs = screen.getAllByLabelText('タスク');
       await userEvent.clear(taskInputs[0]);
       await userEvent.type(taskInputs[0], '更新されたタスク1');
 
       // 2番目のタスクを削除
-      const removeButtons = screen.getAllByText('Remove Task');
+      const removeButtons = screen.getAllByText('タスクを削除');
       await userEvent.click(removeButtons[1]);
 
       // 新規タスクを追加
-      const addTaskButton = screen.getByText('Add Task');
+      const addTaskButton = screen.getByText('タスクを追加');
       await userEvent.click(addTaskButton);
 
       // 新規タスクの内容を入力（非同期の更新を待つ）
       await waitFor(() => {
-        const taskInputs = screen.getAllByLabelText('Task');
+        const taskInputs = screen.getAllByLabelText('タスク');
         expect(taskInputs).toHaveLength(2); // 削除されたタスクは表示されない
       });
 
-      const newTaskInput = screen.getAllByLabelText('Task')[1];
+      const newTaskInput = screen.getAllByLabelText('タスク')[1];
       await userEvent.type(newTaskInput, '新規タスクの内容');
 
       // フォームを送信
-      const submitButton = screen.getByText('Update Small Goal');
+      const submitButton = screen.getByText('Small Goalを更新する');
       await userEvent.click(submitButton);
 
       // fetchWithAuth が一度だけ呼ばれたことを確認
@@ -915,12 +915,12 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // タスクの内容を更新
-      const taskInputs = screen.getAllByLabelText('Task');
+      const taskInputs = screen.getAllByLabelText('タスク');
       await userEvent.clear(taskInputs[0]);
       await userEvent.type(taskInputs[0], '更新されたタスク1');
 
       // フォームを送信
-      const submitButton = screen.getByText('Update Small Goal');
+      const submitButton = screen.getByText('Small Goalを更新する');
       await userEvent.click(submitButton);
 
       // API レスポンスの処理を待つ
@@ -984,7 +984,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // フォームを送信
-      const submitButton = screen.getByText('Update Small Goal');
+      const submitButton = screen.getByText('Small Goalを更新する');
       await userEvent.click(submitButton);
 
       // エラーメッセージがログされ、alert が表示されることを確認
@@ -1049,7 +1049,7 @@ describe('EditSmallGoalModal コンポーネント', () => {
       );
 
       // フォームを送信
-      const submitButton = screen.getByText('Update Small Goal');
+      const submitButton = screen.getByText('Small Goalを更新する');
       await userEvent.click(submitButton);
 
       // エラーメッセージがログされ、alert が表示されることを確認

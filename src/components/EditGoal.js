@@ -67,9 +67,9 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         {message && <p>{message}</p>}
-        <h2>目標を編集しよう！</h2>
+        <h2>Goalを編集しよう！</h2>
         <form onSubmit={handleSubmit}>
-          <label htmlFor="title">目標のタイトル</label>
+          <label htmlFor="title">Goalのタイトル</label>
           <textarea
             id="title"
             name="title"
@@ -82,7 +82,7 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
             cols={50}
           />
 
-          <label htmlFor="content">詳細</label>
+          <label htmlFor="content">Goalの詳細</label>
           <textarea
             id="content"
             name="content"
@@ -106,7 +106,7 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
             className={styles.deadlineField}
           />
 
-          <button type="submit" className="btn btn-primary">目標を更新する</button>
+          <button type="submit" className="btn btn-primary">Goalを更新する</button>
         </form>
         <button onClick={onClose} className={styles.closeButton}>Close</button>
       </div>

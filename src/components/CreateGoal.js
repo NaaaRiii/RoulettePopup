@@ -41,9 +41,9 @@ export default function NewGoalModal({ isOpen, onClose }) {
   return (
     <div className={styles.modalOverlay} role="dialog" aria-labelledby="modal-title">
       <div className={styles.modalContent}>
-        <h2 id="modal-title">目標を設定する</h2>
+        <h2 id="modal-title">Goalを設定する</h2>
         <form onSubmit={handleSubmit}>
-          <label htmlFor="title">目標のタイトル</label>
+          <label htmlFor="title">Goalのタイトル</label>
           <textarea
             id="title"
             name="title"
@@ -56,7 +56,7 @@ export default function NewGoalModal({ isOpen, onClose }) {
             cols={50}
           />
 
-          <label htmlFor="content">Content</label>
+          <label htmlFor="content">Goalの詳細</label>
           <textarea
             id="content"
             name="content"

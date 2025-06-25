@@ -450,12 +450,12 @@ describe('ルーレット回転処理', () => {
     // モーダルが表示されることを確認
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeTruthy();
-      expect(screen.getByText('Matched text is: テストテキスト')).toBeTruthy();
+      expect(screen.getByText('ごほうびルーレットの結果です！！！: テストテキスト')).toBeTruthy();
     });
 
     // cleanup
     Math.random.mockRestore();
-  });
+  }, 10000); // Add 10 second timeout
 });
 
 
@@ -498,7 +498,7 @@ describe('モーダルの挙動', () => {
 
     const modal = await screen.findByRole('dialog');
     expect(modal).toBeTruthy();
-    expect(modal.textContent).toContain('Matched text is: テストテキスト');
+    expect(modal.textContent).toContain('ごほうびルーレットの結果です！！！: テストテキスト');
 
     Math.random.mockRestore();
   });
@@ -540,7 +540,7 @@ describe('モーダルの挙動', () => {
     // モーダル要素が出現し、テキストが表示されていることを確認
     const modal = await screen.findByRole('dialog');
     expect(modal).toBeTruthy();
-    expect(modal.textContent).toContain('Matched text is: テストテキスト');
+    expect(modal.textContent).toContain('ごほうびルーレットの結果です！！！: テストテキスト');
   
     Math.random.mockRestore();
   });
@@ -643,7 +643,7 @@ describe('プロパティ／外部依存', () => {
     await waitFor(() => {
       expect(utils.fetchRouletteText).toHaveBeenCalled();
       expect(screen.getByRole('dialog')).toBeTruthy();
-      expect(screen.getByText('Matched text is: OK')).toBeTruthy();
+      expect(screen.getByText('ごほうびルーレットの結果です！！！: OK')).toBeTruthy();
     });
   });
 

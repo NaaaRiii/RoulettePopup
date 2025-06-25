@@ -58,7 +58,7 @@ describe('初期表示', () => {
     
     // フォームの主要な要素が表示されることを確認
     expect(screen.getByLabelText('Small Goalのタイトル')).toBeInTheDocument();
-    expect(screen.getByLabelText('Task')).toBeInTheDocument();
+    expect(screen.getByLabelText('タスク')).toBeInTheDocument();
     expect(screen.getByLabelText('難易度の設定')).toBeInTheDocument();
     expect(screen.getByLabelText('期限')).toBeInTheDocument();
     
@@ -83,7 +83,7 @@ describe('初期表示', () => {
     expect(titleInput.value).toBe('');
     
     // タスクフィールドが空であることを確認
-    const taskInput = screen.getByLabelText('Task');
+    const taskInput = screen.getByLabelText('タスク');
     expect(taskInput.value).toBe('');
     
     // 難易度選択が空であることを確認
@@ -110,7 +110,7 @@ describe('初期表示', () => {
     );
     
     // タスクフィールドが1つだけ存在することを確認
-    const taskInputs = screen.getAllByLabelText('Task');
+    const taskInputs = screen.getAllByLabelText('タスク');
     expect(taskInputs).toHaveLength(1);
     
     // タスク削除ボタンが1つだけ存在することを確認
@@ -160,7 +160,7 @@ describe('フォーム要素の表示確認', () => {
     );
     
     // タスク入力フィールドが存在することを確認
-    const taskInput = screen.getByLabelText('Task');
+    const taskInput = screen.getByLabelText('タスク');
     expect(taskInput).toBeInTheDocument();
     
     // タスク入力フィールドが textarea であることを確認
@@ -303,7 +303,7 @@ describe('タスク管理機能', () => {
     );
     
     // 初期状態でタスクフィールドが1つだけ存在することを確認
-    let taskInputs = screen.getAllByLabelText('Task');
+    let taskInputs = screen.getAllByLabelText('タスク');
     expect(taskInputs).toHaveLength(1);
     
     // タスク追加ボタンをクリック
@@ -311,7 +311,7 @@ describe('タスク管理機能', () => {
     await userEvent.click(addTaskButton);
     
     // タスクフィールドが2つに増えたことを確認
-    taskInputs = screen.getAllByLabelText('Task');
+    taskInputs = screen.getAllByLabelText('タスク');
     expect(taskInputs).toHaveLength(2);
     
     // タスク削除ボタンも2つに増えたことを確認
@@ -325,7 +325,7 @@ describe('タスク管理機能', () => {
     await userEvent.click(addTaskButton);
     
     // タスクフィールドが3つに増えたことを確認
-    taskInputs = screen.getAllByLabelText('Task');
+    taskInputs = screen.getAllByLabelText('タスク');
     expect(taskInputs).toHaveLength(3);
     
     // タスク削除ボタンも3つに増えたことを確認
@@ -349,19 +349,19 @@ describe('タスク管理機能', () => {
     // 1つ目のタスクを追加
     await userEvent.click(addTaskButton);
     await waitFor(() => {
-      const taskInputs = screen.getAllByLabelText('Task');
+      const taskInputs = screen.getAllByLabelText('タスク');
       expect(taskInputs).toHaveLength(2);
     });
     
     // 2つ目のタスクを追加
     await userEvent.click(addTaskButton);
     await waitFor(() => {
-      const taskInputs = screen.getAllByLabelText('Task');
+      const taskInputs = screen.getAllByLabelText('タスク');
       expect(taskInputs).toHaveLength(3);
     });
     
     // 最新追加(3番目)のタスクフィールドに内容を入力
-    let taskInputs = screen.getAllByLabelText('Task');
+    let taskInputs = screen.getAllByLabelText('タスク');
     await userEvent.type(taskInputs[2], 'テストタスク2');
     
     // 真ん中(2番目)のタスクフィールドの削除ボタンをクリック
@@ -372,7 +372,7 @@ describe('タスク管理機能', () => {
 
     // タスクフィールドが2つに減ったことを確認
     await waitFor(() => {
-      const taskInputsAfterRemoval = screen.getAllByLabelText('Task');
+      const taskInputsAfterRemoval = screen.getAllByLabelText('タスク');
       expect(taskInputsAfterRemoval).toHaveLength(2);
     });
     
@@ -396,7 +396,7 @@ describe('タスク管理機能', () => {
     );
 
     // 初期状態でタスクフィールドは1つ
-    const taskInputs = await screen.findAllByLabelText('Task');
+    const taskInputs = await screen.findAllByLabelText('タスク');
     expect(taskInputs).toHaveLength(1);
 
     // 削除ボタンを取得
@@ -407,7 +407,7 @@ describe('タスク管理機能', () => {
     await userEvent.click(removeButtons[0]);
 
     // タスクフィールドが依然として1つであることを確認
-    expect(await screen.findAllByLabelText('Task')).toHaveLength(1);
+    expect(await screen.findAllByLabelText('タスク')).toHaveLength(1);
 
     // 削除ボタンも1つのままであることを確認
     expect(await screen.findAllByText('タスクの削除')).toHaveLength(1);
@@ -423,7 +423,7 @@ describe('タスク管理機能', () => {
       />
     );
 
-    const taskInput = screen.getByLabelText('Task');
+    const taskInput = screen.getByLabelText('タスク');
 
     await userEvent.type(taskInput, 'タスク更新テスト');
 
@@ -444,7 +444,7 @@ describe('入力バリデーション', () => {
 
     // フォームの必須フィールドを確認
     const titleInput = screen.getByLabelText('Small Goalのタイトル');
-    const taskInput = screen.getByLabelText('Task');
+    const taskInput = screen.getByLabelText('タスク');
     const difficultySelect = screen.getByLabelText('難易度の設定');
     const deadlineInput = screen.getByLabelText('期限');
 
@@ -508,7 +508,7 @@ describe('API 通信', () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0]; // 明日
 
 		await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-		await userEvent.type(screen.getByLabelText('Task'), 'テストタスク');
+		await userEvent.type(screen.getByLabelText('タスク'), 'テストタスク');
 		await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
 		const deadlineInput = screen.getByLabelText('期限');
 		await userEvent.type(deadlineInput, futureDate);
@@ -561,7 +561,7 @@ describe('API 通信', () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
 		await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-		await userEvent.type(screen.getByLabelText('Task'), 'テストタスク');
+		await userEvent.type(screen.getByLabelText('タスク'), 'テストタスク');
 		await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
 		const deadlineInput = screen.getByLabelText('期限');
 		await userEvent.type(deadlineInput, futureDate);
@@ -599,7 +599,7 @@ describe('API 通信', () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
 		await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-		await userEvent.type(screen.getByLabelText('Task'), 'テストタスク');
+		await userEvent.type(screen.getByLabelText('タスク'), 'テストタスク');
 		await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
 		const deadlineInput = screen.getByLabelText('期限');
 		await userEvent.type(deadlineInput, futureDate);
@@ -635,7 +635,7 @@ describe('API 通信', () => {
 
     // フォームに値を入力
 		await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-		await userEvent.type(screen.getByLabelText('Task'), 'タスク1');
+		await userEvent.type(screen.getByLabelText('タスク'), 'タスク1');
 		await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
 		const deadlineInput = screen.getByLabelText('期限');
 		await userEvent.type(deadlineInput, futureDate);
@@ -645,7 +645,7 @@ describe('API 通信', () => {
 		await userEvent.click(addTaskButton);
 
     // 2つ目のタスクの内容を入力
-		const taskInputs = screen.getAllByLabelText('Task');
+		const taskInputs = screen.getAllByLabelText('タスク');
 		await userEvent.type(taskInputs[1], 'タスク2');
 
     // フォームを送信
@@ -706,7 +706,7 @@ describe('API 通信', () => {
 
     // フォームに値を入力
 		await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-		await userEvent.type(screen.getByLabelText('Task'), 'タスク1');
+		await userEvent.type(screen.getByLabelText('タスク'), 'タスク1');
 		await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
 		const deadlineInput = screen.getByLabelText('期限');
 		await userEvent.type(deadlineInput, futureDate);
@@ -716,7 +716,7 @@ describe('API 通信', () => {
 		await userEvent.click(addTaskButton);
 
     // 2つ目のタスクの内容を入力
-		const taskInputs = screen.getAllByLabelText('Task');
+		const taskInputs = screen.getAllByLabelText('タスク');
 		await userEvent.type(taskInputs[1], 'タスク2');
 
     // 2つ目のタスクを削除
@@ -750,7 +750,7 @@ describe('API 通信', () => {
 
     // フォームに値を入力
 		await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-		await userEvent.type(screen.getByLabelText('Task'), 'タスク1');
+		await userEvent.type(screen.getByLabelText('タスク'), 'タスク1');
 		await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
 		const deadlineInput = screen.getByLabelText('期限');
 		await userEvent.type(deadlineInput, futureDate);
@@ -767,7 +767,7 @@ describe('API 通信', () => {
     expect(fetchWithAuth).not.toHaveBeenCalled();
 
     // 2つ目のタスクに内容を入力
-		const taskInputs = screen.getAllByLabelText('Task');
+		const taskInputs = screen.getAllByLabelText('タスク');
 		await userEvent.type(taskInputs[1], 'タスク2');
 
     // 再度フォームを送信
@@ -805,7 +805,7 @@ describe('API 通信', () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
     await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-    await userEvent.type(screen.getByLabelText('Task'), 'テストタスク');
+    await userEvent.type(screen.getByLabelText('タスク'), 'テストタスク');
     await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
     await userEvent.type(screen.getByLabelText('期限'), futureDate);
 
@@ -829,7 +829,7 @@ describe('API 通信', () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
     await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'API エラー保持テスト');
-    await userEvent.type(screen.getByLabelText('Task'), 'タスク保持テスト');
+    await userEvent.type(screen.getByLabelText('タスク'), 'タスク保持テスト');
     await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
     await userEvent.type(screen.getByLabelText('期限'), futureDate);
 
@@ -842,7 +842,7 @@ describe('API 通信', () => {
 
     // フォーム内容が保持されていることを確認
     expect(screen.getByLabelText('Small Goalのタイトル')).toHaveValue('API エラー保持テスト');
-    expect(screen.getByLabelText('Task')).toHaveValue('タスク保持テスト');
+    expect(screen.getByLabelText('タスク')).toHaveValue('タスク保持テスト');
     expect(screen.getByLabelText('難易度の設定')).toHaveValue('普通');
     expect(screen.getByLabelText('期限')).toHaveValue(futureDate);
   });
@@ -855,7 +855,7 @@ describe('API 通信', () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
     await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'NW エラー保持テスト');
-    await userEvent.type(screen.getByLabelText('Task'), 'タスクNWテスト');
+    await userEvent.type(screen.getByLabelText('タスク'), 'タスクNWテスト');
     await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
     await userEvent.type(screen.getByLabelText('期限'), futureDate);
 
@@ -868,7 +868,7 @@ describe('API 通信', () => {
 
     // フォーム内容が保持されていることを確認
     expect(screen.getByLabelText('Small Goalのタイトル')).toHaveValue('NW エラー保持テスト');
-    expect(screen.getByLabelText('Task')).toHaveValue('タスクNWテスト');
+    expect(screen.getByLabelText('タスク')).toHaveValue('タスクNWテスト');
     expect(screen.getByLabelText('難易度の設定')).toHaveValue('普通');
     expect(screen.getByLabelText('期限')).toHaveValue(futureDate);
   });
@@ -906,7 +906,7 @@ describe('API 成功時の挙動', () => {
 
     // フォームに値を入力
 		await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-		await userEvent.type(screen.getByLabelText('Task'), 'タスク1');
+		await userEvent.type(screen.getByLabelText('タスク'), 'タスク1');
 		await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
 		const deadlineInput = screen.getByLabelText('期限');
 		await userEvent.type(deadlineInput, futureDate);
@@ -953,7 +953,7 @@ describe('API 成功時の挙動', () => {
 
     // フォームに値を入力
 		await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-		await userEvent.type(screen.getByLabelText('Task'), 'タスク1');
+		await userEvent.type(screen.getByLabelText('タスク'), 'タスク1');
 		await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
 		const deadlineInput = screen.getByLabelText('期限');
 		await userEvent.type(deadlineInput, futureDate);
@@ -998,7 +998,7 @@ describe('API 成功時の挙動', () => {
 
     // フォームに値を入力
       await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-      await userEvent.type(screen.getByLabelText('Task'), 'タスク1');
+      await userEvent.type(screen.getByLabelText('タスク'), 'タスク1');
       await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
       const deadlineInput = screen.getByLabelText('期限');
       await userEvent.type(deadlineInput, futureDate);
@@ -1029,7 +1029,7 @@ describe('API 成功時の挙動', () => {
     // フォームがリセットされていることを確認
     await waitFor(() => {
       expect(screen.getByLabelText('Small Goalのタイトル')).toHaveValue('');
-      expect(screen.getByLabelText('Task')).toHaveValue('');
+      expect(screen.getByLabelText('タスク')).toHaveValue('');
       expect(screen.getByLabelText('難易度の設定')).toHaveValue('');
       expect(screen.getByLabelText('期限')).toHaveValue('');
     });
@@ -1072,7 +1072,7 @@ describe('モーダル操作', () => {
     // フォームに値を入力
     const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
     await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'クローズテスト');
-    await userEvent.type(screen.getByLabelText('Task'), 'タスククローズテスト');
+    await userEvent.type(screen.getByLabelText('タスク'), 'タスククローズテスト');
     await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
     await userEvent.type(screen.getByLabelText('期限'), futureDate);
 
@@ -1102,7 +1102,7 @@ describe('モーダル操作', () => {
 
     // フォームがリセットされていることを確認
     expect(screen.getByLabelText('Small Goalのタイトル')).toHaveValue('');
-    expect(screen.getByLabelText('Task')).toHaveValue('');
+    expect(screen.getByLabelText('タスク')).toHaveValue('');
     expect(screen.getByLabelText('難易度の設定')).toHaveValue('');
     expect(screen.getByLabelText('期限')).toHaveValue('');
   });
@@ -1213,7 +1213,7 @@ describe('スタイルの確認', () => {
     expect(titleInput).toHaveClass(styles.textareaField);
 
     // タスク入力フィールド
-    const taskInput = screen.getByLabelText('Task');
+    const taskInput = screen.getByLabelText('タスク');
     expect(taskInput).toHaveClass(styles.textareaField);
 
     // タスク削除ボタン
@@ -1294,7 +1294,7 @@ describe('エラーメッセージのスタイル', () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
     await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-    await userEvent.type(screen.getByLabelText('Task'), 'テストタスク');
+    await userEvent.type(screen.getByLabelText('タスク'), 'テストタスク');
     await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
     const deadlineInput = screen.getByLabelText('期限');
     await userEvent.type(deadlineInput, futureDate);
@@ -1326,7 +1326,7 @@ describe('エラーメッセージのスタイル', () => {
     const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
     await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'テストSmall Goal');
-    await userEvent.type(screen.getByLabelText('Task'), 'テストタスク');
+    await userEvent.type(screen.getByLabelText('タスク'), 'テストタスク');
     await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), ['普通']);
     const deadlineInput = screen.getByLabelText('期限');
     await userEvent.type(deadlineInput, futureDate);
@@ -1391,7 +1391,7 @@ describe('エラーメッセージのスタイル', () => {
     //await userEvent.click(screen.getByText('設定する'));
     // 1. フォームの必須項目を埋める
     await userEvent.type(screen.getByLabelText('Small Goalのタイトル'), 'dummy');
-    await userEvent.type(screen.getAllByLabelText('Task')[0], 'dummy task');
+    await userEvent.type(screen.getAllByLabelText('タスク')[0], 'dummy task');
     await userEvent.selectOptions(screen.getByLabelText('難易度の設定'), '普通');
     fireEvent.change(screen.getByLabelText('期限'), { target: { value: '2025-01-01' } });
 

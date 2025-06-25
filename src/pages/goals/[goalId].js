@@ -296,7 +296,7 @@ function GoalPage() {
           <div className='goal-content-top'>
             <div className='goal-content-top-left-container'>
               <div className='goal-content-top-left-card'>
-                <h2>目標 : {goal.title}</h2>
+                <h2>Goal : {goal.title}</h2>
                 <div className='completed-goal-button-container'>
                   {goal.completed ? (
                     <p>このGoalは達成しました!</p>
@@ -304,23 +304,24 @@ function GoalPage() {
                     <>
                       <p>このGoalを完了しますか?</p>
                       {goal.small_goals?.some(sg => !sg.completed) ? (
-                        <button disabled className='completed-goal-button'>Completed Goal</button>
+                        <button disabled className='completed-goal-button'>Goalを完了する
+                        </button>
                       ) : (
-                        <button onClick={completeGoal} className='button-completed-goal'>Completed Goal</button>
+                        <button onClick={completeGoal} className='button-completed-goal'>Goalを完了する</button>
                       )}
                     </>
                   )}
                 </div>
 
                 <div className='goal-content-top-left-lower-part'>
-                  <h2>内容 : {goal.content}</h2>
+                  <h2>Goalの詳細 : {goal.content}</h2>
                   <p className='deadline-text'>期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}</p>
                   <div className='goal-content-top-left-lower-part-link'>
                     {!goal.completed && (
                       <>
                         <Link href={`#`} onClick={openEditGoalModal}>
                           <div className='edit-goal-link'>
-                            目標を編集する
+                            Goalを編集する
                           </div>
                         </Link>
                         <EditGoalModal 
@@ -357,7 +358,7 @@ function GoalPage() {
                     </div>
                   </Link>*/}
                   <a href="#" onClick={deleteGoal} data-testid="delete-goal-link" className='delete-goal-link'>
-                    Delete Goal
+                    Goalを削除する
                   </a>
                 </div>
               </div>
@@ -380,8 +381,8 @@ function GoalPage() {
                       <h3 className="goalid-small-goal__title">{smallGoal.title}</h3>
                     </div>
                     <div className="goalid-small-goal__right">
-                      <p className="goalid-small-goal__deadline">Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
-                      <p className="goalid-small-goal__difficulty">Difficulty: {smallGoal.difficulty}</p>
+                      <p className="goalid-small-goal__deadline">期限: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
+                      <p className="goalid-small-goal__difficulty">難易度: {smallGoal.difficulty}</p>
                     </div>
                   </div>
 
@@ -412,11 +413,11 @@ function GoalPage() {
 
                     <div className='goalid-small-goal__actions'>
                       <Link href='#' onClick={(e) => { e.preventDefault(); openEditSmallGoalModal(smallGoal); }}>
-                        <div className='goalid-small-goal__edit-link'>Edit</div>
+                        <div className='goalid-small-goal__edit-link'>編集</div>
                       </Link>
                       <Link href='#' onClick={(e) => { e.preventDefault(); deleteSmallGoal(smallGoal.id); }}>
                       <div className='goalid-small-goal__delete-link' data-testid={`delete-small-goal-${smallGoal.id}`}>
-                        Delete
+                        削除
                       </div>
                       </Link>
                     </div>
@@ -441,8 +442,8 @@ function GoalPage() {
                       <h3 className="goalid-small-goal__title">{smallGoal.title}</h3>
                     </div>
                     <div className="goalid-small-goal__right">
-                      <p className="goalid-small-goal__deadline">Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
-                      <p className="goalid-small-goal__difficulty">Difficulty: {smallGoal.difficulty}</p>
+                      <p className="goalid-small-goal__deadline">期限: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
+                      <p className="goalid-small-goal__difficulty">難易度: {smallGoal.difficulty}</p>
                     </div>
                     <span className="completed-text"><strong>完了!</strong></span>
                   </div>

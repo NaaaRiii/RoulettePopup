@@ -303,11 +303,11 @@ describe('Dashboard page', () => {
 		render(<Dashboard />);
 	
 		// "目標を設定する"ボタンを取得してクリック
-		const setGoalButton = await screen.findByText('目標を設定する');
+		const setGoalButton = await screen.findByText('Goalを設定する');
 		fireEvent.click(setGoalButton);
 	
 		// モーダルが開いたことを確認
-		const modalTitle = await screen.findByRole('heading', { name: '目標を設定する' });
+		const modalTitle = await screen.findByRole('heading', { name: 'Goalを設定する' });
 		expect(modalTitle).toBeInTheDocument();
 	
 		// モーダル内の閉じるボタンを取得してクリック
@@ -316,7 +316,7 @@ describe('Dashboard page', () => {
 	
 		// モーダルが閉じたことを確認
 		await waitFor(() => {
-			expect(screen.queryByRole('heading', { name: '目標を設定する' })).not.toBeInTheDocument();
+			expect(screen.queryByRole('heading', { name: 'Goalを設定する' })).not.toBeInTheDocument();
 		});
 	});	
 
@@ -324,7 +324,7 @@ describe('Dashboard page', () => {
 		const Dashboard = require('../../pages/dashboard').default;
     render(<Dashboard />);
 
-    const completedGoalLink = await screen.findByText('達成した目標');
+    const completedGoalLink = await screen.findByText('達成したGoal');
     expect(completedGoalLink.closest('a')).toHaveAttribute('href', '/completed-goal');
   });
 	

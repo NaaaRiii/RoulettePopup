@@ -114,7 +114,7 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
           <div className={styles.tasksContainer}>
             {tasks.filter(task => !task._destroy).map((task, index) => (
               <div key={task.id || `temp-${index}`}>
-                <label htmlFor={`task-${task.id || `temp-${index}`}`}>Task</label>
+                <label htmlFor={`task-${task.id || `temp-${index}`}`}>タスク</label>
                 <textarea
                   id={`task-${task.id || `temp-${index}`}`}
                   type="text"
@@ -127,16 +127,16 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
                 />
                 {tasks.filter(task => !task._destroy).length > 1 && (
                   <button type="button" onClick={() => removeTask(task.id)}>
-                    Remove Task
+                    タスクを削除
                   </button>
                 )}
               </div>
             ))}
           </div>
 
-          <button type="button" onClick={addTask}>Add Task</button>
+          <button type="button" onClick={addTask}>タスクを追加</button>
           <div>
-            <label htmlFor="difficulty">Difficulty</label>
+            <label htmlFor="difficulty">難易度</label>
             <select
               id="difficulty"
               value={difficulty}
@@ -161,7 +161,7 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
               className={styles.deadlineField}
             />
           </div>
-          <button type="submit" className="btn btn-primary">Update Small Goal</button>
+          <button type="submit" className="btn btn-primary">Small Goalを更新する</button>
         </form>
         <button onClick={onClose} className={styles.closeButton}>Close</button>
       </div>

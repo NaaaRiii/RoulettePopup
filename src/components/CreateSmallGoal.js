@@ -120,7 +120,7 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
           <div className={styles.tasksContainer}>
             {tasks.map((task, index) => (
               <div key={task.id}>
-                <label htmlFor={`task-${task.id}`}>Task</label>
+                <label htmlFor={`task-${task.id}`}>タスク</label>
                 <textarea
                   id={`task-${task.id}`}
                   type="text"
@@ -134,7 +134,7 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
                 <button
                   type="button"
                   onClick={() => removeTask(index)}
-                  className={styles.taskButton} // Removeボタンにスタイルを適用
+                  className={styles.taskButton}
                 >
                   タスクの削除
                 </button>

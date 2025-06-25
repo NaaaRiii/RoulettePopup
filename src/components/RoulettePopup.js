@@ -162,7 +162,7 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
           {/*{!isSpinning && selectedSegment && <div>Selected Segment: {selectedSegment}</div>}*/}
           {/*<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>*/}
           <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-              <p>Matched text is: {rouletteText}</p>
+              <p>ごほうびルーレットの結果です！！！: {rouletteText}</p>
               <button data-testid="close-modal-button" onClick={closeModal}>Close</button>
           </Modal>
       </div>

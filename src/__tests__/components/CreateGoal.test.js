@@ -64,11 +64,11 @@ describe('NewGoalModal', () => {
     expect(modalContent).toBeInTheDocument();
 
     // タイトルが存在することを確認
-    expect(screen.getByText('目標を設定する')).toBeInTheDocument();
+    expect(screen.getByText('Goalを設定する')).toBeInTheDocument();
 
     // フォーム要素が存在することを確認
-    expect(screen.getByLabelText('目標のタイトル')).toBeInTheDocument();
-    expect(screen.getByLabelText('Content')).toBeInTheDocument();
+    expect(screen.getByLabelText('Goalのタイトル')).toBeInTheDocument();
+    expect(screen.getByLabelText('Goalの詳細')).toBeInTheDocument();
     expect(screen.getByLabelText('期限')).toBeInTheDocument();
 
     // ボタンが存在することを確認
@@ -85,11 +85,11 @@ describe('NewGoalModal', () => {
     );
 
     // タイトルが空文字であることを確認
-    const titleInput = screen.getByLabelText('目標のタイトル');
+    const titleInput = screen.getByLabelText('Goalのタイトル');
     expect(titleInput).toHaveValue('');
 
     // Contentが空文字であることを確認
-    const contentInput = screen.getByLabelText('Content');
+    const contentInput = screen.getByLabelText('Goalの詳細');
     expect(contentInput).toHaveValue('');
 
     // 期限が空文字であることを確認
@@ -105,7 +105,7 @@ describe('NewGoalModal', () => {
       />
     );
 
-    const titleInput = screen.getByLabelText('目標のタイトル');
+    const titleInput = screen.getByLabelText('Goalのタイトル');
     const testTitle = 'テスト目標';
 
     // タイトルを入力
@@ -123,7 +123,7 @@ describe('NewGoalModal', () => {
       />
     );
 
-    const contentInput = screen.getByLabelText('Content');
+    const contentInput = screen.getByLabelText('Goalの詳細');
     const testContent = 'テストコンテンツ';
 
     // Contentを入力
@@ -193,8 +193,8 @@ describe('NewGoalModal', () => {
     );
 
     // 必須フィールドに入力
-    const titleInput = screen.getByLabelText('目標のタイトル');
-    const contentInput = screen.getByLabelText('Content');
+    const titleInput = screen.getByLabelText('Goalのタイトル');
+    const contentInput = screen.getByLabelText('Goalの詳細');
     const deadlineInput = screen.getByLabelText('期限');
 
     await userEvent.type(titleInput, 'テスト目標');
@@ -227,7 +227,7 @@ describe('NewGoalModal', () => {
       ok: true,
       json: async () => ({
         id: 123,
-        message: '目標を作成しました'
+        message: 'Goalを作成しました'
       })
     };
     fetchWithAuth.mockResolvedValueOnce(mockResponse);
@@ -240,8 +240,8 @@ describe('NewGoalModal', () => {
     );
 
     // 必須フィールドに入力
-    const titleInput = screen.getByLabelText('目標のタイトル');
-    const contentInput = screen.getByLabelText('Content');
+    const titleInput = screen.getByLabelText('Goalのタイトル');
+    const contentInput = screen.getByLabelText('Goalの詳細');
     const deadlineInput = screen.getByLabelText('期限');
 
     await userEvent.type(titleInput, 'テスト目標');
@@ -255,7 +255,7 @@ describe('NewGoalModal', () => {
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/goals/123',
       query: {
-        message: encodeURIComponent('目標を作成しました')
+        message: encodeURIComponent('Goalを作成しました')
       }
     });
   });
@@ -277,8 +277,8 @@ describe('NewGoalModal', () => {
     );
 
     // 必須フィールドに入力
-    const titleInput = screen.getByLabelText('目標のタイトル');
-    const contentInput = screen.getByLabelText('Content');
+    const titleInput = screen.getByLabelText('Goalのタイトル');
+    const contentInput = screen.getByLabelText('Goalの詳細');
     const deadlineInput = screen.getByLabelText('期限');
 
     await userEvent.type(titleInput, 'テスト目標');
@@ -305,8 +305,8 @@ describe('NewGoalModal', () => {
     );
 
     // 必須フィールドに入力
-    const titleInput = screen.getByLabelText('目標のタイトル');
-    const contentInput = screen.getByLabelText('Content');
+    const titleInput = screen.getByLabelText('Goalのタイトル');
+    const contentInput = screen.getByLabelText('Goalの詳細');
     const deadlineInput = screen.getByLabelText('期限');
 
     await userEvent.type(titleInput, 'テスト目標');
@@ -339,7 +339,7 @@ describe('NewGoalModal', () => {
     const titleId = dialog.getAttribute('aria-labelledby');
     const title = document.getElementById(titleId);
     expect(title).toBeInTheDocument();
-    expect(title).toHaveTextContent('目標を設定する');
+    expect(title).toHaveTextContent('Goalを設定する');
   });
 
   it('オーバーレイに styles.modalOverlay、内容に styles.modalContent が付いていること', () => {

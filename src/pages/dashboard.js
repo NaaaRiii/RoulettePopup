@@ -295,11 +295,11 @@ return (
             <div className='dashboard-left-bottom-container'>
               <div className='button-container'>
                 <Link href="/new-goal" onClick={handleOpenModal}>
-                  <div className={'btn btn-primary'}>目標を設定する</div>
+                  <div className={'btn btn-primary'}>Goalを設定する</div>
                 </Link>
                 <NewGoalModal isOpen={isModalOpen} onClose={handleCloseModal} />
                 <Link href="/completed-goal">
-                  <div className={'btn btn-primary'}>達成した目標</div>
+                  <div className={'btn btn-primary'}>達成したGoal</div>
                 </Link>
               </div>
 
@@ -325,7 +325,7 @@ return (
                           <p className='goal-title'>{goal.title}</p> {/* Goalのタイトルは各small-goalに表示されます */}
                           <div className='small-goal__content'>
                           <p className='small-goal__title' data-testid='small-goal-title'>{smallGoal.title}</p>
-                            <p className='small-goal__deadline'>Deadline: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
+                            <p className='small-goal__deadline'>期限: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
                           </div>
                         </div>
                         <div className='small-goal__button-container'>
@@ -374,14 +374,14 @@ return (
                     >
                     <span data-testid="goal-title">{goal.title}</span>
                     <p className="goal-deadline">
-                      Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
+                      期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
                     </p>
                   </li>
                   ))}
               </ul>
 
               <div className='dashboard-right-container-bottom'>
-                <h3>最近完了したSmall-Goal</h3>
+                <h3>最近完了したSmall Goal</h3>
                 {latestCompletedGoals.map(goal => (
                   <div key={goal.id} className="bottom-small-goal-card">
                     <p>{goal.title}</p>

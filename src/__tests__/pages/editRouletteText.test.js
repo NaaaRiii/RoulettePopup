@@ -353,7 +353,7 @@ describe('EditRouletteText Component', () => {
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       expect(numberSelect).toBeInTheDocument();
 
-      const textInput = await screen.findByLabelText('Edit text');
+      const textInput = await screen.findByLabelText('内容を編集してください。');
       expect(textInput).toBeInTheDocument();
     });
   });
@@ -375,7 +375,7 @@ describe('EditRouletteText Component', () => {
 
       await userEvent.selectOptions(numberSelect, '1');
 
-      const textInput = screen.getByLabelText('Edit text');
+      const textInput = screen.getByLabelText('内容を編集してください。');
 
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
 
@@ -404,7 +404,7 @@ describe('EditRouletteText Component', () => {
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       userEvent.selectOptions(numberSelect, '1');
   
-      const textInput = screen.getByLabelText('Edit text');
+      const textInput = screen.getByLabelText('内容を編集してください。');
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
   
       userEvent.clear(textInput);
@@ -450,7 +450,7 @@ describe('EditRouletteText Component', () => {
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       userEvent.selectOptions(numberSelect, '1');
   
-      const textInput = screen.getByLabelText('Edit text');
+      const textInput = screen.getByLabelText('内容を編集してください。');
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
   
       userEvent.clear(textInput);
@@ -486,7 +486,7 @@ describe('EditRouletteText Component', () => {
       // 数字選択して初期値が入るまで待つ
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       userEvent.selectOptions(numberSelect, '1');
-      const textInput = screen.getByLabelText('Edit text');
+      const textInput = screen.getByLabelText('内容を編集してください。');
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
     
       // 新しいテキストを入れて
@@ -562,7 +562,7 @@ describe('EditRouletteText Component', () => {
         screen.getByLabelText('編集したい数字を選んでください。'),
         '1'
       );
-      const textInput = screen.getByLabelText('Edit text');
+      const textInput = screen.getByLabelText('内容を編集してください。');
       // 初期値は API 取得に失敗した場合は空文字の可能性があるため、値を直接入力
       await userEvent.clear(textInput);
       await userEvent.type(textInput, 'Brand-new Prize 1');
@@ -734,10 +734,10 @@ describe('EditRouletteText Component', () => {
         '1'
       );
       await waitFor(() =>
-        expect(screen.getByLabelText('Edit text')).toHaveValue('Prize 1')
+        expect(screen.getByLabelText('内容を編集してください。')).toHaveValue('Prize 1')
       );
-      await userEvent.clear(screen.getByLabelText('Edit text'));
-      await userEvent.type(screen.getByLabelText('Edit text'), 'New Prize 1');
+      await userEvent.clear(screen.getByLabelText('内容を編集してください。'));
+      await userEvent.type(screen.getByLabelText('内容を編集してください。'), 'New Prize 1');
     
       // ④ confirm をモック、fetch 履歴をクリア
       jest.spyOn(window, 'confirm').mockReturnValue(true);
@@ -794,7 +794,7 @@ describe('EditRouletteText Component', () => {
   
       // セレクトボックスと入力フィールドを取得
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
-      const textInput = screen.getByLabelText('Edit text');
+      const textInput = screen.getByLabelText('内容を編集してください。');
   
       // 初期状態の確認
       expect(numberSelect).toHaveValue('');
@@ -880,7 +880,7 @@ describe('EditRouletteText Component', () => {
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       userEvent.selectOptions(numberSelect, '1');
     
-      const textInput = screen.getByLabelText('Edit text');
+      const textInput = screen.getByLabelText('内容を編集してください。');
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
     
       await userEvent.clear(textInput);
@@ -929,7 +929,7 @@ describe('EditRouletteText Component', () => {
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       await userEvent.selectOptions(numberSelect, '1');
     
-      const textInput = screen.getByLabelText('Edit text');
+      const textInput = screen.getByLabelText('内容を編集してください。');
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
     
       await userEvent.clear(textInput);

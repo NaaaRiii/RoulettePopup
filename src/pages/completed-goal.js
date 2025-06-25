@@ -39,10 +39,10 @@ function CompletedGoal() {
   return (
     <Layout>
       <div className="completed-goals-container">
-        <h1>These are your Completed Goals!</h1>
+        <h1>達成したGoal</h1>
         <div className="completed-goals-grid">
           {goalsState.map((goal) => {
-            console.log('Goal Data:', goal);  // goal オブジェクト全体を出力
+            console.log('Goal Data:', goal);
             return (
               <div key={goal.id} className="c-card goal-card">
                 <div className="completed-goal-content">
@@ -51,7 +51,11 @@ function CompletedGoal() {
                   </Link>
                   {goal.completed_time && (
                     <p className="goal-date">
-                      達成日: {new Date(goal.completed_time).toLocaleDateString()}
+                      達成日: {new Date(goal.completed_time).toLocaleDateString('ja-JP', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                      })}
                     </p>
                   )}
                 </div>

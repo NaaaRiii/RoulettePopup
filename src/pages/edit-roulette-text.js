@@ -42,7 +42,6 @@ const EditRouletteText = () => {
           }
         } catch (error) {
           if (error.name === 'AbortError') {
-            // フェッチが中止された場合は何もしない
             console.log('Fetch aborted');
           } else {
             console.error('Error fetching roulette texts:', error);
@@ -106,8 +105,8 @@ const EditRouletteText = () => {
       //  const { roulette_text: updatedRouletteText } = data;
       const updatedRouletteText =
         (data.roulette_text && typeof data.roulette_text === 'object')
-          ? data.roulette_text   // 旧 API 形式 { roulette_text: {...} }
-          : data;                // 新 API 形式 { id, number, text, ... }
+          ? data.roulette_text
+          : data;
           
         if (updatedRouletteText && 'number' in updatedRouletteText) {
         setRouletteTexts(prevTexts => prevTexts.map(text => text.number === updatedRouletteText.number ? updatedRouletteText : text));
@@ -159,7 +158,7 @@ const EditRouletteText = () => {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label htmlFor="rouletteText">Edit text</label>
+                    <label htmlFor="rouletteText">内容を編集してください。</label>
                     <input
                       type="text"
                       id="rouletteText"
