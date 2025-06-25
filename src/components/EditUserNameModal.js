@@ -27,13 +27,8 @@ export default function EditUserNameModal({ isOpen, onClose, currentName, onUser
       );
 
       if (response.ok) {
-        // 更新に成功したら、レスポンスを取得
         const data = await response.json();
-        console.log("Updated user name:", data);
-        console.log("Response user data:", data.user);
-        console.log("New name in response:", data.user?.name);
 
-        // 親コンポーネントに新しいユーザー名を渡す
         if (onUserUpdate && data.user) {
           onUserUpdate(data.user);
         }
@@ -47,7 +42,6 @@ export default function EditUserNameModal({ isOpen, onClose, currentName, onUser
     } catch (error) {
       console.error("Submission failed", error);
     } finally {
-      // 成功・失敗・例外に関係なく、モーダルを閉じる
       onClose();
     }
   };
