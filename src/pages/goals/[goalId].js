@@ -12,17 +12,15 @@ import CreateSmallGoal from '../../components/CreateSmallGoal';
 import EditGoalModal from '../../components/EditGoal';
 import EditSmallGoalModal from '../../components/EditSmallGoal';
 import { useModalState } from '../../hooks/useModalState';
+import { useGoalData } from '../../hooks/useGoalData';
+import { useGoalActions } from '../../hooks/useGoalActions';
+import { useSmallGoalActions } from '../../hooks/useSmallGoalActions';
 import '../../components/styles.css';
-
 
 function GoalPage() {
   const { goalsState, setGoalsState, refreshGoals } = useGoals();
   const router = useRouter();
   const { goalId } = router.query;
-  const [goal, setGoal] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
-  const [smallGoalsError, setSmallGoalsError] = useState(null);
 
   const { fetchTickets } = useContext(TicketsContext);
   
@@ -39,217 +37,24 @@ function GoalPage() {
     closeEditSmallGoalModal,
   } = useModalState();
 
-  const handleGoalUpdated = async (updatedGoal) => {
-    await fetchGoalData();
-  };
+  const {
+    goal,
+    loading,
+    message,
+    smallGoalsError,
+    handleTaskToggle,
+    handleGoalUpdated,
+    handleSmallGoalUpdated,
+    handleSmallGoalAdded,
+    setGoal,
+  } = useGoalData();
 
-  useEffect(() => {
-    const messageFromQuery = router.query.message;
-    if (messageFromQuery) {
-      setMessage(decodeURIComponent(messageFromQuery));
-    }
-  }, [router.query]);
-
-  const fetchGoalData = useCallback(async () => {
-    if (!goalId) {
-      console.error('goalId is undefined.');
-      return;
-    }
-    setLoading(true);
-
-    try {
-      const goalDetailsResponse = await fetchWithAuth(
-        `/api/goals/${goalId}`
-      );
-      if (!goalDetailsResponse.ok) {
-        throw new Error('Failed to fetch goal details');
-      }
-      const goalDetails = await goalDetailsResponse.json();
-      if (!goalDetails) {
-        setGoal(null);
-        setLoading(false);
-        return;
-      }
-
-      const smallGoalsResponse = await fetchWithAuth(
-        `/api/goals/${goalId}/small_goals`
-      );
-      if (!smallGoalsResponse.ok) {
-        throw new Error('Failed to fetch small goals');
-      }
-      const smallGoalsData = await smallGoalsResponse.json();
-      if (!Array.isArray(smallGoalsData)) {
-        console.error('Invalid data format for small_goals:', smallGoalsData);
-        setSmallGoalsError('Invalid data format for small goals.');
-        setGoal({
-          ...goalDetails,
-          small_goals: []
-        });
-        setLoading(false);
-        return;
-      }
-  
-      setGoal({
-        ...goalDetails,
-        small_goals: smallGoalsData.map(smallGoal => ({
-          ...smallGoal,
-          tasks: smallGoal.tasks
-        }))
-      });
-      setSmallGoalsError(null);
-      setLoading(false);
-    } catch (error) {
-      console.error('Failed to fetch goal data', error);
-      setGoal(null);
-      setLoading(false);
-    }
-  }, [goalId]);
-
-  useEffect(() => {
-    if (goalId) {
-      fetchGoalData();
-    } else {
-      console.error('goalId is undefined.');
-    }
-  }, [goalId, fetchGoalData]);
-
-  const handleTaskToggle = async (taskId, currentStatus) => {
-    const newCompleted = !currentStatus;
-    try {
-      const response = await fetchWithAuth(
-        `/api/tasks/${taskId}/complete`,
-        { method:'POST', body: JSON.stringify({ completed:newCompleted }) }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to update task');
-      }
-
-      setGoal(prevGoal => {
-        const updatedSmallGoals = prevGoal.small_goals.map(smallGoal => ({
-          ...smallGoal,
-          tasks: smallGoal.tasks.map(task => 
-            task.id === taskId ? { ...task, completed: newCompleted } : task
-          )
-        }));
-        return { ...prevGoal, small_goals: updatedSmallGoals };
-      });
-
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const deleteGoal = (event) => {
-    event.preventDefault();
-  
-    if (window.confirm('Are you sure ?')) {
-      fetchWithAuth(`/api/goals/${goalId}`, {
-        method: 'DELETE'
-      })
-        .then(response => {
-          if (response.ok) {
-            alert('Goalが削除されました。');
-            refreshGoals();
-  
-            router.push('/dashboard');
-          } else {
-            console.error(`Error: ${response.statusText}`);
-            alert('Failed to delete the goal.');
-          }
-        })
-        .catch(error => {
-          console.error('Communication has failed:', error);
-          alert('Communication has failed.');
-        });
-    }
-  };
-
-  const deleteSmallGoal = (smallGoalId) => {
-    if (window.confirm('Are you sure?')) {
-      fetchWithAuth(
-        `/api/goals/${goalId}/small_goals/${smallGoalId}`,
-        { method: 'DELETE' }
-      )
-      .then(response => {
-        if (response.ok) {
-          setGoal(prevGoal => ({
-            ...prevGoal,
-            small_goals: prevGoal.small_goals.filter(sg => sg.id !== smallGoalId)
-          }));
-          alert('Small Goalが削除されました。');
-        } else {
-          alert('Small Goalの削除に失敗しました。');
-        }
-      })
-      .catch(() => alert('通信に失敗しました。'));
-    }
-  };
-
-  const completeGoal = async () => {
-    const response = await fetchWithAuth(
-      `/api/goals/${goalId}/complete`,
-      { method: 'POST' }
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
-     try {
-       await fetchTickets();
-       console.log('[Goal] after fetchTickets');
-     } catch (e) {
-       console.error('Failed to refresh tickets', e);
-     }
-     router.push({
-       pathname: '/dashboard',
-       query: { message: encodeURIComponent(data.message) }
-     });
-    } else {
-      alert(data.message);
-    }
-  };
-
-  const completeSmallGoal = async (smallGoalId) => {
-    try {
-      const response = await fetchWithAuth(
-        `/api/goals/${goalId}/small_goals/${smallGoalId}/complete`,
-        { method: 'POST' }
-      );
-
-      const data = await response.json();
-      if (response.ok) {
-        const updatedGoals = goal.small_goals.map(sg => {
-          if (sg.id === smallGoalId) {
-            return { ...sg, completed: true };
-          }
-          return sg;
-        });
-        setGoal({ ...goal, small_goals: updatedGoals });
-
-        router.push({
-          pathname: '/dashboard',
-          query: { message: encodeURIComponent(data.message) }
-        });
-      } else {
-        alert('Failed to complete small goal.');
-      }
-    } catch (error) {
-      console.error('Error completing small goal:', error);
-    }
-  };
-
-  const handleSmallGoalUpdated = async (updatedSmallGoal) => {
-    await fetchGoalData();
-  };
+  const { deleteGoal, completeGoal } = useGoalActions({ goalId, refreshGoals });
+  const { deleteSmallGoal, completeSmallGoal } = useSmallGoalActions({ goalId, setGoal });
 
   useEffect(() => {
     console.log("Goal state updated:", goal);
   }, [goal]);
-
-  const handleSmallGoalAdded = async (newSmallGoal) => {
-    await fetchGoalData();
-  };
 
   if (loading) return <p>Loading...</p>;
   if (!goal) {
@@ -339,7 +144,6 @@ function GoalPage() {
           </div>
 
           <div className="goal-content-bottom">
-            {/* 未完了のSmall Goalsセクション */}
             <div className="goal-content-bottom-top">
               {goal.small_goals.filter(smallGoal => !smallGoal.completed).map(smallGoal => (
                 <div key={smallGoal.id} className="c-card goalid-small-goal">
@@ -370,9 +174,8 @@ function GoalPage() {
                           </li>
                         ))}
                       </ul>
-                      {/* タスクが全て完了している場合に完了ボタンを表示 */}
                       {!smallGoal.completed && smallGoal.tasks?.every(task => task.completed) && (
-                        <button className="btn btn-success" onClick={() => completeSmallGoal(smallGoal.id)}>
+                        <button className="btn btn-success" onClick={() => completeSmallGoal(smallGoal.id, goal, setGoal)}>
                           完了
                         </button>
                       )}
@@ -414,13 +217,11 @@ function GoalPage() {
                     </div>
                     <span className="completed-text"><strong>完了!</strong></span>
                   </div>
-
-                  {/* タスクを「・」付きで表示 */}
                   <div className="goalid-small-goal__tasks-completed">
                     <ul>
                       {smallGoal.tasks?.map(task => (
                         <li key={task.id}>
-                          ・{task.content} {/* チェックボックスの代わりに「・」を表示 */}
+                          ・{task.content}
                         </li>
                       ))}
                     </ul>
