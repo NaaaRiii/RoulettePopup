@@ -35,3 +35,54 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
+### Setup for Production Testing
+
+1. Copy the example configuration file:
+```bash
+cp cypress.config.prod.example.ts cypress.config.prod.ts
+```
+
+2. Edit `cypress.config.prod.ts` and set your actual test user credentials:
+```typescript
+env: {
+  TEST_EMAIL: 'your-actual-email@example.com',
+  TEST_PASSWORD: 'your-actual-password'
+}
+```
+
+3. Run production tests:
+```bash
+npm run cypress:prod
+```
+
+### API Testing Options
+
+You can configure different testing modes in `cypress.env.prod.json`:
+
+```json
+{
+  "MOCK_AUTH": "true",      // Use mock authentication (fast)
+  "TEST_REAL_API": "false", // Test actual API calls
+  "MOCK_API": "true"        // Mock API responses
+}
+```
+
+**Testing Modes:**
+
+- **Mock Authentication Only** (`MOCK_AUTH: "true", TEST_REAL_API: "false"`):
+  - Fast tests using mock authentication
+  - No actual API calls
+  - Good for UI testing
+
+- **Mock Auth + Real API** (`MOCK_AUTH: "true", TEST_REAL_API: "true"`):
+  - Mock authentication for speed
+  - Real API calls to test backend integration
+  - Good for integration testing
+
+- **Real Authentication** (`MOCK_AUTH: "false"`):
+  - Full end-to-end testing
+  - Requires valid user credentials
+  - Slower but comprehensive
+
+**Note:** `cypress.config.prod.ts` and `cypress.env.prod.json` are gitignored to protect sensitive information.
+

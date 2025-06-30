@@ -45,3 +45,12 @@ amplify_outputs(backup).json
 # cypress environment variables
 cypress.env.json
 cypress.env.example.jsoncypress/screenshots/
+
+cypress/screenshots
+
+cypress.env.prod.json
+
+cypress.env.example.json
+
+# cypress production configuration
+cypress.config.prod.ts

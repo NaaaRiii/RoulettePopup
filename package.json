@@ -18,6 +18,9 @@
     "test:e2e:amplify": "cypress run --spec 'cypress/e2e/roulette_spin_amplify.cy.js'",
     "test:e2e:amplify:debug": "cypress run --spec 'cypress/e2e/roulette_spin_amplify_debug.cy.js'",
     "test:e2e:amplify:simple": "cypress run --spec 'cypress/e2e/roulette_spin_amplify_simple.cy.js'",
+    "test:e2e:amplify:prod": "cypress run --config-file cypress.config.prod.ts --spec 'cypress/e2e/amplify_auth_test.cy.js'",
+    "test:e2e:amplify:prod:open": "cypress open --config-file cypress.config.prod.ts",
+    "test:e2e:amplify:prod:fixed": "cypress run --config-file cypress.config.prod.ts --spec 'cypress/e2e/amplify_auth_test.cy.js' --env failOnStatusCode=false",
     "cypress:setup": "cp cypress.env.example.json cypress.env.json && echo 'cypress.env.json を作成しました。必要に応じて編集してください.'"
   },
   "dependencies": {
