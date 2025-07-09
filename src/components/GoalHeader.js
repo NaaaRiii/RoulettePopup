@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import EditGoalModal from './EditGoal';
 import CreateSmallGoal from './CreateSmallGoal';
+import { formatDate } from '../utils/formatDate';
 
 const GoalHeader = ({ 
   goal, 
@@ -14,7 +15,8 @@ const GoalHeader = ({
   onCloseEditGoalModal,
   onCloseCreateSmallGoalModal,
   onGoalUpdated,
-  onSmallGoalAdded
+  onSmallGoalAdded,
+  onDeleteGoal
 }) => {
   return (
     <div className='goal-content-top-left-card'>
@@ -43,6 +45,9 @@ const GoalHeader = ({
         <div className='goal-content-top-left-lower-part-link'>
           {!goal.completed && (
             <>
+              <p className='deadline-text'>
+                期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
+              </p>
               <Link href={`#`} onClick={onOpenEditGoalModal}>
                 <div className='edit-goal-link'>
                   Goalを編集する
@@ -70,6 +75,14 @@ const GoalHeader = ({
               onSmallGoalAdded={onSmallGoalAdded}
             />
           </div>
+          <a 
+            href="#" 
+            onClick={onDeleteGoal} 
+            data-testid="delete-goal-link" 
+            className='delete-goal-link'
+          >
+            Goalを削除する
+          </a>
         </div>
       </div>
     </div>

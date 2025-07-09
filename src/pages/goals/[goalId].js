@@ -6,7 +6,6 @@ import { TicketsContext } from '../../contexts/TicketsContext';
 import Layout from '../../components/Layout';
 import ExpCalendar from '../../components/Calendar';
 import GoalHeader from '../../components/GoalHeader';
-import GoalDetails from '../../components/GoalDetails';
 import SmallGoalList from '../../components/SmallGoalList';
 import { useModalState } from '../../hooks/useModalState';
 import { useGoalData } from '../../hooks/useGoalData';
@@ -83,9 +82,6 @@ function GoalPage() {
                 onCloseCreateSmallGoalModal={closeCreateSmallGoalModal}
                 onGoalUpdated={handleGoalUpdated}
                 onSmallGoalAdded={handleSmallGoalAdded}
-              />
-              <GoalDetails
-                goal={goal}
                 onDeleteGoal={deleteGoal}
               />
             </div>
