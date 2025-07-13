@@ -25,14 +25,16 @@ function MyApp({ Component, pageProps }) {
     </GoalsProvider>
   );
 
-  if (isPublicPage) {
-    return content;
-  }
-
   return (
-    <Authenticator>
-      {content}
-    </Authenticator>
+    <Authenticator.Provider>
+      {isPublicPage ? (
+        content
+      ) : (
+        <Authenticator>
+          {content}
+        </Authenticator>
+      )}
+    </Authenticator.Provider>
   );
 }
 

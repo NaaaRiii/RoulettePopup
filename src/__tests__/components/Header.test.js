@@ -76,8 +76,9 @@ describe('Header コンポーネント', () => {
         signOut: mockSignOut,
       });
       const { rerender } = render(<Header />);
-      expect(screen.getByText('Sign Up')).toBeInTheDocument();
-      expect(screen.getByText('Log In')).toBeInTheDocument();
+      expect(screen.getByText('使い方')).toBeInTheDocument();
+      expect(screen.getByText('お試し')).toBeInTheDocument();
+      expect(screen.getByText('ログイン')).toBeInTheDocument();
       expect(screen.queryByText('You are Logged In')).not.toBeInTheDocument();
 
       // ログイン状態
@@ -91,8 +92,9 @@ describe('Header コンポーネント', () => {
       expect(screen.getByText('Dashboard')).toBeInTheDocument();
       expect(screen.getByText('How to Use')).toBeInTheDocument();
       expect(screen.getByText('Log out')).toBeInTheDocument();
-      expect(screen.queryByText('Sign Up')).not.toBeInTheDocument();
-      expect(screen.queryByText('Log In')).not.toBeInTheDocument();
+      expect(screen.queryByText('お試し')).not.toBeInTheDocument();
+      expect(screen.queryByText('ログイン')).not.toBeInTheDocument();
+      expect(screen.queryByText('使い方')).not.toBeInTheDocument();
     });
   });
 
@@ -101,15 +103,19 @@ describe('Header コンポーネント', () => {
       render(<Header />);
     });
 
-    it('Sign Up と Log In リンクが表示されること', () => {
-      const signUpLink = screen.getByText('Sign Up');
-      const logInLink = screen.getByText('Log In');
+    it('使い方、お試し、ログイン リンクが表示されること', () => {
+      const howToLink = screen.getByText('使い方');
+      const trialLink = screen.getByText('お試し');
+      const loginLink = screen.getByText('ログイン');
 
-      expect(signUpLink).toBeInTheDocument();
-      expect(signUpLink).toHaveAttribute('href', '/signup');
+      expect(howToLink).toBeInTheDocument();
+      expect(howToLink).toHaveAttribute('href', '/dashboard');
 
-      expect(logInLink).toBeInTheDocument();
-      expect(logInLink).toHaveAttribute('href', '/login');
+      expect(trialLink).toBeInTheDocument();
+      expect(trialLink).toHaveAttribute('href', '/signup');
+
+      expect(loginLink).toBeInTheDocument();
+      expect(loginLink).toHaveAttribute('href', '/login');
     });
   });
 

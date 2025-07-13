@@ -1,20 +1,14 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-
-import { useAuthenticator } from '@aws-amplify/ui-react'; 
+import { useAuthenticator } from '@aws-amplify/ui-react';
 
 const Header = () => {
   const router = useRouter();
 
-  const { route, user, signOut } = useAuthenticator((context) => [
-    context.route, 
-    context.user, 
-    context.signOut
-  ]);
-
-  // Amplify的にログインしているかどうか
-  const isLoggedIn = (route === 'authenticated');
+  // Amplify 認証情報の取得
+  const { route, user, signOut } = useAuthenticator((context) => [context.route, context.user, context.signOut]);
+  const isLoggedIn = route === 'authenticated' && !!user;
 
   // Amplifyでのログアウト
   const handleLogout = async (e) => {
@@ -39,9 +33,9 @@ const Header = () => {
             </div>
           ) : (
             <ul className="flex_list">
-              {/*<li><Link href="/guest_login">Guest Login</Link></li>*/}
-              <li><Link href="/signup">Sign Up</Link></li>
-              <li><Link href="/login">Log In</Link></li>
+              <li><Link href="/dashboard">使い方</Link></li>
+              <li><Link href="/signup">お試し</Link></li>
+              <li><Link href="/login">ログイン</Link></li>
             </ul>
           )}
         </nav>

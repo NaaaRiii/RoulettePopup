@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="footer">
 			<div className="layout-footer_copyright">
-				©︎ 2023 Plus ONE, Inc.
+				©︎ 2023-2025 Plus ONE, Inc.
 			</div>
     </footer>
   );
