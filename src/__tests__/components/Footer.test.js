@@ -13,7 +13,7 @@ describe('Footer コンポーネント', () => {
 
   it('コピーライトテキストが正しく表示されること', () => {
     render(<Footer />);
-    const copyrightText = screen.getByText('©︎ 2023 Plus ONE, Inc.');
+    const copyrightText = screen.getByText('©︎ 2023-2025 Plus ONE, Inc.');
     expect(copyrightText).toBeInTheDocument();
     expect(copyrightText.closest('.layout-footer_copyright')).toBeInTheDocument();
   });
