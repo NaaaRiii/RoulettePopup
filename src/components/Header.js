@@ -26,16 +26,16 @@ const Header = () => {
         <nav className="flex_header-list">
           {isLoggedIn ? (
             <div className="logged_in">
-              <span>You are Logged In</span>
-              <Link href="/dashboard">Dashboard</Link>
-              <Link href="/dashboard">How to Use</Link>
-              <a href="/logout" onClick={handleLogout}>Log out</a>
+              <span>ログイン中</span>
+              <Link href="/dashboard">ダッシュボード</Link>
+              <Link href="/dashboard">使い方</Link>
+              <a href="/logout" onClick={handleLogout}>ログアウト</a>
             </div>
           ) : (
             <ul className="flex_list">
               <li><Link href="/dashboard">使い方</Link></li>
               <li><Link href="/signup">お試し</Link></li>
-              <li><Link href="/login">ログイン</Link></li>
+              <li><Link href="/dashboard">ログイン</Link></li>
             </ul>
           )}
         </nav>

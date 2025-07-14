@@ -42,12 +42,12 @@ const GoalHeader = ({
 
       <div className='goal-content-top-left-lower-part'>
         <h2>Goalの詳細 : {goal.content}</h2>
+          <p className='deadline-text'>
+            期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
+          </p>
         <div className='goal-content-top-left-lower-part-link'>
           {!goal.completed && (
             <>
-              <p className='deadline-text'>
-                期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
-              </p>
               <Link href={`#`} onClick={onOpenEditGoalModal}>
                 <div className='edit-goal-link'>
                   Goalを編集する

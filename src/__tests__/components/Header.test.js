@@ -64,8 +64,8 @@ describe('Header コンポーネント', () => {
       render(<Header />);
       
       // コンポーネントが正しい値を取得していることを確認
-      expect(screen.getByText('You are Logged In')).toBeInTheDocument();
-      expect(screen.getByText('Log out')).toBeInTheDocument();
+      expect(screen.getByText('ログイン中')).toBeInTheDocument();
+      expect(screen.getByText('ログアウト')).toBeInTheDocument();
     });
 
     it('isLoggedIn の判定が正しく機能すること', () => {
@@ -79,7 +79,7 @@ describe('Header コンポーネント', () => {
       expect(screen.getByText('使い方')).toBeInTheDocument();
       expect(screen.getByText('お試し')).toBeInTheDocument();
       expect(screen.getByText('ログイン')).toBeInTheDocument();
-      expect(screen.queryByText('You are Logged In')).not.toBeInTheDocument();
+      expect(screen.queryByText('ログイン中')).not.toBeInTheDocument();
 
       // ログイン状態
       mockUseAuthenticator.mockReturnValue({
@@ -88,13 +88,12 @@ describe('Header コンポーネント', () => {
         signOut: mockSignOut,
       });
       rerender(<Header />);
-      expect(screen.getByText('You are Logged In')).toBeInTheDocument();
-      expect(screen.getByText('Dashboard')).toBeInTheDocument();
-      expect(screen.getByText('How to Use')).toBeInTheDocument();
-      expect(screen.getByText('Log out')).toBeInTheDocument();
+      expect(screen.getByText('ログイン中')).toBeInTheDocument();
+      expect(screen.getByText('ダッシュボード')).toBeInTheDocument();
+      expect(screen.getByText('使い方')).toBeInTheDocument();
+      expect(screen.getByText('ログアウト')).toBeInTheDocument();
       expect(screen.queryByText('お試し')).not.toBeInTheDocument();
       expect(screen.queryByText('ログイン')).not.toBeInTheDocument();
-      expect(screen.queryByText('使い方')).not.toBeInTheDocument();
     });
   });
 
@@ -115,7 +114,7 @@ describe('Header コンポーネント', () => {
       expect(trialLink).toHaveAttribute('href', '/signup');
 
       expect(loginLink).toBeInTheDocument();
-      expect(loginLink).toHaveAttribute('href', '/login');
+      expect(loginLink).toHaveAttribute('href', '/dashboard');
     });
   });
 
@@ -131,24 +130,24 @@ describe('Header コンポーネント', () => {
 
     it('ログイン状態の要素が表示されること', () => {
       // "You are Logged In" テキストの確認
-      expect(screen.getByText('You are Logged In')).toBeInTheDocument();
+      expect(screen.getByText('ログイン中')).toBeInTheDocument();
 
       // Dashboard リンクの確認
-      const dashboardLink = screen.getByText('Dashboard');
+      const dashboardLink = screen.getByText('ダッシュボード');
       expect(dashboardLink).toBeInTheDocument();
       expect(dashboardLink).toHaveAttribute('href', '/dashboard');
 
       // How to Use リンクの確認
-      const howToUseLink = screen.getByText('How to Use');
+      const howToUseLink = screen.getByText('使い方');
       expect(howToUseLink).toBeInTheDocument();
       expect(howToUseLink).toHaveAttribute('href', '/dashboard');
 
       // Log out リンクの確認
-      expect(screen.getByText('Log out')).toBeInTheDocument();
+      expect(screen.getByText('ログアウト')).toBeInTheDocument();
     });
 
     it('ログアウトリンクをクリックした時に適切な処理が実行されること', () => {
-      const logoutLink = screen.getByText('Log out');
+      const logoutLink = screen.getByText('ログアウト');
 
       // クリックイベントを発火し、デフォルトの動作を防止
       fireEvent.click(logoutLink, {
