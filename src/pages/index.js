@@ -28,7 +28,7 @@ export default function HomePage() {
 					</div>
 					<div className="goal-image">
 						<Image
-							src="/images/goal-setting.png"
+							src="/images/Goal-setting.png"
 							alt="Goal 設定フォーム"
 							width={300}
 							height={225}
