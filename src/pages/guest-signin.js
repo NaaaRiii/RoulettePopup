@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Auth } from 'aws-amplify';
+import { Auth } from '@aws-amplify/auth';
 
 export default function GuestSigninPage() {
   const router = useRouter();
