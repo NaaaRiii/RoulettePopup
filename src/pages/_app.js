@@ -3,7 +3,6 @@ import '../lib/amplifyClient';
 import React from 'react';
 import { GoalsProvider } from '../contexts/GoalsContext';
 import { TicketsProvider } from '../contexts/TicketsContext';
-//import '../../styles/globals.css';
 import '../components/styles.css';
 
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -14,7 +13,7 @@ import { useRouter } from 'next/router';
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
 
-  const publicPaths = ['/', '/login']; 
+  const publicPaths = ['/', '/login', '/guest-signin'];
   const isPublicPage = publicPaths.includes(router.pathname);
 
   const content = (

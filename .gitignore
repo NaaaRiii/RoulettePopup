@@ -54,3 +54,5 @@ cypress.env.example.json
 
 # cypress production configuration
 cypress.config.prod.ts
+
+.env.local

@@ -11,7 +11,7 @@ export default function HomePage() {
 				<section className="hero">
 					<p className="hero-title">Plus ONEで成長を可視化しよう！</p>
 					<div className="button-container">
-            <Link href="/signup">
+            <Link href="/guest-signin">
               <button className="button">お試し</button>
             </Link>
             <Link href="/dashboard">

@@ -34,7 +34,7 @@ const Header = () => {
           ) : (
             <ul className="flex_list">
               <li><Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer">使い方</Link></li>
-              <li><Link href="/signup">お試し</Link></li>
+              <li><Link href="/guest-signin">お試し</Link></li>
               <li><Link href="/dashboard">ログイン</Link></li>
             </ul>
           )}
