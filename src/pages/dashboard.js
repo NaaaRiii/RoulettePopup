@@ -115,9 +115,7 @@ function Dashboard() {
         const data = await response.json();
         console.log('Fetched user data:', data);
   
-        // 必要なデータをセット
         setUserRank(data.rank);
-        //const storedLastRouletteRank = data.last_roulette_rank || localStorage.getItem('lastRouletteRank');
         const formattedData = {
           ...data,
           lastRouletteRank: parseInt(data.last_roulette_rank, 10) || 0
@@ -140,12 +138,10 @@ function Dashboard() {
   useEffect(() => {
     console.log("Current rank:", userData.rank, "Last roulette rank:", userData.lastRouletteRank);
     if (userData.rank >= 10 && Math.floor(userData.rank / 10) > Math.floor(userData.lastRouletteRank / 10)) {
-      //console.log("Modal should open now.");
-      //setIsModalOpen(true);
       updateLastRouletteRank(userData.rank);
     }
-  // TODO: Fix the dependency array issue for userData
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      // TODO: Fix the dependency array issue for userData
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData.rank, userData.lastRouletteRank]);
 
   const updateLastRouletteRank = async (newRank) => {
@@ -166,14 +162,9 @@ function Dashboard() {
     if (response.ok) {
       const resData = await response.json();
       console.log('resData:', resData);
-      //if (resData.success) {
-      //  console.log("Update response received and successful");
-      //  localStorage.setItem('lastRouletteRank', newRank);
-      //  setUserData(prev => ({ ...prev, lastRouletteRank: newRank }));
-      //}
+
       if (resData.success) {
         console.log("Update response received and successful");
-        //localStorage.setItem('lastRouletteRank', newRank);
         const formattedData = {
           ...userData,
           lastRouletteRank: parseInt(newRank, 10) || 0
@@ -216,15 +207,6 @@ function Dashboard() {
 
 return (
   <Layout>
-      {/*{isModalOpen && (
-        <div id="modal" className="modal">
-          <div className="modal-content">
-            <iframe src="http://localhost:4000/roulette-popup" width="500" height="500"></iframe>
-            <span className="close-button" onClick={toggleModal}>Close</span>
-          </div>
-        </div>
-      )}*/}
-
       <div>
         {message && <p>{message}</p>}
       </div>
@@ -252,12 +234,8 @@ return (
                       <div className='user-profile__title'>
                         {userData?.currentTitle}
                       </div>
-                      {/*<div className='user-profile__name'>
-                        {userData?.name}
-                      </div>*/}
                       <div className='user-profile__name'>
                         {userData?.name}
-                        {/* ペンアイコンを表示してクリックでモーダルを開く */}
                         <Link href="/edit-name" onClick={openEditName}>
                           <FaPen />
                         </Link>
