@@ -1,24 +1,24 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { signIn } from 'aws-amplify/auth';
 
 export default function GuestSigninPage() {
   const router = useRouter();
 
   useEffect(() => {
     const login = async () => {
-      const email = process.env.NEXT_PUBLIC_GUEST_EMAIL;
-      const password = process.env.NEXT_PUBLIC_GUEST_PASSWORD;
-      if (!email || !password) {
-        console.error('Guest credentials are not set in environment variables.');
-        router.replace('/login');
-        return;
-      }
-
       try {
-        const { isSignedIn } = await signIn({ username: email, password });
-        if (!isSignedIn) {
-          throw new Error('Guest sign in did not complete');
+        const base = (process.env.NEXT_PUBLIC_RAILS_API_URL || '').replace(/\/$/, '');
+        const response = await fetch(`${base}/api/guest_login`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Guest login failed: ${response.status} ${text}`);
         }
         router.replace('/dashboard');
       } catch (error) {
