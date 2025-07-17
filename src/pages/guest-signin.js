@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Auth } from '@aws-amplify/auth';
+import { signIn } from 'aws-amplify/auth';
 
 export default function GuestSigninPage() {
   const router = useRouter();
@@ -16,7 +16,10 @@ export default function GuestSigninPage() {
       }
 
       try {
-        await Auth.signIn(email, password);
+        const { isSignedIn } = await signIn({ username: email, password });
+        if (!isSignedIn) {
+          throw new Error('Guest sign in did not complete');
+        }
         router.replace('/dashboard');
       } catch (error) {
         console.error('Guest login failed:', error);
