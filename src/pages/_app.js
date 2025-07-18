@@ -5,16 +5,18 @@ import { GoalsProvider } from '../contexts/GoalsContext';
 import { TicketsProvider } from '../contexts/TicketsContext';
 import '../components/styles.css';
 
-import { Authenticator } from '@aws-amplify/ui-react';
+import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 
 import { useRouter } from 'next/router';
 
-function MyApp({ Component, pageProps }) {
+function AuthenticatedApp({ Component, pageProps }) {
+  const { route } = useAuthenticator((context) => [context.route]);
   const router = useRouter();
 
   const publicPaths = ['/', '/login', '/guest-signin'];
   const isPublicPage = publicPaths.includes(router.pathname);
+  const isAuthenticated = route === 'authenticated';
 
   const content = (
     <GoalsProvider>
@@ -24,15 +26,21 @@ function MyApp({ Component, pageProps }) {
     </GoalsProvider>
   );
 
+  if (isPublicPage || isAuthenticated) {
+    return content;
+  }
+
+  return (
+    <Authenticator>
+      {content}
+    </Authenticator>
+  );
+}
+
+function MyApp({ Component, pageProps }) {
   return (
     <Authenticator.Provider>
-      {isPublicPage ? (
-        content
-      ) : (
-        <Authenticator>
-          {content}
-        </Authenticator>
-      )}
+      <AuthenticatedApp Component={Component} pageProps={pageProps} />
     </Authenticator.Provider>
   );
 }
