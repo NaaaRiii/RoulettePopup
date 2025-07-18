@@ -37,10 +37,7 @@ function AuthenticatedApp({ Component, pageProps }) {
         }
       }
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  }, [router.pathname]);
 
   // デバッグ用ログ
   console.log('Auth check:', { signedIn, isPublicPage, pathname: router.pathname });
