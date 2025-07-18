@@ -27,7 +27,14 @@ function AuthenticatedApp({ Component, pageProps }) {
         await getCurrentUser();
         if (!cancelled) setSignedIn(true);
       } catch {
-        if (!cancelled) setSignedIn(false);
+        // getCurrentUser が失敗した場合は fetchAuthSession でトークンの有無を確認
+        try {
+          const { tokens } = await (await import('aws-amplify/auth')).fetchAuthSession();
+          const hasId = !!tokens?.idToken;
+          if (!cancelled) setSignedIn(hasId);
+        } catch {
+          if (!cancelled) setSignedIn(false);
+        }
       }
     })();
     return () => {
