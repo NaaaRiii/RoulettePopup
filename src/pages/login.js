@@ -1,26 +1,21 @@
-import React from 'react';
-//import { Amplify } from 'aws-amplify';
-import { Authenticator } from '@aws-amplify/ui-react';
+import React, { useEffect } from 'react';
+import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import { useRouter } from 'next/router';
-//import outputs from '../../amplify_outputs.json';
-
-//Amplify.configure(outputs);
 
 export default function LoginPage() {
   const router = useRouter();
 
-  const handleAuthStateChange = async (authState) => {
-    if (authState === 'signedin') {
-      // ログイン成功時
-      router.push('/dashboard');
+  // Amplify v6 では useAuthenticator で認証状態を確認
+  const { route } = useAuthenticator((context) => [context.route]);
+
+  useEffect(() => {
+    if (route === 'authenticated') {
+      router.replace('/dashboard');
     }
-  };
+  }, [route, router]);
 
   return (
-    <Authenticator
-      // ユーザーがログイン状態になったら呼ばれるコールバック
-      onStateChange={(authState) => handleAuthStateChange(authState)}
-    >
+    <Authenticator>
       {/* ログインフォームは Authenticator が自動的に生成 */}
     </Authenticator>
   );
