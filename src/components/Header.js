@@ -38,17 +38,33 @@ const Header = () => {
   // Amplifyでのログアウト
   const handleLogout = async (e) => {
     e.preventDefault();
-    // useAuthenticator の signOut があれば使用、なければ Amplify モジュラー API
+    // useAuthenticator の signOut
     try {
       if (signOut) {
         await signOut();
-      } else {
-        await amplifySignOut();
       }
+      // Amplify v6 modular signOut (global)
+      await amplifySignOut({ global: true });
     } catch (error) {
       console.error('Amplify signOut error:', error);
     }
-    router.push('/'); // ログアウト後の画面へ遷移
+
+    // ローカルストレージの JWT を削除
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+    }
+
+    // Rails セッション Cookie も削除するため API にリクエスト
+    const base = (process.env.NEXT_PUBLIC_RAILS_API_URL || '').replace(/\/$/, '');
+    try {
+      await fetch(`${base}/api/logout`, { method: 'DELETE', credentials: 'include' });
+    } catch (_) {
+      /* ignore */
+    }
+
+    // state 更新
+    setIsLoggedIn(false);
+    router.push('/');
   };
 
   return (
