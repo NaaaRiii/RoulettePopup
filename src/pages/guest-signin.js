@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { signIn } from 'aws-amplify/auth';
+import { signIn, getCurrentUser } from 'aws-amplify/auth';
 
 export default function GuestSigninPage() {
   const router = useRouter();
@@ -32,17 +32,30 @@ export default function GuestSigninPage() {
           return;
         }
 
+        // 既に認証されているかチェック
+        let isAlreadyAuthenticated = false;
         try {
-          const { isSignedIn, nextStep } = await signIn({ username: email, password });
-          console.log('Amplify signIn result:', { isSignedIn, nextStep });
-          
-          if (!isSignedIn) {
-            throw new Error('Amplify sign in did not complete successfully');
+          await getCurrentUser();
+          isAlreadyAuthenticated = true;
+          console.log('User is already authenticated');
+        } catch (error) {
+          console.log('User is not authenticated, proceeding with sign in');
+        }
+
+        // 認証されていない場合のみsignInを実行
+        if (!isAlreadyAuthenticated) {
+          try {
+            const { isSignedIn, nextStep } = await signIn({ username: email, password });
+            console.log('Amplify signIn result:', { isSignedIn, nextStep });
+            
+            if (!isSignedIn) {
+              throw new Error('Amplify sign in did not complete successfully');
+            }
+          } catch (amplifyError) {
+            console.error('Amplify sign in failed:', amplifyError);
+            router.replace('/login');
+            return;
           }
-        } catch (amplifyError) {
-          console.error('Amplify sign in failed:', amplifyError);
-          router.replace('/login');
-          return;
         }
 
         // Amplifyの認証状態が確実に反映されるまで少し待機
