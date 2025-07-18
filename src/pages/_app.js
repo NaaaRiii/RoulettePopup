@@ -1,25 +1,42 @@
 import '../lib/amplifyClient';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GoalsProvider } from '../contexts/GoalsContext';
 import { TicketsProvider } from '../contexts/TicketsContext';
 import '../components/styles.css';
 
-import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
+import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 
 import { useRouter } from 'next/router';
+import { getCurrentUser } from 'aws-amplify/auth';
 
 function AuthenticatedApp({ Component, pageProps }) {
-  const { route } = useAuthenticator((context) => [context.route]);
   const router = useRouter();
 
   const publicPaths = ['/', '/login', '/guest-signin'];
   const isPublicPage = publicPaths.includes(router.pathname);
-  const isAuthenticated = route === 'authenticated';
+
+  // サインイン状態を保持
+  const [signedIn, setSignedIn] = useState(null); // null = loading, true/false = 判定済み
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await getCurrentUser();
+        if (!cancelled) setSignedIn(true);
+      } catch {
+        if (!cancelled) setSignedIn(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // デバッグ用ログ
-  console.log('Auth state:', { route, isPublicPage, isAuthenticated, pathname: router.pathname });
+  console.log('Auth check:', { signedIn, isPublicPage, pathname: router.pathname });
 
   const content = (
     <GoalsProvider>
@@ -29,15 +46,17 @@ function AuthenticatedApp({ Component, pageProps }) {
     </GoalsProvider>
   );
 
-  if (isPublicPage || isAuthenticated) {
-    return content;
-  }
+  // 公開ページは常に表示
+  if (isPublicPage) return content;
 
-  return (
-    <Authenticator>
-      {content}
-    </Authenticator>
-  );
+  // サインイン判定中は何も表示しない（またはローディング表示を追加しても良い）
+  if (signedIn === null) return null;
+
+  // サインイン済みの場合はそのまま表示
+  if (signedIn) return content;
+
+  // 未サインインの場合のみAuthenticatorを表示
+  return <Authenticator>{content}</Authenticator>;
 }
 
 function MyApp({ Component, pageProps }) {
