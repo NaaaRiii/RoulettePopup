@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { signIn } from 'aws-amplify/auth';
 
 export default function GuestSigninPage() {
   const router = useRouter();
@@ -20,6 +21,17 @@ export default function GuestSigninPage() {
           const text = await response.text();
           throw new Error(`Guest login failed: ${response.status} ${text}`);
         }
+
+        try {
+          const email = process.env.NEXT_PUBLIC_GUEST_EMAIL;
+          const password = process.env.NEXT_PUBLIC_GUEST_PASSWORD;
+          if (email && password) {
+            await signIn({ username: email, password });
+          }
+        } catch (amplifyError) {
+          console.warn('Amplify sign in failed, but continuing with guest session:', amplifyError);
+        }
+
         router.replace('/dashboard');
       } catch (error) {
         console.error('Guest login failed:', error);
