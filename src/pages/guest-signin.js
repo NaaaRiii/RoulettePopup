@@ -58,9 +58,18 @@ export default function GuestSigninPage() {
           }
         }
 
-        // Amplifyの認証状態が確実に反映されるまで少し待機
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // 認証状態を再確認
+        try {
+          const currentUser = await getCurrentUser();
+          console.log('Final auth check - Current user:', currentUser);
+        } catch (error) {
+          console.error('Final auth check failed:', error);
+        }
 
+        // Amplifyの認証状態が確実に反映されるまで少し待機
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        console.log('Redirecting to dashboard...');
         router.replace('/dashboard');
       } catch (error) {
         console.error('Guest login failed:', error);

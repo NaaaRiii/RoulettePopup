@@ -18,6 +18,9 @@ function AuthenticatedApp({ Component, pageProps }) {
   const isPublicPage = publicPaths.includes(router.pathname);
   const isAuthenticated = route === 'authenticated';
 
+  // デバッグ用ログ
+  console.log('Auth state:', { route, isPublicPage, isAuthenticated, pathname: router.pathname });
+
   const content = (
     <GoalsProvider>
       <TicketsProvider>
