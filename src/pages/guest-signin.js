@@ -22,15 +22,31 @@ export default function GuestSigninPage() {
           throw new Error(`Guest login failed: ${response.status} ${text}`);
         }
 
+        // Rails側のゲストログインが成功したら、Amplify側でも認証状態を設定
+        const email = process.env.NEXT_PUBLIC_GUEST_EMAIL;
+        const password = process.env.NEXT_PUBLIC_GUEST_PASSWORD;
+        
+        if (!email || !password) {
+          console.error('Guest credentials not found in environment variables');
+          router.replace('/login');
+          return;
+        }
+
         try {
-          const email = process.env.NEXT_PUBLIC_GUEST_EMAIL;
-          const password = process.env.NEXT_PUBLIC_GUEST_PASSWORD;
-          if (email && password) {
-            await signIn({ username: email, password });
+          const { isSignedIn, nextStep } = await signIn({ username: email, password });
+          console.log('Amplify signIn result:', { isSignedIn, nextStep });
+          
+          if (!isSignedIn) {
+            throw new Error('Amplify sign in did not complete successfully');
           }
         } catch (amplifyError) {
-          console.warn('Amplify sign in failed, but continuing with guest session:', amplifyError);
+          console.error('Amplify sign in failed:', amplifyError);
+          router.replace('/login');
+          return;
         }
+
+        // Amplifyの認証状態が確実に反映されるまで少し待機
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         router.replace('/dashboard');
       } catch (error) {
