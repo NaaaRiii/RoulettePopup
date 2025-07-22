@@ -22,7 +22,6 @@ export const isValidAngle = (angle) => {
     { min: 355, max: 359 }
   ];
 
-  // どの範囲にも含まれない場合にtrueを返す
   return !excludedRanges.some(range => angle >= range.min && angle <= range.max);
 };
 
@@ -33,22 +32,11 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { tickets, setTickets, fetchTickets } = useContext(TicketsContext);
 
-  // ルーレットのセグメントを定義（例: 12セグメント）
   const segmentAngles = 360 / 12;
   const segments = Array.from({ length: 12 }, (_, index) => {
     const angle = 360 / 12 * index;
     const color = `hsl(${angle}, 100%, 50%)`;
-    //console.log(`Segment ${index + 1} color: ${color}`);
     return (
-      //<div
-      //  className="segment"
-      //  style={{
-      //    backgroundColor: color,
-      //    transform: `rotate(${angle}deg)`,
-      //  }}
-      //  key={index}
-      //  data-number={index + 1}
-      ///>
       <div
       className="segment"
       data-testid={`segment-${index + 1}`}
@@ -159,8 +147,6 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
             ルーレットを回す
           </button>
         </div>
-          {/*{!isSpinning && selectedSegment && <div>Selected Segment: {selectedSegment}</div>}*/}
-          {/*<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>*/}
           <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
               <p>ごほうびルーレットの結果です！！！: {rouletteText}</p>
               <button data-testid="close-modal-button" onClick={closeModal}>Close</button>

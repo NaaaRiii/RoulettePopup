@@ -101,8 +101,6 @@ const EditRouletteText = () => {
       const data = await response.json();
       console.log("Updated Data:", data);
 
-      //if (data.roulette_text && typeof data.roulette_text === 'object' && 'number' in data.roulette_text) {
-      //  const { roulette_text: updatedRouletteText } = data;
       const updatedRouletteText =
         (data.roulette_text && typeof data.roulette_text === 'object')
           ? data.roulette_text
