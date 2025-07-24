@@ -3,21 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        # 1) いまの Node バージョンを表示（任意）
-        - echo "Using Node $(node -v) before setting version"
-
-        # 2) nvm が読みに行く default-packages を削除（ここで削除すると
-        #    nvm install がグローバルパッケージを入れなくなる）
-        - rm -f ~/.nvm/default-packages
-
-        # 3) Node 20 をインストール（なければ取得）、ついでに --no-progress でログを抑制
-        - nvm install 20 --no-progress
-        - nvm use 20
-
-        # 4) バージョン確認
         - node -v
-
-        # 5) 依存ライブラリをキャッシュ優先でインストール
         - npm ci --prefer-offline --cache .npm --no-audit --progress=false
     build:
       commands:
@@ -28,6 +14,4 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
-      - /root/.nvm/versions/node/v20.19.4/**/*
-      - /root/.npm/**/*
+      - .npm/**/*

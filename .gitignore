@@ -58,3 +58,5 @@ cypress.config.prod.ts
 .env.local
 
 *.mmd
+
+/src/amplify_outputs.json
