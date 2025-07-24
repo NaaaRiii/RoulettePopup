@@ -7,21 +7,10 @@ import { Amplify } from 'aws-amplify';
 
 const awsConfig = {
   Auth: {
-    region: process.env.NEXT_PUBLIC_COGNITO_REGION,
-    userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
-    // In v6 the field name changed from userPoolWebClientId → userPoolClientId.
-    // Use whichever is available.
-    userPoolClientId:
-      process.env.NEXT_PUBLIC_COGNITO_APP_CLIENT_ID || process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID,
-    mandatorySignIn: true,
-    oauth: {
-      domain: process.env.NEXT_PUBLIC_COGNITO_DOMAIN,
-      scope: ['email', 'profile', 'openid'],
-      redirectSignIn:
-        process.env.NEXT_PUBLIC_REDIRECT_SIGNIN || (typeof window !== 'undefined' ? `${window.location.origin}/` : '/'),
-      redirectSignOut:
-        process.env.NEXT_PUBLIC_REDIRECT_SIGNOUT || (typeof window !== 'undefined' ? `${window.location.origin}/` : '/'),
-      responseType: 'code',
+    Cognito: {
+      region: process.env.NEXT_PUBLIC_COGNITO_REGION,
+      userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
+      userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_APP_CLIENT_ID,
     },
   },
 };
