@@ -1,88 +1,200 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## はじめに
 
-## Getting Started
+日々の積み重ねを記録しそれが数字として積もっているのを実感したく、PlusONEというタスク管理アプリを作成しました。
+タスク管理と名打てば、タスクを作成してそれが期限までに達成できるかを管理するというものと、なんとなくイメージが湧くかと思います。
+そういった機能を軸として添えながらも、目的としては日々の研鑽が数字として積み重なっていくことを実感できることが目的のサービスです。
 
-First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# PlusONE 使い方ガイド
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 概要
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+**PlusONE**は、Goal（目標）を設定し、日々の進捗を可視化できるタスク管理アプリです。  
+EXP（経験値）とごほうびルーレット機能があり、ゲーム感覚で自身の成長を記録していきます。
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+## 1. ダッシュボードの見方
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+ログイン後、ダッシュボード画面に遷移されます。
+- **左上**：ユーザー情報（名前・プロフィール画像・EXP・Rank）
+- **中央**：経験値の推移グラフ（EXPの増減が日付ごとに表示されます）
+　　　赤字が今日の日付です。
+- **右上**：カレンダー（色の濃淡でその日の進捗度合が表示されます）
+　　　赤字が今日の日付です。
+- **右下**：進行中のGoal（目標名と締切日がリスト表示されます）
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+![ダッシュボード](public/images/ダッシュボード.png)
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 2. Goal（目標）の設定
+1. ダッシュボード下部の「目標を設定する」ボタンをクリック
+2. 目標のタイトル・目標の内容・期限を入力して「設定する」をクリックして保存
+3. 保存したGoalの詳細ページに遷移します
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+![Goalの設定](public/images/goalの設定.png)
 
-### Setup for Production Testing
 
-1. Copy the example configuration file:
-```bash
-cp cypress.config.prod.example.ts cypress.config.prod.ts
-```
+## Goalページ
+1.Goalの内容が編集できます
+2.Small Goalの作成ができます
 
-2. Edit `cypress.config.prod.ts` and set your actual test user credentials:
-```typescript
-env: {
-  TEST_EMAIL: 'your-actual-email@example.com',
-  TEST_PASSWORD: 'your-actual-password'
-}
-```
+![Goalページ](public/images/goalページ.png)
 
-3. Run production tests:
-```bash
-npm run cypress:prod
-```
+## 3. Small Goal（小目標）の設定
 
-### API Testing Options
+1. 目標詳細ページの「Small Goalの作成」をクリックすると、Small Goalを設定できます
+2. Small Goalのタイトル・Task・Small Goalの難易度・期限を入力して「設定する」をクリックして保存
 
-You can configure different testing modes in `cypress.env.prod.json`:
+※Small Goalは必須ではありません。Goalを達成するために、その道標になるのがSmall Goalです。Small Goalを作成する際、Taskの設定は必須です。
 
-```json
-{
-  "MOCK_AUTH": "true",      // Use mock authentication (fast)
-  "TEST_REAL_API": "false", // Test actual API calls
-  "MOCK_API": "true"        // Mock API responses
-}
-```
+※Small Goalの難易度はなんとなくで問題ありません。難易度によって獲得するEXP（経験値）が変わりますが、大事なのは日々積み重ねができているかです。
 
-**Testing Modes:**
+Tips：目標達成への道をなるべく細かく設定するのが理想ですが、大雑把でも問題なく、むしろ1日で完了できる小さな目標をSmall Goalで設定してみてください。
 
-- **Mock Authentication Only** (`MOCK_AUTH: "true", TEST_REAL_API: "false"`):
-  - Fast tests using mock authentication
-  - No actual API calls
-  - Good for UI testing
 
-- **Mock Auth + Real API** (`MOCK_AUTH: "true", TEST_REAL_API: "true"`):
-  - Mock authentication for speed
-  - Real API calls to test backend integration
-  - Good for integration testing
+GoalとSmall Goal・タスクの例　
+Goal: TOEICで800点以上を取得する
+Small Goal : 基礎文法をマスターする
+期限: 2日後
+タスク:
+・現在, 過去進行形をおさらいする
+・現在, 過去進行形の問題を10問解く
+・間違えた問題をノートにまとめる
 
-- **Real Authentication** (`MOCK_AUTH: "false"`):
-  - Full end-to-end testing
-  - Requires valid user credentials
-  - Slower but comprehensive
+![Small Goalの作成](public/images/Small_Goal-setting2.png)
 
-**Note:** `cypress.config.prod.ts` and `cypress.env.prod.json` are gitignored to protect sensitive information.
+
+## 4. Goalの達成
+
+- Goalを達成したら「達成したGoal」ボタンから達成したGoalの一覧を確認できます
+- 達成するとEXP(経験値)が増え、またRankが上がります
+- Rankが10を超えると「ごほうびルーレット」を回せるようになります
+
+![グラフ](public/images/グラフ.png)
+
+
+---
+
+## 5. カレンダー
+
+- カレンダーには、その日獲得したEXPの量に応じて色が変わります
+- ピンク字になっているのが、今日の日付です
+
+![カレンダー](public/images/Calendar.png)
+
+
+## 機能一覧
+### 認証
+- AWS Amplify を利用したユーザー登録／ログイン／ログアウト
+- ログイン状態の判定と保護ルーティング（未ログイン時は /login へリダイレクト）
+
+### ダッシュボード
+- プロフィール表示（ユーザー名・アバター・累計EXP・現在のランク）
+- 最新の達成 Goal 一覧表示
+- EXP カレンダー：１日ごとの獲得 EXP をヒートマップで可視化
+- EXP 折れ線グラフ：直近１週間の EXP 推移を表示
+- Goal 一覧（進行中／完了）と操作ボタン
+
+### Goal 管理
+- Goal 作成（タイトル・内容・期限）
+- Goal 編集／削除
+- Goal 詳細ページ /goals/[goalId] で Small Goal やタスクを紐づけて管理
+- Goal 完了時は「Completed Goals」ページに自動で移動
+
+### Small Goal & タスク管理
+- Goal を細分化した Small Goal の作成・編集・削除
+- Small Goal 内のタスク進捗管理
+- Small Goal/タスク完了で EXP 加算
+
+### ランク & EXP システム
+- Goal、Small Goal達成で EXP を付与
+- EXP が一定値に達するとランクアップ
+- ランク10を超えると「ごほうびルーレット」が解放
+
+### ごほうびルーレット
+- チケットを１枚消費してルーレットを回せる
+- 12 セグメントのホイールが停止した位置番号からごほうびテキストを取得
+- 結果はモーダルで表示
+- API 連携でチケット残数を管理しスピン後に更新
+
+### チケット管理
+- 現在のチケット枚数を管理
+- ルーレットスピン時にチケットを 1 枚消費
+
+### ルーレットテキスト編集
+- ルーレットの数字に対応するテキストを好きなように編集できる
+
+### ユーザー名編集
+- ダッシュボードからユーザー名を変更 
+
+## 使用技術
+
+| フロントエンド |
+| -------------- |
+| React.js (Next.js) 　|
+| React Calendar （カレンダー UI）　|
+| Recharts （EXP 折れ線グラフ）　|
+| eslint　 |
+| Jest ＋ React Testing Library（ユニット / コンポーネントテスト）　　|
+
+
+| バックエンド |
+| ----------------- |
+| Ruby 3.2.8 |
+| Rails 7.0.7.2 |
+| RuboCop（コード解析） |
+| RSpec（自動テスト）|
+| Puma（APサーバー） |
+| MySQL 8.0.42 |
+
+
+| インフラ |
+| -------------- |
+| Docker/docker-compose|
+| AWS（Amplify,ECR,ECS,Fargate,VPC,S3,Route53,ALB,RDS,ACM,SSM） |
+| Terraform(インフラをコード管理) |
+
+
+## インフラ構成図
+
+![インフラ構成図](public/images/インフラ構成図-072402.png)
+
+
+## ER図
+![er図](public/images/er図2.png)
+
+
+## なぜ、Rails + Next.js + AWS ECS + Terraform で開発したのか
+
+### Rails の採用理由
+- 日本語のドキュメント・学習教材・記事が豊富なため
+- ルーティングとコントローラ構成が REST を前提にしており、API 設計が自然に整うため
+- RSpec / FactoryBot など、「テストを書く」前提でツールが整備済みであるため
+
+---
+
+### Next.js の採用理由
+- `next/link` と `next/router` によるクライアントサイド遷移でページ間をシームレスに移動でき、SPA 対応が容易なため  
+- `app/` や `pages/` ディレクトリにファイルを置くだけでルートが自動生成され、ビルド時にルートごとのバンドルが分割され初期表示が高速なため  
+- Amplify など PaaS との親和性が高く、ビルド → デプロイ → CDN キャッシュが標準化されており CI/CD の設定が最小限なため
+
+---
+
+### AWS ECS の採用理由
+- 基盤サーバーの管理を AWS に任せられるため、運用負荷と開発コストを抑えられるため  
+- 前職で AWS を利用していたため馴染みがあり、マネジメントコンソールなど GUI 操作にも慣れているため  
+- 他サービスと比べてドキュメントが豊富でユーザーの知見も多く、学習コストが低いため
+
+---
+
+### Terraformの採用理由
+AWS マネジメントコンソールの UI 変更に伴う手順更新コストを避けるため
+インフラをコード（IaC）で管理すれば、変更内容をレビュー・再利用でき、結果として工数を大きく削減できると判断したため
+
+
+## まとめ
+
+PlusONEは、目標管理をアプリですが、日々どれだけ積み重ねができているのか、また振り返った時にどれだけ積み重ねてきたかを可視化するために作成しました。
+EXPを獲得する感覚で、自分を成長させることの一助になればと思い作成しました。
 
