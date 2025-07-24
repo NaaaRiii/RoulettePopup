@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Header from '../../components/Header';
 
-// Next.js の useRouter のモック
+
 const mockPush = jest.fn();
 jest.mock('next/router', () => ({
   useRouter: () => ({
@@ -11,7 +11,6 @@ jest.mock('next/router', () => ({
   }),
 }));
 
-// AWS Amplify の useAuthenticator のモック
 const mockUseAuthenticator = jest.fn();
 const mockSignOut = jest.fn();
 jest.mock('@aws-amplify/ui-react', () => ({
@@ -20,13 +19,11 @@ jest.mock('@aws-amplify/ui-react', () => ({
 
 describe('Header コンポーネント', () => {
   beforeEach(() => {
-    // デフォルトは未ログイン状態
     mockUseAuthenticator.mockReturnValue({
       route: 'unauthenticated',
       user: null,
       signOut: mockSignOut,
     });
-    // モックのリセット
     jest.clearAllMocks();
   });
 
@@ -63,13 +60,11 @@ describe('Header コンポーネント', () => {
 
       render(<Header />);
       
-      // コンポーネントが正しい値を取得していることを確認
       expect(screen.getByText('ログイン中')).toBeInTheDocument();
       expect(screen.getByText('ログアウト')).toBeInTheDocument();
     });
 
     it('isLoggedIn の判定が正しく機能すること', () => {
-      // 未ログイン状態
       mockUseAuthenticator.mockReturnValue({
         route: 'unauthenticated',
         user: null,
@@ -81,7 +76,6 @@ describe('Header コンポーネント', () => {
       expect(screen.getByText('ログイン')).toBeInTheDocument();
       expect(screen.queryByText('ログイン中')).not.toBeInTheDocument();
 
-      // ログイン状態
       mockUseAuthenticator.mockReturnValue({
         route: 'authenticated',
         user: { username: 'testuser' },
@@ -108,10 +102,10 @@ describe('Header コンポーネント', () => {
       const loginLink = screen.getByText('ログイン');
 
       expect(howToLink).toBeInTheDocument();
-      expect(howToLink).toHaveAttribute('href', '/dashboard');
+      expect(howToLink).toHaveAttribute('href', 'https://qiita.com/NaaaRiii/items/b79753445554530fafd7');
 
       expect(trialLink).toBeInTheDocument();
-      expect(trialLink).toHaveAttribute('href', '/signup');
+      expect(trialLink).toHaveAttribute('href', '/guest-signin');
 
       expect(loginLink).toBeInTheDocument();
       expect(loginLink).toHaveAttribute('href', '/dashboard');
@@ -129,36 +123,31 @@ describe('Header コンポーネント', () => {
     });
 
     it('ログイン状態の要素が表示されること', () => {
-      // "You are Logged In" テキストの確認
       expect(screen.getByText('ログイン中')).toBeInTheDocument();
 
-      // Dashboard リンクの確認
       const dashboardLink = screen.getByText('ダッシュボード');
       expect(dashboardLink).toBeInTheDocument();
       expect(dashboardLink).toHaveAttribute('href', '/dashboard');
 
-      // How to Use リンクの確認
       const howToUseLink = screen.getByText('使い方');
       expect(howToUseLink).toBeInTheDocument();
-      expect(howToUseLink).toHaveAttribute('href', '/dashboard');
+      expect(howToUseLink).toHaveAttribute('href', 'https://qiita.com/NaaaRiii/items/b79753445554530fafd7');
 
-      // Log out リンクの確認
       expect(screen.getByText('ログアウト')).toBeInTheDocument();
     });
 
-    it('ログアウトリンクをクリックした時に適切な処理が実行されること', () => {
+    it('ログアウトリンクをクリックした時に適切な処理が実行されること', async () => {
       const logoutLink = screen.getByText('ログアウト');
 
-      // クリックイベントを発火し、デフォルトの動作を防止
       fireEvent.click(logoutLink, {
         preventDefault: () => {},
       });
 
-      // signOut 関数が呼ばれること
       expect(mockSignOut).toHaveBeenCalled();
 
-      // ルーターの push('/') が呼ばれること
-      expect(mockPush).toHaveBeenCalledWith('/');
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/');
+      });
     });
   });
 });

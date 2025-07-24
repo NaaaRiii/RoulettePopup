@@ -56,3 +56,5 @@ cypress.env.example.json
 cypress.config.prod.ts
 
 .env.local
+
+*.mmd

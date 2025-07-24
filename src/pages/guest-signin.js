@@ -22,7 +22,6 @@ export default function GuestSigninPage() {
           throw new Error(`Guest login failed: ${response.status} ${text}`);
         }
 
-        // Rails側のゲストログインが成功したら、Amplify側でも認証状態を設定
         const email = process.env.NEXT_PUBLIC_GUEST_EMAIL;
         const password = process.env.NEXT_PUBLIC_GUEST_PASSWORD;
         
@@ -32,7 +31,6 @@ export default function GuestSigninPage() {
           return;
         }
 
-        // 既に認証されているかチェック
         let isAlreadyAuthenticated = false;
         try {
           await getCurrentUser();
@@ -42,7 +40,6 @@ export default function GuestSigninPage() {
           console.log('User is not authenticated, proceeding with sign in');
         }
 
-        // 認証されていない場合のみsignInを実行
         if (!isAlreadyAuthenticated) {
           try {
             const { isSignedIn, nextStep } = await signIn({ username: email, password });
@@ -58,7 +55,6 @@ export default function GuestSigninPage() {
           }
         }
 
-        // 認証状態を再確認
         try {
           const currentUser = await getCurrentUser();
           console.log('Final auth check - Current user:', currentUser);
@@ -66,7 +62,6 @@ export default function GuestSigninPage() {
           console.error('Final auth check failed:', error);
         }
 
-        // Amplifyの認証状態が確実に反映されるまで少し待機
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         console.log('Redirecting to dashboard...');
@@ -78,8 +73,7 @@ export default function GuestSigninPage() {
     };
 
     login();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [router]);
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
