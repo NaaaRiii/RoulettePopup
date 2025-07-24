@@ -121,6 +121,14 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
     }, spinDuration);
   };
 
+  // お試し（無料）でルーレットを回すハンドラー
+  const startTrialSpin = () => {
+    // 既に回転中の場合は何もしない
+    if (isSpinning) return;
+
+    startSpinning();
+  };
+
   const closeModal = () => {
     console.log('Closing modal and fetching tickets');
     setIsModalOpen(false);
@@ -142,9 +150,12 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
           {segments}
         </div>
 
-        <div className="start-button">
+        <div className="start-button" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+          <button data-testid="trial-button" onClick={startTrialSpin} disabled={isSpinning}>
+            お試しで回す
+          </button>
           <button data-testid="start-button" onClick={startSpinningWithTicket} disabled={isSpinning}>
-            ルーレットを回す
+            チケットを消費して回す
           </button>
         </div>
           <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>

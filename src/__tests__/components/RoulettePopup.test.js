@@ -310,9 +310,7 @@ describe('ルーレット回転処理', () => {
     const mockFetchTickets = jest.fn();
 
     render(
-      <TicketsContext.Provider
-        value={{ tickets: 5, setTickets: mockSetTickets, fetchTickets: mockFetchTickets }}
-      >
+      <TicketsContext.Provider value={{ tickets: 5, setTickets: mockSetTickets, fetchTickets: mockFetchTickets }}>
         <RoulettePopup />
       </TicketsContext.Provider>
     );
@@ -683,3 +681,74 @@ describe('初期チケット枚数の表示', () => {
     expect(screen.getByTestId('ticket-count').textContent).toBe('チケット:5')
   })
 })
+
+/* ──────────────────────────────────────────────────────────────── */
+/* お試しスピン (Trial Spin)                                       */
+/* ──────────────────────────────────────────────────────────────── */
+
+describe('お試しスピン (Trial Spin)', () => {
+  beforeEach(() => {
+    // fetchWithAuth など前回までの呼び出しをクリア
+    fetchWithAuth.mockClear();
+
+    // Math.random を固定して deterministic にする (100°)
+    jest.spyOn(Math, 'random').mockReturnValue(100 / 360);
+
+    // fetchRouletteText の戻り値をモック
+    utils.fetchRouletteText.mockResolvedValue({ text: 'トライアルテキスト' });
+  });
+
+  afterEach(() => {
+    Math.random.mockRestore();
+    jest.restoreAllMocks();
+  });
+
+  it('「お試しで回す」ボタンが存在し、初期状態で有効', () => {
+    render(
+      <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
+        <RoulettePopup />
+      </TicketsContext.Provider>
+    );
+
+    const trialBtn = screen.getByTestId('trial-button');
+    expect(trialBtn).toBeTruthy();
+    expect(trialBtn.disabled).toBe(false);
+  });
+
+  it('お試しボタン押下で API 呼び出しなしにスピンし、モーダルが表示される', async () => {
+    // window.confirm は使われない想定なので spy だけしておく
+    window.confirm = jest.fn();
+
+    const mockSetTickets = jest.fn();
+
+    render(
+      <TicketsContext.Provider value={{ tickets: 1, setTickets: mockSetTickets, fetchTickets: jest.fn() }}>
+        <RoulettePopup spinDuration={0} />
+      </TicketsContext.Provider>
+    );
+
+    const trialBtn = screen.getByTestId('trial-button');
+
+    // クリックでスピン開始
+    fireEvent.click(trialBtn);
+
+    // confirm は呼ばれない
+    expect(window.confirm).not.toHaveBeenCalled();
+
+    // API 呼び出しも行われない
+    expect(fetchWithAuth).not.toHaveBeenCalled();
+
+    // setTickets も呼ばれない（チケット消費なし）
+    expect(mockSetTickets).not.toHaveBeenCalled();
+
+    // fetchRouletteText が呼ばれるのを待機
+    await waitFor(() => {
+      expect(utils.fetchRouletteText).toHaveBeenCalled();
+    });
+
+    // モーダル表示 & テキスト確認
+    const modal = await screen.findByRole('dialog');
+    expect(modal).toBeTruthy();
+    expect(modal.textContent).toContain('トライアルテキスト');
+  });
+});
