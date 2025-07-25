@@ -10,6 +10,8 @@ import '@aws-amplify/ui-react/styles.css';
 
 import { useRouter } from 'next/router';
 import { getCurrentUser } from 'aws-amplify/auth';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
 function AuthenticatedApp({ Component, pageProps }) {
   const router = useRouter();
@@ -18,6 +20,16 @@ function AuthenticatedApp({ Component, pageProps }) {
   const isPublicPage = publicPaths.includes(router.pathname);
 
   const [signedIn, setSignedIn] = useState(null);
+
+  // Material-UIテーマの作成
+  const theme = createTheme({
+    typography: {
+      fontFamily: '"UD デジタル 教科書体 N-R", "UD Digi Kyokasho NP-R", "Roboto", "Helvetica", "Arial", sans-serif',
+      button: {
+        fontFamily: '"UD デジタル 教科書体 N-R", "UD Digi Kyokasho NP-R", "Roboto", "Helvetica", "Arial", sans-serif',
+      },
+    },
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -38,11 +50,14 @@ function AuthenticatedApp({ Component, pageProps }) {
   }, [router.pathname]);
 
   const content = (
-    <GoalsProvider>
-      <TicketsProvider>
-        <Component {...pageProps} />
-      </TicketsProvider>
-    </GoalsProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <GoalsProvider>
+        <TicketsProvider>
+          <Component {...pageProps} />
+        </TicketsProvider>
+      </GoalsProvider>
+    </ThemeProvider>
   );
 
   if (isPublicPage) return content;

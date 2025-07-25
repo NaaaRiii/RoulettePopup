@@ -159,7 +159,8 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
               data-testid="trial-button" 
               onClick={startTrialSpin} 
               disabled={isSpinning}
-              size="large"
+              size="medium"
+              sx={{ fontSize: '10px' }}
             >
               お試しで回す
             </Button>
@@ -169,7 +170,8 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
               data-testid="start-button" 
               onClick={startSpinningWithTicket} 
               disabled={isSpinning}
-              size="large"
+              size="medium"
+              sx={{ fontSize: '10px' }}
             >
               チケットを消費して回す
             </Button>
@@ -184,6 +186,7 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
               data-testid="close-modal-button" 
               onClick={closeModal}
               size="medium"
+              sx={{ fontSize: '12px' }}
             >
               Close
             </Button>
