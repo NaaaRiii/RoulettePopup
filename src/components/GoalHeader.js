@@ -27,7 +27,7 @@ const GoalHeader = ({
         ) : (
           <>
             <p>このGoalを完了しますか?</p>
-            {goal.small_goals?.some(sg => !sg.completed) ? (
+            {!goal.small_goals || goal.small_goals.length === 0 || goal.small_goals.some(sg => !sg.completed) ? (
               <button disabled className='completed-goal-button'>
                 Goalを完了する
               </button>

@@ -707,11 +707,8 @@ describe('Goal 完了', () => {
       completed: false,
       deadline: null,
     };
-    // すべて completed:true ⇒ "Completed Goal" ボタンが有効になる
-    const smallGoals = [
-      { id:1, title:'SG1', completed:true,  difficulty:'Easy', deadline:null, tasks:[] },
-      { id:2, title:'SG2', completed:true,  difficulty:'Easy', deadline:null, tasks:[] },
-    ];
+    // Small Goal が存在しない場合 ⇒ "Goalを完了する" ボタンは無効になる
+    const smallGoals = [];  // ← 変更: Small Goal なし
 
     fetchWithAuth.mockImplementation(async (url, opts = {}) => {
       if (url === `/api/goals/${goalId}`)                     // Goal 詳細
@@ -727,7 +724,7 @@ describe('Goal 完了', () => {
     });
   });
 
-  it('未完了 small goal が無いとき "Completed Goal" で Goal 完了 & ダッシュボード遷移', async () => {
+  it('small goal が無いとき Goal 完了ボタンが無効になる', async () => {
     render(
       <Authenticator.Provider>
         <TicketsContext.Provider
@@ -741,33 +738,14 @@ describe('Goal 完了', () => {
     /* ① Goal & Small Goals の描画を待つ */
     await screen.findByText('Goal : Test Goal');
 
-    /* "Completed Goal" ボタンが有効になっているはず */
+    /* "Goalを完了する" ボタンが無効になっていることを確認 */
     const goalCompleteBtn = screen.getByRole('button', { name:/Goalを完了する/i });
-    expect(goalCompleteBtn).toBeEnabled();
+    expect(goalCompleteBtn).toBeDisabled();
 
-    /* ② クリック */
-    const user = userEvent.setup();
-    await user.click(goalCompleteBtn);
-
-    /* ③ /api/goals/:id/complete が POST されたか */
-    await waitFor(() =>
-      expect(fetchWithAuth).toHaveBeenCalledWith(
-        `/api/goals/${goalId}/complete`,
-        { method:'POST' }
-      )
-    );
-
-    /* ④ fetchTickets() が呼ばれる（チケット枚数更新） */
-    await waitFor(() =>
-      expect(fetchTicketsMock).toHaveBeenCalled()
-    );
-
-    /* ⑤ router.push('/dashboard', flash message) が呼ばれる */
-    await waitFor(() =>
-      expect(routerPush).toHaveBeenCalledWith({
-        pathname: '/dashboard',
-        query: { message: encodeURIComponent('Goal Completed!') },
-      })
+    // 無効ボタンのためクリック操作は行わず、complete API が呼ばれていないことを確認
+    expect(fetchWithAuth).not.toHaveBeenCalledWith(
+      `/api/goals/${goalId}/complete`,
+      expect.any(Object)
     );
   });
 });

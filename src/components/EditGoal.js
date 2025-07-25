@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import styles from '../components/CreateGoal.module.css';
 
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
-  const router = useRouter();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [deadline, setDeadline] = useState('');
@@ -19,10 +17,14 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
 
   useEffect(() => {
     if (goalId && isOpen) {
-      fetch(`${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/goals/${goalId}`,
-        { method: 'GET'}
-      )
-        .then((response) => response.json())
+      fetchWithAuth(`/api/goals/${goalId}`, { method: 'GET' })
+        .then(async (response) => {
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to load goal');
+          }
+          return response.json();
+        })
         .then((data) => {
           setTitle(data.title);
           setContent(data.content);
