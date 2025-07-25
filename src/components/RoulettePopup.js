@@ -4,6 +4,7 @@ import Modal from './Modal';
 import { fetchRouletteText } from './utils';
 import { TicketsContext } from '../contexts/TicketsContext';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { Button, Stack } from '@mui/material';
 
 export const isValidAngle = (angle) => {
   const excludedRanges = [
@@ -150,19 +151,44 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
           {segments}
         </div>
 
-        <div className="start-button" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-          <button data-testid="trial-button" onClick={startTrialSpin} disabled={isSpinning}>
-            お試しで回す
-          </button>
-          <button data-testid="start-button" onClick={startSpinningWithTicket} disabled={isSpinning}>
-            チケットを消費して回す
-          </button>
+        <div className="start-button" style={{ display: 'flex', justifyContent: 'center' }}>
+          <Stack direction="row" spacing={2}>
+            <Button 
+              variant="outlined" 
+              color="primary" 
+              data-testid="trial-button" 
+              onClick={startTrialSpin} 
+              disabled={isSpinning}
+              size="large"
+            >
+              お試しで回す
+            </Button>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              data-testid="start-button" 
+              onClick={startSpinningWithTicket} 
+              disabled={isSpinning}
+              size="large"
+            >
+              チケットを消費して回す
+            </Button>
+          </Stack>
         </div>
-          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-              <p>ごほうびルーレットの結果です！！！: {rouletteText}</p>
-              <button data-testid="close-modal-button" onClick={closeModal}>Close</button>
-          </Modal>
-      </div>
+
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+            <p>ごほうびルーレットの結果です！！！: {rouletteText}</p>
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              data-testid="close-modal-button" 
+              onClick={closeModal}
+              size="medium"
+            >
+              Close
+            </Button>
+        </Modal>
+    </div>
   );
 };
 
