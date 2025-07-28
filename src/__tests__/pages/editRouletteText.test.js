@@ -943,7 +943,7 @@ describe('EditRouletteText Component', () => {
       window.confirm.mockRestore();
     });
     
-    it('starts the roulette when the "ルーレットを回す" button is clicked', async () => {
+    it('starts the roulette when the "チケットを消費して回す" button is clicked', async () => {
       // window.confirm をモックして常に true を返す
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
     
@@ -955,8 +955,8 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
     
-      // 「ルーレットを回す」ボタンを取得
-      const startButton = screen.getByText('ルーレットを回す');
+      // 「チケットを消費して回す」ボタンを取得
+      const startButton = screen.getByText('チケットを消費して回す');
     
       // ボタンが有効であることを確認
       expect(startButton).toBeEnabled();
@@ -970,6 +970,47 @@ describe('EditRouletteText Component', () => {
       });
     
       // window.confirm のモックを元に戻す
+      window.confirm.mockRestore();
+    });
+
+    it('does not consume tickets when the "お試しで回す" button is clicked', async () => {
+      // window.confirm は呼ばれない想定
+      jest.spyOn(window, 'confirm').mockImplementation(() => true);
+
+      // fetchWithAuth のモックをクリア
+      fetchWithAuth.mockClear();
+
+      const mockSetTickets   = jest.fn();
+      const mockFetchTickets = jest.fn();
+
+      render(
+        <Authenticator.Provider>
+          <TicketsContext.Provider value={{ tickets: 3, setTickets: mockSetTickets, fetchTickets: mockFetchTickets }}>
+            <EditRouletteText />
+          </TicketsContext.Provider>
+        </Authenticator.Provider>
+      );
+
+      // 「お試しで回す」ボタンを取得
+      const trialButton = await screen.findByText('お試しで回す');
+
+      // クリック
+      userEvent.click(trialButton);
+
+      // window.confirm は呼ばれていない
+      expect(window.confirm).not.toHaveBeenCalled();
+
+      // fetchWithAuth は呼ばれていない（チケット消費 API 不呼出）
+      expect(fetchWithAuth).not.toHaveBeenCalled();
+
+      // setTickets も呼ばれていない（チケット枚数更新なし）
+      expect(mockSetTickets).not.toHaveBeenCalled();
+
+      // ボタンが一時的に無効化される（スピン中）→ waitFor を使い disabled になるまで確認
+      await waitFor(() => {
+        expect(trialButton).toBeDisabled();
+      });
+
       window.confirm.mockRestore();
     });
   });

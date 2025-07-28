@@ -160,7 +160,7 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
               onClick={startTrialSpin} 
               disabled={isSpinning}
               size="medium"
-              sx={{ fontSize: '10px' }}
+              sx={{ fontSize: '13px', fontFamily: '"UD デジタル 教科書体 N-R", "UD Digi Kyokasho NP-R"', minWidth: '180px' }}
             >
               お試しで回す
             </Button>
@@ -171,7 +171,7 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
               onClick={startSpinningWithTicket} 
               disabled={isSpinning}
               size="medium"
-              sx={{ fontSize: '10px' }}
+              sx={{ fontSize: '13px', fontFamily: '"UD デジタル 教科書体 N-R", "UD Digi Kyokasho NP-R"', minWidth: '180px' }}
             >
               チケットを消費して回す
             </Button>
@@ -186,7 +186,7 @@ const RoulettePopup = ({ onSpinComplete, spinDuration = 6000 }) => {
               data-testid="close-modal-button" 
               onClick={closeModal}
               size="medium"
-              sx={{ fontSize: '12px' }}
+              sx={{ fontSize: '12px', fontFamily: '"UD デジタル 教科書体 N-R", "UD Digi Kyokasho NP-R"' }}
             >
               Close
             </Button>
