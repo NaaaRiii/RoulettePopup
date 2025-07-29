@@ -26,7 +26,7 @@ jest.mock('../../components/EditSmallGoal', () => {
   };
 });
 
-describe('SmallGoalList', () => {
+describe('SmallGoalListコンポーネント', () => {
   const mockGoal = {
     id: 123,
     title: 'Test Goal',

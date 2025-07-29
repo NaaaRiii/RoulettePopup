@@ -8,7 +8,6 @@ import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@testing-library/jest-dom';
 
-// `next/router` のモック
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }));
@@ -18,7 +17,6 @@ const mockRouletteTexts = [
   { id: 2, number: 2, text: 'Prize 2' },
 ];
 
-// `useFetchRouletteTexts` のモック
 jest.mock('../../hooks/useFetchRouletteTexts', () => {
   const React = require('react');
   return {
@@ -64,8 +62,6 @@ const TestWrapper = ({ children }) => {
 };
 
 beforeEach(() => {
-  //jest.clearAllMocks();
-
   useRouter.mockImplementation(() => ({
     route: '/edit-roulette-text',
     pathname: '/edit-roulette-text',
@@ -86,16 +82,14 @@ beforeEach(() => {
 });
 
 beforeAll(() => {
-  // window.alert をモック
   jest.spyOn(window, 'alert').mockImplementation(() => {});
 });
 
 afterAll(() => {
-  // モックを元に戻す
   window.alert.mockRestore();
 });
 
-// `fetch` のモック設定
+
 global.fetch = jest.fn((url, options) => {
   const { method = 'GET' } = options;
 
@@ -106,7 +100,7 @@ global.fetch = jest.fn((url, options) => {
       json: () => Promise.resolve(mockRouletteTexts),
     });
   }
-  // ---------------- PATCH /api/roulette_texts/:number ------
+
   const idMatch = url.match(/^\/api\/roulette_texts\/(\d+)$/);
   if (idMatch && method === 'PATCH') {
     const body = JSON.parse(options.body);
@@ -124,7 +118,7 @@ global.fetch = jest.fn((url, options) => {
     });
   }
 
-  // ユーザー情報を取得するエンドポイントのモック
+
   if (url === '/api/current_user' && method === 'GET') {
     return Promise.resolve({
       ok: true,
@@ -155,14 +149,14 @@ global.fetch = jest.fn((url, options) => {
   });
 });
 
-// テストケース
-describe('EditRouletteText Component', () => {
+
+describe('EditRouletteTextコンポーネント', () => {
   const mockTicketsContextValue = {
     tickets: 5,
     setTickets: jest.fn(),
   };
 
-  it('renders EditRouletteText component without crashing', () => {
+  it('EditRouletteTextコンポーネントがクラッシュすることなくレンダリングされること', () => {
     render(
       <Authenticator.Provider>
         <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -175,8 +169,8 @@ describe('EditRouletteText Component', () => {
     expect(screen.getByText('Prize 2')).toBeInTheDocument();
   });
 
-  describe('Ticket Information Display', () => {
-    it('displays the correct tickets value from TicketsContext', async () => {
+  describe('チケット情報の表示', () => {
+    it('TicketsContextから正しいチケット値を表示すること', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -191,7 +185,7 @@ describe('EditRouletteText Component', () => {
       });
     });
 
-    it('updates the displayed tickets when context values change', async () => {
+    it('コンテキストの値が変更されたときに表示されたチケットが更新されること', async () => {
       const Wrapper = () => {
         const [tickets, setTickets] = React.useState(5);
     
@@ -226,8 +220,8 @@ describe('EditRouletteText Component', () => {
   });
 
 
-  describe('Roulette Text List Display', () => {
-    it('displays the roulette text list container', async () => {
+  describe('ルーレットテキストリストの表示', () => {
+    it('ルーレットテキストリストコンテナを表示すること', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -240,7 +234,7 @@ describe('EditRouletteText Component', () => {
       expect(rouletteTextList).toBeInTheDocument();
     });
 
-    it('displays the correct number of roulette texts', async () => {
+    it('正しい数のルーレットテキストを表示すること', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -253,7 +247,7 @@ describe('EditRouletteText Component', () => {
       expect(rouletteTextItems).toHaveLength(2);
     });
 
-    it('displays each roulette text correctly', async () => {
+    it('各ルーレットテキストを正しく表示すること', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -269,7 +263,7 @@ describe('EditRouletteText Component', () => {
       expect(rouletteTextItem2).toHaveTextContent('Prize 2');
     });
 
-    it('displays the correct image for each roulette text item', async () => {
+    it('各ルーレットテキスト項目に対して正しい画像を表示すること', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -306,8 +300,8 @@ describe('EditRouletteText Component', () => {
     });
   });
 
-  describe('Data Fetching', () => {
-    it('fetches roulette texts on mount and updates state', async () => {
+  describe('データの取得', () => {
+    it('マウント時にルーレットテキストを取得し、状態を更新すること', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -321,8 +315,8 @@ describe('EditRouletteText Component', () => {
     });
   });
 
-  describe('Edit Form', () => {
-    it('includes necessary elements in the edit form', async () => {
+  describe('編集フォーム', () => {
+    it('編集フォームに必要な要素が含まれていること', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -338,7 +332,7 @@ describe('EditRouletteText Component', () => {
       expect(form).toBeInTheDocument();
     });
 
-    it('contains a number select box and a text input field', async () => {
+    it('数字選択ボックスとテキスト入力フィールドが含まれていること', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -358,8 +352,8 @@ describe('EditRouletteText Component', () => {
     });
   });
 
-  describe('Edit Form Interaction', () => {
-    it('sets the corresponding text when a number is selected', async () => {
+  describe('編集フォームの操作', () => {
+    it('数字が選択されたときに対応するテキストが設定されること', async () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -385,8 +379,8 @@ describe('EditRouletteText Component', () => {
     });
   });
 
-  describe('Form Submission', () => {
-    it('edits the text and submits the form correctly', async () => {
+  describe('フォームの送信', () => {
+    it('テキストを編集し、フォームを正しく送信すること', async () => {
       jest.spyOn(window, 'confirm').mockReturnValue(true);
       global.fetch.mockClear();
   
@@ -433,7 +427,7 @@ describe('EditRouletteText Component', () => {
       window.confirm.mockRestore();
     });
   
-    it('updates the rouletteTexts state correctly after editing', async () => {
+    it('編集後にrouletteTexts状態を正しく更新すること', async () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
   
       render(
@@ -468,7 +462,7 @@ describe('EditRouletteText Component', () => {
       window.confirm.mockRestore();
     });
 
-    it('displays a flash message after successful edit', async () => {
+    it('編集成功後にフラッシュメッセージを表示すること', async () => {
       jest.spyOn(window, 'confirm').mockReturnValue(true);
       global.fetch.mockClear();
     
@@ -480,23 +474,18 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
       
-      // フォームを開く
       await userEvent.click(await screen.findByText('ルーレットを編集する'));
       
-      // 数字選択して初期値が入るまで待つ
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       userEvent.selectOptions(numberSelect, '1');
       const textInput = screen.getByLabelText('内容を編集してください。');
       await waitFor(() => expect(textInput).toHaveValue('Prize 1'));
     
-      // 新しいテキストを入れて
       await userEvent.clear(textInput);
       await userEvent.type(textInput, 'Updated Prize 1');
     
-      // 送信→PATCH
       userEvent.click(screen.getByText('内容を保存する'));
       
-      // ―― ① PATCH リクエストが行われたかを待機
       await waitFor(() => {
         const patchCall = global.fetch.mock.calls.find(([url, opts]) =>
           url.endsWith('/api/roulette_texts/1') &&
@@ -521,13 +510,10 @@ describe('EditRouletteText Component', () => {
         window.confirm.mockRestore();
       });
     
-    it('handles *new* API format without roulette_text wrapper', async () => {
-      // confirm を常に YES
+    it('roulette_textラッパーなしの新しいAPI形式を処理すること', async () => {
       jest.spyOn(window, 'confirm').mockReturnValue(true);
   
-      // ------- fetch をこのテスト専用で差し替え -------
       global.fetch.mockImplementationOnce((url, opts) => {
-        // GET /api/roulette_texts (初期一覧) は既存モックに任せる
         if (opts?.method === 'GET') {
           return Promise.resolve({
             ok: true,
@@ -535,7 +521,6 @@ describe('EditRouletteText Component', () => {
             json: () => Promise.resolve(mockRouletteTexts),
           });
         }
-        // PATCH /api/roulette_texts/1 だけ新形式を返す
         return Promise.resolve({
           ok: true,
           status: 200,
@@ -556,29 +541,22 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
   
-      // ------ フォームを開いて編集操作 ------
       await userEvent.click(screen.getByRole('button', { name: /ルーレットを編集する/i }));
       await userEvent.selectOptions(
         screen.getByLabelText('編集したい数字を選んでください。'),
         '1'
       );
       const textInput = screen.getByLabelText('内容を編集してください。');
-      // 初期値は API 取得に失敗した場合は空文字の可能性があるため、値を直接入力
       await userEvent.clear(textInput);
       await userEvent.type(textInput, 'Brand-new Prize 1');
   
-      // ------ 送信 ------
       await userEvent.click(screen.getByText('内容を保存する'));
   
-      // ------ 検証 ------
       await waitFor(() => {
-        // flash
         expect(
           screen.getByText('Number: 1 を Brand-new Prize 1 に変更しました。')
         ).toBeInTheDocument();
-        // list 書き換え
         expect(screen.getByTestId('roulette-text-item-1')).toHaveTextContent('Brand-new Prize 1');
-        // fetchTickets()
         expect(fetchTicketsMock).toHaveBeenCalled();
       });
   
@@ -586,8 +564,8 @@ describe('EditRouletteText Component', () => {
     });
   });
 
-  describe('Insufficient Edit Tickets', () => {
-    it('always displays the edit button regardless of tickets', async () => {
+  describe('編集チケット不足', () => {
+    it('チケット数に関係なく常に編集ボタンを表示すること', async () => {
       const mockTicketsContextValue = {
         tickets: 5,
         fetchTickets: jest.fn(),
@@ -601,15 +579,13 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
   
-      // ボタンが存在することを確認
       const editButton = screen.getByText('ルーレットを編集する');
       expect(editButton).toBeInTheDocument();
     });
   });
   
-  describe('Cancel Button Functionality', () => {
-    it('closes the edit form when the "Cancel" button is clicked', async () => {
-      // window.confirm をモックして常に true を返すように設定
+  describe('キャンセルボタンの機能', () => {
+    it('「キャンセル」ボタンがクリックされたときに編集フォームを閉じること', async () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
   
       render(
@@ -620,30 +596,25 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
   
-      // "ルーレットを編集する" ボタンをクリックしてフォームを表示
       const editButton = await screen.findByText('ルーレットを編集する');
       userEvent.click(editButton);
   
-      // 編集フォームが表示されていることを確認
       const editForm = await screen.findByTestId('edit-roulette-text-form');
       expect(editForm).toBeInTheDocument();
   
-      // 「キャンセル」ボタンを取得してクリック
       const cancelButton = screen.getByText('キャンセル');
       userEvent.click(cancelButton);
   
-      // 編集フォームが閉じていることを確認
       await waitFor(() => {
         expect(screen.queryByTestId('edit-roulette-text-form')).not.toBeInTheDocument();
       });
   
-      // window.confirm のモックを元に戻す
       window.confirm.mockRestore();
     });
   });
   
-  describe('RoulettePopup Rendering within EditRouletteText', () => {
-    it('renders RoulettePopup component correctly within EditRouletteText', () => {
+  describe('EditRouletteText内でのRoulettePopupのレンダリング', () => {
+    it('EditRouletteText内でRoulettePopupコンポーネントを正しくレンダリングすること', () => {
       render(
         <Authenticator.Provider>
           <TestWrapper>
@@ -652,7 +623,6 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
 
-      // RoulettePopup の主要な要素を確認
       const rouletteContainer = screen.getByTestId('roulette-container');
       expect(rouletteContainer).toBeInTheDocument();
 
@@ -663,7 +633,6 @@ describe('EditRouletteText Component', () => {
       expect(startButton).toBeInTheDocument();
       expect(startButton).toBeEnabled();
 
-      // 12個のセグメントが存在することを確認
       for (let i = 1; i <= 12; i++) {
         const segment = screen.getByTestId(`segment-${i}`);
         expect(segment).toBeInTheDocument();
@@ -671,8 +640,8 @@ describe('EditRouletteText Component', () => {
     });
   });
 
-  describe('Roulette Description Section', () => {
-    it('displays the roulette description correctly in a list format', () => {
+  describe('ルーレット説明セクション', () => {
+    it('ルーレットの説明をリスト形式で正しく表示すること', () => {
       render(
         <Authenticator.Provider>
           <TicketsContext.Provider value={mockTicketsContextValue}>
@@ -681,23 +650,20 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
   
-      // ルーレット説明セクションの <ul> を取得
       const descriptionList = screen.getByTestId('roulette-description-list');
       expect(descriptionList).toBeInTheDocument();
   
-      // <ul> 内のすべての <li> 要素を取得
       const listItems = descriptionList.querySelectorAll('li');
       expect(listItems).toHaveLength(3);
   
-      // 各 <li> のテキストを確認
       expect(listItems[0]).toHaveTextContent('Rankが10上がるごとに、チケットが付与されます。');
       expect(listItems[1]).toHaveTextContent('ルーレットを回すには、チケットを1枚使用する必要があります。');
       expect(listItems[2]).toHaveTextContent('各チケットの枚数は、左上に表示されています。');
     });
   });
 
-  describe('TicketsContext Data Usage', () => {
-    it('retrieves and displays tickets correctly', () => {
+  describe('TicketsContextデータの使用', () => {
+    it('チケットを正しく取得して表示すること', () => {
       render(
         <Authenticator.Provider>
           <TestWrapper tickets={5}>
@@ -706,16 +672,14 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
 
-      // tickets の表示を確認
       const ticketsElement = screen.getByTestId('tickets');
       expect(ticketsElement).toBeInTheDocument();
       expect(ticketsElement).toHaveTextContent('チケットを『5』枚持っています。');
     });
 
-    it('displays a flash message after successful edit and updates the displayed text', async () => {
+    it('編集成功後にフラッシュメッセージを表示し、表示されたテキストを更新すること', async () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
     
-      // ① レンダリング
       render(
         <Authenticator.Provider>
           <TestWrapper>
@@ -724,11 +688,9 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
     
-      // ② フォームを開く
       userEvent.click(screen.getByRole('button', { name: /ルーレットを編集する/i }));
       await screen.findByTestId('edit-roulette-text-form');
     
-      // ③ セレクト→入力
       userEvent.selectOptions(
         screen.getByLabelText('編集したい数字を選んでください。'),
         '1'
@@ -739,14 +701,11 @@ describe('EditRouletteText Component', () => {
       await userEvent.clear(screen.getByLabelText('内容を編集してください。'));
       await userEvent.type(screen.getByLabelText('内容を編集してください。'), 'New Prize 1');
     
-      // ④ confirm をモック、fetch 履歴をクリア
       jest.spyOn(window, 'confirm').mockReturnValue(true);
       global.fetch.mockClear();
     
-      // ⑤ 送信
       userEvent.click(screen.getByText('内容を保存する'));
     
-      // ⑥ PATCH が正しく投げられたことを検証
       await waitFor(() => {
         const patchCall = global.fetch.mock.calls.find(
           ([url, opts]) =>
@@ -761,14 +720,12 @@ describe('EditRouletteText Component', () => {
         });
       });
     
-      // ⑦ フラッシュメッセージが表示されることを検証
       await waitFor(() => {
         expect(
           screen.getByText('Number: 1 を New Prize 1 に変更しました。')
         ).toBeInTheDocument();
       });
     
-      // ⑧ ✅ 追加：リスト上のリールテキストが更新されていることを検証
       await waitFor(() => {
         const updatedItem = screen.getByTestId('roulette-text-item-1');
         expect(updatedItem).toHaveTextContent('New Prize 1');
@@ -778,8 +735,8 @@ describe('EditRouletteText Component', () => {
     });
   });
 
-  describe('Form Input State Updates', () => {
-    it('updates state variables when select box and input field values change', async () => {
+  describe('フォーム入力状態の更新', () => {
+    it('選択ボックスと入力フィールドの値が変更されたときに状態変数を更新すること', async () => {
       render(
         <Authenticator.Provider>
           <TestWrapper>
@@ -788,35 +745,28 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
   
-      // 編集フォームを表示
       const editButton = await screen.findByText('ルーレットを編集する');
       userEvent.click(editButton);
   
-      // セレクトボックスと入力フィールドを取得
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       const textInput = screen.getByLabelText('内容を編集してください。');
   
-      // 初期状態の確認
       expect(numberSelect).toHaveValue('');
       expect(textInput).toHaveValue('');
   
-      // セレクトボックスで数字「2」を選択
       userEvent.selectOptions(numberSelect, '2');
   
-      // `editedText` が対応するテキストに更新されるのを待つ
       await waitFor(() => expect(textInput).toHaveValue('Prize 2'));
   
-      // テキストフィールドに新しい値を入力
       await userEvent.clear(textInput);
       await userEvent.type(textInput, 'New Prize 2');
   
-      // 入力フィールドの値が更新されたことを確認
       expect(textInput).toHaveValue('New Prize 2');
     });
   });
 
-  describe('Button Click Events', () => {
-    it('shows the edit form when the "ルーレットを編集する" button is clicked', async () => {
+  describe('ボタンクリックイベント', () => {
+    it('「ルーレットを編集する」ボタンがクリックされたときに編集フォームを表示すること', async () => {
       render(
         <Authenticator.Provider>
           <TestWrapper>
@@ -836,7 +786,7 @@ describe('EditRouletteText Component', () => {
       expect(await screen.findByTestId('edit-roulette-text-form')).toBeInTheDocument();
     });
 
-    it('hides the edit form when the "キャンセル" button is clicked', async () => {
+    it('「キャンセル」ボタンがクリックされたときに編集フォームを非表示にすること', async () => {
       render(
         <Authenticator.Provider>
           <TestWrapper>
@@ -862,7 +812,7 @@ describe('EditRouletteText Component', () => {
       });
     });
 
-    it('calls handleSubmit and sends PATCH request', async () => {
+    it('handleSubmitを呼び出し、PATCHリクエストを送信すること', async () => {
       jest.spyOn(window, 'confirm').mockReturnValue(true);
       fetchWithAuth.mockClear();
       global.fetch.mockClear();
@@ -906,10 +856,9 @@ describe('EditRouletteText Component', () => {
       window.confirm.mockRestore();
     });
 
-    it('calls fetchTickets after successful edit', async () => {
+    it('編集成功後にfetchTicketsを呼び出すこと', async () => {
       jest.spyOn(window, 'confirm').mockReturnValue(true);
     
-      // ---- fetchTicketsMock を初期化 ----
       fetchTicketsMock.mockReset();
       fetchTicketsMock.mockImplementation(() => {});
     
@@ -921,10 +870,8 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
     
-      // アンカー
       await screen.findByText('Prize 1');
     
-      // フォーム操作
       await userEvent.click(screen.getByText('ルーレットを編集する'));
       const numberSelect = await screen.findByLabelText('編集したい数字を選んでください。');
       await userEvent.selectOptions(numberSelect, '1');
@@ -937,14 +884,12 @@ describe('EditRouletteText Component', () => {
     
       await userEvent.click(screen.getByText('内容を保存する'));
     
-      // fetchTickets が呼ばれるまで待つ
       await waitFor(() => expect(fetchTicketsMock).toHaveBeenCalled());
     
       window.confirm.mockRestore();
     });
     
-    it('starts the roulette when the "チケットを消費して回す" button is clicked', async () => {
-      // window.confirm をモックして常に true を返す
+    it('「チケットを消費して回す」ボタンがクリックされたときにルーレットを開始すること', async () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
     
       render(
@@ -955,29 +900,22 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
     
-      // 「チケットを消費して回す」ボタンを取得
       const startButton = screen.getByText('チケットを消費して回す');
     
-      // ボタンが有効であることを確認
       expect(startButton).toBeEnabled();
     
-      // ボタンをクリック
       userEvent.click(startButton);
     
-      // ボタンが無効化されるのを待つ
       await waitFor(() => {
         expect(startButton).toBeDisabled();
       });
     
-      // window.confirm のモックを元に戻す
       window.confirm.mockRestore();
     });
 
-    it('does not consume tickets when the "お試しで回す" button is clicked', async () => {
-      // window.confirm は呼ばれない想定
+    it('「お試しで回す」ボタンがクリックされたときにチケットを消費しないこと', async () => {
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
 
-      // fetchWithAuth のモックをクリア
       fetchWithAuth.mockClear();
 
       const mockSetTickets   = jest.fn();
@@ -991,22 +929,16 @@ describe('EditRouletteText Component', () => {
         </Authenticator.Provider>
       );
 
-      // 「お試しで回す」ボタンを取得
       const trialButton = await screen.findByText('お試しで回す');
 
-      // クリック
       userEvent.click(trialButton);
 
-      // window.confirm は呼ばれていない
       expect(window.confirm).not.toHaveBeenCalled();
 
-      // fetchWithAuth は呼ばれていない（チケット消費 API 不呼出）
       expect(fetchWithAuth).not.toHaveBeenCalled();
 
-      // setTickets も呼ばれていない（チケット枚数更新なし）
       expect(mockSetTickets).not.toHaveBeenCalled();
 
-      // ボタンが一時的に無効化される（スピン中）→ waitFor を使い disabled になるまで確認
       await waitFor(() => {
         expect(trialButton).toBeDisabled();
       });

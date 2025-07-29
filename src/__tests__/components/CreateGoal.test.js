@@ -24,7 +24,7 @@ jest.mock('../../utils/fetchWithAuth');
 const originalConsoleError = console.error;
 console.error = jest.fn();
 
-describe('NewGoalModal', () => {
+describe('NewGoalModalコンポーネント', () => {
   beforeEach(() => {
     // 各テスト前にモックをリセット
     jest.clearAllMocks();

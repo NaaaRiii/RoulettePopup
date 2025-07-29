@@ -80,7 +80,7 @@ jest.mock('@aws-amplify/auth', () => ({
   fetchAuthSession: jest.fn(),
 }));
 
-describe('getIdToken', () => {
+describe('getIdTokenユーティリティ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // console.error のモックを設定

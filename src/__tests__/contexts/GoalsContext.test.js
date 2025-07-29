@@ -3,7 +3,7 @@ import { render, waitFor, renderHook } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { GoalsContext, GoalsProvider, useGoals } from '../../contexts/GoalsContext';
 
-describe('GoalsContext', () => {
+describe('GoalsContextコンテキスト', () => {
   it('初期状態で refresh は false である', () => {
     // テスト用のコンポーネント
     const TestComponent = () => {

@@ -20,7 +20,7 @@ global.fetch = jest.fn();
 // Mock environment variables
 const originalEnv = process.env;
 
-describe('GuestSigninPage', () => {
+describe('GuestSigninページ', () => {
   let mockRouter;
 
   beforeEach(() => {
@@ -54,8 +54,8 @@ describe('GuestSigninPage', () => {
     return render(<GuestSigninPage />);
   };
 
-  describe('Successful guest login flow', () => {
-    it('should complete guest login successfully and redirect to dashboard', async () => {
+  describe('ゲストログイン成功フロー', () => {
+    it('ゲストログインを成功し、ダッシュボードにリダイレクトすること', async () => {
       // Mock successful Rails API response
       global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -103,8 +103,8 @@ describe('GuestSigninPage', () => {
     });
   });
 
-  describe('Rails API failure scenarios', () => {
-    it('should redirect to login when Rails API returns error', async () => {
+  describe('Rails API失敗シナリオ', () => {
+    it('Rails APIがエラーを返したときにログインにリダイレクトすること', async () => {
       // Mock failed Rails API response
       global.fetch.mockResolvedValueOnce({
         ok: false,
@@ -119,7 +119,7 @@ describe('GuestSigninPage', () => {
       });
     });
 
-    it('should redirect to login when Rails API throws network error', async () => {
+    it('Rails APIがネットワークエラーを発生させたときにログインにリダイレクトすること', async () => {
       // Mock network error
       global.fetch.mockRejectedValueOnce(new Error('Network error'));
 
@@ -131,8 +131,8 @@ describe('GuestSigninPage', () => {
     });
   });
 
-  describe('Amplify signIn failure scenarios', () => {
-    it('should redirect to login when Amplify signIn fails', async () => {
+  describe('Amplify signIn失敗シナリオ', () => {
+    it('Amplify signInが失敗したときにログインにリダイレクトすること', async () => {
       // Mock successful Rails API response
       global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -150,7 +150,7 @@ describe('GuestSigninPage', () => {
       });
     });
 
-    it('should redirect to login when Amplify signIn returns isSignedIn: false', async () => {
+    it('Amplify signInがisSignedIn: falseを返したときにログインにリダイレクトすること', async () => {
       // Mock successful Rails API response
       global.fetch.mockResolvedValueOnce({
         ok: true,
@@ -172,8 +172,8 @@ describe('GuestSigninPage', () => {
     });
   });
 
-  describe('Environment variable scenarios', () => {
-    it('should redirect to login when guest email is missing', async () => {
+  describe('環境変数シナリオ', () => {
+    it('ゲストメールが欠けているときにログインにリダイレクトすること', async () => {
       // Remove guest email from environment
       delete process.env.NEXT_PUBLIC_GUEST_EMAIL;
 
@@ -191,7 +191,7 @@ describe('GuestSigninPage', () => {
       });
     });
 
-    it('should redirect to login when guest password is missing', async () => {
+    it('ゲストパスワードが欠けているときにログインにリダイレクトすること', async () => {
       // Remove guest password from environment
       delete process.env.NEXT_PUBLIC_GUEST_PASSWORD;
 
@@ -209,7 +209,7 @@ describe('GuestSigninPage', () => {
       });
     });
 
-    it('should handle missing Rails API URL gracefully', async () => {
+    it('Rails API URLの欠如を適切に処理すること', async () => {
       // Remove Rails API URL from environment
       delete process.env.NEXT_PUBLIC_RAILS_API_URL;
 
@@ -244,13 +244,13 @@ describe('GuestSigninPage', () => {
     });
   });
 
-  describe('Component rendering', () => {
-    it('should render loading message', () => {
+  describe('コンポーネントのレンダリング', () => {
+    it('ローディングメッセージをレンダリングすること', () => {
       renderGuestSignin();
       expect(screen.getByText('ログイン中...')).toBeInTheDocument();
     });
 
-    it('should have proper styling for loading container', () => {
+    it('ローディングコンテナに適切なスタイリングを適用すること', () => {
       renderGuestSignin();
       const container = screen.getByText('ログイン中...').parentElement;
       expect(container).toHaveStyle({
@@ -262,8 +262,8 @@ describe('GuestSigninPage', () => {
     });
   });
 
-  describe('Error logging', () => {
-    it('should log errors to console', async () => {
+  describe('エラーログ出力', () => {
+    it('エラーをコンソールに出力すること', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
       // Mock failed Rails API response
@@ -285,7 +285,7 @@ describe('GuestSigninPage', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should log Amplify signIn errors to console', async () => {
+    it('Amplify signInエラーをコンソールに出力すること', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
       // Mock successful Rails API response

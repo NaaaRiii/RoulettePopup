@@ -1,6 +1,6 @@
 import { formatDate } from '../../utils/formatDate';
 
-describe('formatDate', () => {
+describe('formatDateユーティリティ', () => {
   it('Date オブジェクトを yyyy-MM-dd 形式の文字列に変換する', () => {
     const date = new Date('2024-03-15');
     expect(formatDate(date)).toBe('2024-03-15');

@@ -13,7 +13,7 @@ jest.mock('next/link', () => {
   return MockLink;
 });
 
-describe('SmallGoalCard', () => {
+describe('SmallGoalCardコンポーネント', () => {
   const mockSmallGoal = {
     id: 1,
     title: 'Test Small Goal',

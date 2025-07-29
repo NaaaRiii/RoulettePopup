@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useModalState } from '../../hooks/useModalState';
 
-describe('useModalState', () => {
+describe('useModalStateフック', () => {
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
