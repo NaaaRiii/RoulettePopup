@@ -51,7 +51,7 @@ jest.mock('next/link', () => {
   return ActualLink;
 });
 
-describe('Dashboard page', () => {
+describe('Dashboardページ', () => {
   const mockGoalsData = [
 		{
 			id: 255,
@@ -250,7 +250,7 @@ describe('Dashboard page', () => {
 		jest.clearAllMocks();
 	});
 
-  it('renders the dashboard with user profile and goals', async () => {
+  it('ユーザープロファイルと目標を含むダッシュボードをレンダリングすること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
     const mockRouter = {
       query: { message: 'Goal completed successfully' },
@@ -268,7 +268,7 @@ describe('Dashboard page', () => {
 		expect(screen.getByText('Your Rank: 20')).toBeInTheDocument();
 	});
 
-	it('calls updateLastRouletteRank when rank increases past a multiple of 10', async () => {
+	it('ランクが10の倍数を超えて上がったときにupdateLastRouletteRankを呼び出すこと', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
@@ -289,7 +289,7 @@ describe('Dashboard page', () => {
 		});
 	});
 
-	it('updates lastRouletteRank when rank increases past a multiple of 10', async () => {
+	it('ランクが10の倍数を超えて上がったときにlastRouletteRankを更新すること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 
@@ -298,7 +298,7 @@ describe('Dashboard page', () => {
 	 expect(rankText).toBeInTheDocument();
  });
 	
-	it('opens and closes the goal creation modal when the respective buttons are clicked', async () => {
+	it('各ボタンがクリックされたときに目標作成モーダルを開いて閉じること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
@@ -320,7 +320,7 @@ describe('Dashboard page', () => {
 		});
 	});	
 
-	it('renders the completed goals link with correct href', async () => {
+	it('正しいhrefで完了した目標リンクをレンダリングすること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
     render(<Dashboard />);
 
@@ -328,7 +328,7 @@ describe('Dashboard page', () => {
     expect(completedGoalLink.closest('a')).toHaveAttribute('href', '/completed-goal');
   });
 	
-	it('should render the latest completed Small-Goals', async () => {
+	it('最新の完了した小目標をレンダリングすること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
     render(<Dashboard />);
 
@@ -342,7 +342,7 @@ describe('Dashboard page', () => {
     expect(screen.getByText('2024-04-25')).toBeInTheDocument();
   });
 
-	it('should render the Calendar component', async () => {
+	it('Calendarコンポーネントをレンダリングすること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
@@ -351,7 +351,7 @@ describe('Dashboard page', () => {
 		expect(calendarElement).toBeInTheDocument();
 	});
 	
-	it('should render the ExpLineChart component', async () => {
+	it('ExpLineChartコンポーネントをレンダリングすること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
@@ -360,7 +360,7 @@ describe('Dashboard page', () => {
 		expect(chartElement).toBeInTheDocument();
 	});
 
-	it('should render unmet goals in the correct order by deadline', async () => {
+	it('締切り順に未達成の目標を正しい順序でレンダリングすること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
     render(<Dashboard />);
 
@@ -374,7 +374,7 @@ describe('Dashboard page', () => {
 	});
 	
 	// 進行中のSmall Goalが表示され、遷移できるかを確認
-  it('should render ongoing Small Goals and allow navigation upon clicking "確認" button', async () => {
+  it('進行中の小目標をレンダリングし、"確認"ボタンクリック時にナビゲーションを許可すること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 	
@@ -398,7 +398,7 @@ describe('Dashboard page', () => {
 		});
 	});
 	
-	it('should render the Layout component correctly', async () => {
+	it('Layoutコンポーネントを正しくレンダリングすること', async () => {
 		const Dashboard = require('../../pages/dashboard').default;
 		render(<Dashboard />);
 		console.log(document.body.innerHTML);
@@ -410,7 +410,7 @@ describe('Dashboard page', () => {
 	});
 	
 	//userRank が 10 を超える場合、「ごほうびルーレット」リンクが表示されることを確認するテスト
-	it('shows ごほうびルーレット link when userRank is 10', async () => {
+	it('userRankが10のときにごほうびルーレットリンクを表示すること', async () => {
 		fetchWithAuth.mockReset();
 		fetchWithAuth
 			.mockResolvedValueOnce({ ok:true, json:async()=>mockGoalsData }) // first call /api/goals
@@ -430,7 +430,7 @@ describe('Dashboard page', () => {
 	});
 
 	// dashboard.test.js ─ 「ごほうびルーレット」が出ることを確認するテスト
-	it('renders the "ごほうびルーレット" link when userRank is 10', async () => {
+	it('userRankが10のときに"ごほうびルーレット"リンクをレンダリングすること', async () => {
 		/* ① 既存モックをリセット */
 		fetchWithAuth.mockReset();
 
@@ -453,7 +453,7 @@ describe('Dashboard page', () => {
 	});
 
 	//userRank が 9 の場合、「ごほうびルーレット」リンクが表示されないことを確認するテスト
-  it('should not render the "ごほうびルーレット" link when userRank is 9', async () => {
+  it('userRankが9のときに"ごほうびルーレット"リンクをレンダリングしないこと', async () => {
     // userRank を 9 に設定
     fetchWithAuth.mockReturnValue({
       isLoggedIn: true,
@@ -469,7 +469,7 @@ describe('Dashboard page', () => {
     });
   });
 
-	it('redirects to login page if user is not logged in', async () => {
+	it('ユーザーがログインしていない場合にログインページにリダイレクトすること', async () => {
 		/** 1️⃣ 既存の fetchWithAuth モックをリセット */
 		fetchWithAuth.mockReset();
 
@@ -494,7 +494,7 @@ describe('Dashboard page', () => {
 		});
 	});
 	
-  it('renders only goals with completed: false as ongoing goals', async () => {
+  it('completed: falseの目標のみを進行中の目標としてレンダリングすること', async () => {
 		/** 1️⃣ 既存のモックをリセット */
 		fetchWithAuth.mockReset();
 	
@@ -533,7 +533,7 @@ describe('Dashboard page', () => {
 			});
 	});
 
-	it('renders only small goals with completed: false as ongoing small goals', async () => {
+	it('completed: falseの小目標のみを進行中の小目標としてレンダリングすること', async () => {
 		/** 1️⃣ 既定モックを全消し */
 		fetchWithAuth.mockReset();
 	
@@ -578,7 +578,7 @@ describe('Dashboard page', () => {
 	});
 	
 	
-	it('removes a small goal from ongoing Small Goals when it is deleted', async () => {
+	it('小目標が削除されたときに進行中の小目標からそれを削除すること', async () => {
 		const initialMockGoalsData = [...mockGoalsData];
 
 		// 1️⃣ 既存モックをリセット

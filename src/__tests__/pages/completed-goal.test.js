@@ -54,7 +54,7 @@ jest.mock('../../utils/getIdToken');
 // 4. グローバルの`fetch`をモック
 global.fetch = jest.fn();
 
-describe('CompletedGoal Component', () => {
+describe('CompletedGoalコンポーネント', () => {
   const mockGoals = [
     {
       id: 1,

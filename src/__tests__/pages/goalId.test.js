@@ -55,7 +55,7 @@ jest.mock('../../hooks/useFetchRouletteTexts', () => ({
 }));
 
 
-describe('Data Fetching', () => {
+describe('データの取得', () => {
   beforeEach(() => {
     // goalId をクエリに渡すようにルーターをモック
     useRouter.mockImplementation(() => ({
@@ -75,7 +75,7 @@ describe('Data Fetching', () => {
     jest.clearAllMocks();
   });
 
-  it('on mount calls both fetchWithAuth endpoints and shows "Loading..."', async () => {
+  it('マウント時に両方のfetchWithAuthエンドポイントを呼び出し、"Loading..."を表示すること', async () => {
     // fetchWithAuth の呼び出し跡を追いたいのでモックの戻り値は一旦解決しない Promise を返す
     fetchWithAuth
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 123, title: 'Test Goal' }) })       // /api/goals/123
@@ -106,7 +106,7 @@ describe('Data Fetching', () => {
   });
 
 
-  it('on successful fetch stores goal state and renders title, content, and small goals list', async () => {
+  it('取得成功時に目標状態を保存し、タイトル、内容、小目標リストをレンダリングすること', async () => {
     // モックの goalDetails
     const mockGoalDetails = {
       id: 123,
@@ -169,7 +169,7 @@ describe('Data Fetching', () => {
 		expect(screen.getByText('・Task 2')).toBeInTheDocument();
   });
 
-	it('on fetch failure shows "Goal not found"', async () => {
+	it('取得失敗時に"Goal not found"を表示すること', async () => {
     // 取得失敗: response.ok===false
     fetchWithAuth.mockResolvedValueOnce({ ok: false, status: 500 });
     // small_goals は呼ばれないがモックにしておく
@@ -187,7 +187,7 @@ describe('Data Fetching', () => {
     expect(notFoundEl).toBeInTheDocument();
   });
 
-  it('on fetch exception shows "Goal not found"', async () => {
+  it('取得例外時に"Goal not found"を表示すること', async () => {
     // 例外を投げる
     fetchWithAuth.mockRejectedValueOnce(new Error('Network error'));
 
@@ -203,7 +203,7 @@ describe('Data Fetching', () => {
     expect(notFoundEl).toBeInTheDocument();
   });
 
-	it('when small_goals format is invalid, sets smallGoalsError and displays error message', async () => {
+	it('small_goalsの形式が無効なとき、smallGoalsErrorを設定してエラーメッセージを表示すること', async () => {
     const mockGoalDetails = {
       id: 123,
       title: 'Test Goal Title',
@@ -233,7 +233,7 @@ describe('Data Fetching', () => {
 });
 
 
-describe('Display Logic', () => {
+describe('表示ロジック', () => {
 	beforeEach(() => {
     // useRouter のモック
     useRouter.mockImplementation(() => ({
@@ -251,7 +251,7 @@ describe('Display Logic', () => {
     jest.clearAllMocks();
   });
 
-  it('shows message from query string when ?message=... is present', async () => {
+  it('?message=...が存在するときにクエリ文字列からメッセージを表示すること', async () => {
     // ルーターに goalId と message をセット
     useRouter.mockImplementation(() => ({
       query: { goalId: '123', message: encodeURIComponent('Hello World') },
@@ -283,7 +283,7 @@ describe('Display Logic', () => {
     expect(messageEl).toBeInTheDocument();
   });
 
-  it('renders "Completed Goal" button disabled when there are incomplete small goals', async () => {
+  it('未完成の小目標があるときに"目標完了"ボタンを無効でレンダリングすること', async () => {
     useRouter.mockImplementation(() => ({
       query: { goalId: '123', message: null },
       push: jest.fn(),
@@ -322,7 +322,7 @@ describe('Display Logic', () => {
     expect(button).toBeDisabled();
   });
 
-  it('renders "Completed Goal" button enabled when all small goals are completed', async () => {
+  it('すべての小目標が完了したときに"目標完了"ボタンを有効でレンダリングすること', async () => {
     useRouter.mockImplementation(() => ({
       query: { goalId: '123', message: null },
       push: jest.fn(),
@@ -360,7 +360,7 @@ describe('Display Logic', () => {
     expect(button).toBeEnabled();
   });
 
-	it('groups small goals into incomplete and completed sections based on completed flag', async () => {
+	it('完了フラグに基づいて小目標を未完了と完了済みセクションにグループ化すること', async () => {
     const mockGoalDetails = {
       id: 123,
       title: 'Test Goal',
@@ -425,7 +425,7 @@ describe('Display Logic', () => {
 });
 
 
-describe('Modal Operations', () => {
+describe('モーダル操作', () => {
   beforeEach(() => {
 		jest.clearAllMocks();
     fetchWithAuth.mockReset();
@@ -464,7 +464,7 @@ describe('Modal Operations', () => {
     jest.clearAllMocks();
   });
 
-  it('opens CreateSmallGoal modal then closes it with onClose', async () => {
+  it('CreateSmallGoalモーダルを開いてonCloseで閉じること', async () => {
     // goalDetails と small_goals を返す
     fetchWithAuth
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 123, title: 'Test Goal' }) })
@@ -502,7 +502,7 @@ describe('Modal Operations', () => {
     });
   });
 
-	it('opens EditGoalModal when "目標を編集する" link is clicked', async () => {
+	it('"目標を編集する"リンクがクリックされたときにEditGoalModalを開くこと', async () => {
     // 1st: goalDetails, 2nd: small_goals
     fetchWithAuth
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 123, title: 'Test Goal' }) })
@@ -524,7 +524,7 @@ describe('Modal Operations', () => {
 		expect(await screen.findByTestId('mock-edit-goal')).toBeInTheDocument();
 	});
 
-  it('opens EditSmallGoalModal when a small-goal Edit link is clicked', async () => {
+  it('小目標の編集リンクがクリックされたときにEditSmallGoalModalを開くこと', async () => {
     const goal = { id: 123, title: 'Test Goal' };
     const smallGoals = [
       { id: 1, title: 'Small Goal 1', completed: false, difficulty: 'Easy', deadline: null, tasks: [] }
@@ -552,7 +552,7 @@ describe('Modal Operations', () => {
 });
 
 
-describe('Task Toggle', () => {
+describe('タスクの切り替え', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -580,7 +580,7 @@ describe('Task Toggle', () => {
     });
   });
 
-  it('calls POST /api/tasks/:id/complete and toggles completed state', async () => {
+  it('POST /api/tasks/:id/completeを呼び出し、完了状態を切り替えること', async () => {
     render(
       <Authenticator.Provider>
         <TicketsContext.Provider value={{ tickets:0, setTickets:jest.fn(), fetchTickets:jest.fn() }}>
@@ -651,7 +651,7 @@ describe('Small Goal 完了', () => {
     });
   });
 
-  it('"完了" ボタン → POST /complete → smallGoal.completed が true になり dashboard に遷移する', async () => {
+  it('"完了"ボタン→POST /complete→smallGoal.completedがtrueになりdashboardに遷移すること', async () => {
     render(
       <Authenticator.Provider>
         <TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
@@ -724,7 +724,7 @@ describe('Goal 完了', () => {
     });
   });
 
-  it('small goal が無いとき Goal 完了ボタンが無効になる', async () => {
+  it('小目標が無いとき目標完了ボタンが無効になること', async () => {
     render(
       <Authenticator.Provider>
         <TicketsContext.Provider
@@ -786,7 +786,7 @@ describe('削除操作', () => {
     });
   });
 
-  it('Confirm OK → DELETE で small goal が UI から消える', async () => {
+  it('確認 OK→DELETEで小目標がUIから消えること', async () => {
 
     /* ① confirm を YES にしておく */
     const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
@@ -824,7 +824,7 @@ describe('削除操作', () => {
     confirmSpy.mockRestore();
   });
 
-	it('Confirm OK → DELETE /api/goals/:id → refreshGoals が呼ばれ dashboard に遷移', async () => {
+	it('確認 OK→DELETE /api/goals/:id→refreshGoalsが呼ばれdashboardに遷移すること', async () => {
 		const goalId = '123';
 	
 		/* ---- Router / GoalsContext のモックを再設定 ---- */
@@ -948,7 +948,7 @@ describe('副作用フック', () => {
 		});
 	});
 
-  it('goalId が変わると再フェッチし、前回 state をリセットする', async () => {
+  it('goalIdが変わると再フェッチし、前回のstateをリセットすること', async () => {
 		const AppWrapped = ({ goalId }) => (
 			<Authenticator.Provider>
 				<TicketsContext.Provider value={{ tickets: 0, setTickets: jest.fn(), fetchTickets: jest.fn() }}>
@@ -1003,7 +1003,7 @@ describe('UI コンポーネント存在', () => {
    * GoalPage 内では <div data-testid="calendar">…</div> を含むため
    * これを取得して存在をアサートする
    */
-  it('ExpCalendar が描画される', async () => {
+  it('ExpCalendarが描画されること', async () => {
     render(
       <Authenticator.Provider>
         <TicketsContext.Provider

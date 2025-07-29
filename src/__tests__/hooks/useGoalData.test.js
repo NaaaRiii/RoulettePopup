@@ -11,7 +11,7 @@ jest.mock('next/router', () => ({
   }),
 }));
 
-describe('useGoalData', () => {
+describe('useGoalDataフック', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, 'error').mockImplementation(() => {});

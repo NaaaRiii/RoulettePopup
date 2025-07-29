@@ -9,7 +9,7 @@ jest.mock('../../utils/fetchWithAuth', () => ({
   fetchWithAuth: jest.fn(),
 }));
 
-describe('TicketsContext', () => {
+describe('TicketsContextコンテキスト', () => {
   const originalConsoleError = console.error;
   const originalConsoleLog = console.log;
 

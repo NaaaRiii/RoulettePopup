@@ -16,7 +16,7 @@ describe('fetchWithAuth', () => {
     jest.clearAllMocks();
   });
 
-  describe('URL construction', () => {
+  describe('URLの構築', () => {
     it('末尾にスラッシュがあるベースURLを正しく処理できること', async () => {
       process.env.NEXT_PUBLIC_RAILS_API_URL = 'https://api.example.com/';
       const mockFetch = jest.fn();
@@ -70,7 +70,7 @@ describe('fetchWithAuth', () => {
     });
   });
 
-  describe('Authorization header', () => {
+  describe('Authorizationヘッダー', () => {
     beforeEach(() => {
       process.env.NEXT_PUBLIC_RAILS_API_URL = 'https://api.example.com';
       const mockFetch = jest.fn();
@@ -157,7 +157,7 @@ describe('fetchWithAuth', () => {
     });
   });
 
-  describe('fetch options', () => {
+  describe('fetchオプション', () => {
     beforeEach(() => {
       process.env.NEXT_PUBLIC_RAILS_API_URL = 'https://api.example.com';
       const mockFetch = jest.fn();
@@ -235,7 +235,7 @@ describe('fetchWithAuth', () => {
     });
   });
 
-  describe('return value', () => {
+  describe('戻り値', () => {
     beforeEach(() => {
       process.env.NEXT_PUBLIC_RAILS_API_URL = 'https://api.example.com';
     });
@@ -265,7 +265,7 @@ describe('fetchWithAuth', () => {
     });
   });
 
-  describe('error handling', () => {
+  describe('エラーハンドリング', () => {
     beforeEach(() => {
       process.env.NEXT_PUBLIC_RAILS_API_URL = 'https://api.example.com';
       (getIdToken as jest.Mock).mockReset();

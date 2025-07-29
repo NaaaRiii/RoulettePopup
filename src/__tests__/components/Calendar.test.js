@@ -53,7 +53,7 @@ jest.mock('react-calendar', () => {
 const originalConsoleError = console.error;
 console.error = jest.fn();
 
-describe('ExpCalendar', () => {
+describe('ExpCalendarコンポーネント', () => {
   beforeEach(() => {
     // 各テスト前にモックをリセット
     jest.clearAllMocks();
