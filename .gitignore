@@ -52,7 +52,6 @@ cypress.env.prod.json
 
 cypress.env.example.json
 
-# cypress production configuration
 cypress.config.prod.ts
 
 .env.local
@@ -60,3 +59,8 @@ cypress.config.prod.ts
 *.mmd
 
 /src/amplify_outputs.json
+
+CLAUDE_WORK_LOG.md
+docs/claude-logs/
+
+plan/
