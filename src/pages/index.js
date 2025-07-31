@@ -56,7 +56,8 @@ export default function HomePage() {
 				<section className="feature-exp">
 					<div className="feature-card exp-text">
 						<h3>EXPの獲得</h3>
-						<p>カレンダーには、1日に獲得したEXPの量が多いほど、色が濃く表示されます。</p>
+						<p>カレンダーには、1日に獲得したEXPの量が多いほど、<br />
+							色が濃く表示されます。</p>
 						<p>グラフには、1週間分のEXPの推移が表示されます。</p>
 					</div>
 					<div className="exp-image">
