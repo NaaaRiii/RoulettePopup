@@ -28,7 +28,7 @@ export default function HomePage() {
 					</div>
 					<div className="goal-image">
 						<Image
-							src="/images/Goal-setting.png"
+							src="/images/goal-setting.png"
 							alt="Goal 設定フォーム"
 							width={300}
 							height={225}
@@ -40,7 +40,7 @@ export default function HomePage() {
 				<section className="feature-small">
 					<div className="small-goal-image">
 						<Image
-							src="/images/Small_Goal-setting.png"
+							src="/images/small_goal-setting.png"
 							alt="Small Goal 設定フォーム"
 							width={400}
 							height={250}

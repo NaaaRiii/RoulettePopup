@@ -73,24 +73,24 @@ const Header = () => {
     <header className="fixed top-0 left-0 w-full z-50 bg-[rgb(240,239,226)] h-[90px]">
       <div className="flex items-center justify-between h-full px-10">
         {/* ロゴ */}
-        <div className="text-2xl font-bold text-[#373741]">
+        <div className="text-[1.8rem] font-bold text-[#373741]">
           <Link href="/dashboard" id="logo">Plus ONE</Link>
         </div>
         
         {/* デスクトップメニュー */}
         <nav className="hidden md:flex items-center gap-4">
           {isLoggedIn ? (
-            <div className="flex items-center gap-4 text-sm text-red-800">
+            <div className="flex items-center gap-4 text-[1.2rem] text-red-800">
               <span>ログイン中</span>
-              <Link href="/dashboard" className="hover:text-red-600">ダッシュボード</Link>
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="hover:text-red-600">使い方</Link>
-              <a href="/logout" onClick={handleLogout} className="hover:text-red-600">ログアウト</a>
+              <Link href="/dashboard" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">ダッシュボード</Link>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">使い方</Link>
+              <a href="/logout" onClick={handleLogout} className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">ログアウト</a>
             </div>
           ) : (
             <div className="flex items-center gap-5">
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="px-2.5 py-2.5 text-blue-600 hover:text-blue-800">使い方</Link>
-              <Link href="/guest-signin" className="px-2.5 py-2.5 text-blue-600 hover:text-blue-800">お試し</Link>
-              <Link href="/dashboard" className="px-2.5 py-2.5 text-blue-600 hover:text-blue-800">ログイン</Link>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">使い方</Link>
+              <Link href="/guest-signin" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">お試し</Link>
+              <Link href="/dashboard" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">ログイン</Link>
             </div>
           )}
         </nav>
@@ -118,9 +118,9 @@ const Header = () => {
             </>
           ) : (
             <>
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-blue-600 hover:text-blue-800 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
-              <Link href="/guest-signin" className="py-3 text-blue-600 hover:text-blue-800 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>お試し</Link>
-              <Link href="/dashboard" className="py-3 text-blue-600 hover:text-blue-800" onClick={() => setIsMobileMenuOpen(false)}>ログイン</Link>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
+              <Link href="/guest-signin" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>お試し</Link>
+              <Link href="/dashboard" className="py-3 text-[#373741] hover:text-blue-600" onClick={() => setIsMobileMenuOpen(false)}>ログイン</Link>
             </>
           )}
         </nav>

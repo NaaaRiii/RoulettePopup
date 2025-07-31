@@ -29,34 +29,3 @@ button {
 button:hover {
   background-color: #e9ecef;
 }
-
-
-/* button:disabled {
-  background-color: #e9ecef !important;
-  color: #6c757d !important;
-  border-color: #dee2e6 !important;
-  cursor: not-allowed !important;
-  opacity: 0.6 !important;
-}
-
-button:disabled:hover {
-  background-color: #e9ecef !important;
-}
-
-
-h2 {
-  font-size: 1.5rem !important;
-  font-weight: bold !important;
-  margin-bottom: 1rem !important;
-}
-
-
-.goal-content-top-left-card {
-  display: flex !important;
-  flex-direction: column !important;
-  background-color: #FFFCEB !important;
-  width: 70% !important;
-  border-radius: 3px !important;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.04) !important;
-  padding: 50px 60px !important;
-} */
