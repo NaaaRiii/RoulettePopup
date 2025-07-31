@@ -95,75 +95,111 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
   if (!isOpen || !smallGoal) return null;
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
-        <h2>Small Goalを編集</h2>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="title">Small Goalのタイトル</label>
-          <textarea
-            id="title"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className={styles.textareaField}
-            rows={2}
-            cols={50}
-          />
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center p-4">
+      <div className="relative bg-white w-full max-w-[500px] max-h-[90vh] rounded border border-gray-400 flex flex-col">
+        {/* ヘッダー部分（固定） */}
+        <div className="p-5 pb-3 border-b border-gray-200">
+          <h2 className="text-2xl font-bold mb-4">Small Goalを編集</h2>
+        </div>
 
-          <div className={styles.tasksContainer}>
-            {tasks.filter(task => !task._destroy).map((task, index) => (
-              <div key={task.id || `temp-${index}`}>
-                <label htmlFor={`task-${task.id || `temp-${index}`}`}>タスク</label>
-                <textarea
-                  id={`task-${task.id || `temp-${index}`}`}
-                  type="text"
-                  value={task.content}
-                  onChange={(e) => handleTaskChange(task.id, e.target.value)}
-                  required
-                  className={styles.textareaField}
-                  rows={2}
-                  cols={50}
-                />
-                {tasks.filter(task => !task._destroy).length > 1 && (
-                  <button type="button" onClick={() => removeTask(task.id)}>
-                    タスクを削除
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+        {/* スクロール可能なコンテンツ部分 */}
+        <div className="flex-1 overflow-y-auto p-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="title" className="block mb-2 font-medium">Small Goalのタイトル</label>
+              <textarea
+                id="title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="w-full p-2 border border-gray-300 rounded-sm resize-none"
+                rows={2}
+              />
+            </div>
 
-          <button type="button" onClick={addTask}>タスクを追加</button>
-          <div>
-            <label htmlFor="difficulty">難易度</label>
-            <select
-              id="difficulty"
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-              required
-            >
-              <option value="ものすごく簡単">ものすごく簡単</option>
-              <option value="簡単">簡単</option>
-              <option value="普通">普通</option>
-              <option value="難しい">難しい</option>
-              <option value="とても難しい">とても難しい</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="deadline">期限</label>
-            <input
-              id="deadline"
-              type="date"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-              required
-              className={styles.deadlineField}
-            />
-          </div>
-          <button type="submit" className="btn btn-primary">Small Goalを更新する</button>
-        </form>
-        <button onClick={onClose} className={styles.closeButton}>Close</button>
+            <div className="space-y-4">
+              <h3 className="font-medium">タスク一覧</h3>
+              {tasks.filter(task => !task._destroy).map((task, index) => (
+                <div key={task.id || `temp-${index}`} className="p-3 bg-gray-50 rounded border">
+                  <label htmlFor={`task-${task.id || `temp-${index}`}`} className="block mb-2 font-medium">タスク {index + 1}</label>
+                  <textarea
+                    id={`task-${task.id || `temp-${index}`}`}
+                    type="text"
+                    value={task.content}
+                    onChange={(e) => handleTaskChange(task.id, e.target.value)}
+                    required
+                    className="w-full p-2 border border-gray-300 rounded-sm resize-none mb-2"
+                    rows={2}
+                  />
+                  {tasks.filter(task => !task._destroy).length > 1 && (
+                    <button 
+                      type="button" 
+                      onClick={() => removeTask(task.id)}
+                      className="px-3 py-1 text-sm border border-red-300 rounded-sm bg-red-50 hover:bg-red-100 text-red-700 cursor-pointer"
+                    >
+                      タスクを削除
+                    </button>
+                  )}
+                </div>
+              ))}
+              
+              <button 
+                type="button" 
+                onClick={addTask}
+                className="w-full px-3 py-2 border border-green-300 rounded-sm bg-green-50 hover:bg-green-100 text-green-700 cursor-pointer"
+              >
+                + タスクを追加
+              </button>
+            </div>
+            
+            <div>
+              <label htmlFor="difficulty" className="block mb-2 font-medium">難易度</label>
+              <select
+                id="difficulty"
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+                required
+                className="w-full p-2 border border-gray-300 rounded-sm"
+              >
+                <option value="ものすごく簡単">ものすごく簡単</option>
+                <option value="簡単">簡単</option>
+                <option value="普通">普通</option>
+                <option value="難しい">難しい</option>
+                <option value="とても難しい">とても難しい</option>
+              </select>
+            </div>
+            
+            <div>
+              <label htmlFor="deadline" className="block mb-2 font-medium">期限</label>
+              <input
+                id="deadline"
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                required
+                className="w-full p-2 border border-gray-300 rounded-sm"
+              />
+            </div>
+          </form>
+        </div>
+
+        {/* フッター部分（固定） */}
+        <div className="p-5 pt-3 border-t border-gray-200 bg-gray-50">
+          <button 
+            type="submit" 
+            onClick={handleSubmit}
+            className="w-full px-3 py-2 border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600 rounded font-medium"
+          >
+            Small Goalを更新する
+          </button>
+          <button 
+            onClick={onClose} 
+            className="w-full mt-2 px-3 py-2 border border-gray-300 rounded bg-white hover:bg-gray-50 cursor-pointer"
+          >
+            キャンセル
+          </button>
+        </div>
       </div>
     </div>
   );

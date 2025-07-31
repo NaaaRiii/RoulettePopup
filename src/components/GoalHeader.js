@@ -19,20 +19,26 @@ const GoalHeader = ({
   onDeleteGoal
 }) => {
   return (
-    <div className='goal-content-top-left-card'>
-      <h2>Goal : {goal.title}</h2>
-      <div className='completed-goal-button-container'>
+    <div className='flex flex-col bg-[#FFFCEB] w-[70%] rounded-sm shadow-sm p-12 px-15'>
+      <h2 className="text-2xl font-bold mb-4">Goal : {goal.title}</h2>
+      <div className='flex flex-col gap-2'>
         {goal.completed ? (
           <p>このGoalは達成しました!</p>
         ) : (
           <>
             <p>このGoalを完了しますか?</p>
             {!goal.small_goals || goal.small_goals.length === 0 || goal.small_goals.some(sg => !sg.completed) ? (
-              <button disabled className='completed-goal-button'>
+              <button 
+                disabled 
+                className='w-[30%] px-3 py-2 mt-2 mb-2 rounded-sm border-none cursor-not-allowed bg-gray-200 text-gray-500 opacity-60'
+              >
                 Goalを完了する
               </button>
             ) : (
-              <button onClick={onCompleteGoal} className='button-completed-goal'>
+              <button 
+                onClick={onCompleteGoal} 
+                className='w-[30%] px-3 py-2 mt-2 mb-2 rounded-sm border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600'
+              >
                 Goalを完了する
               </button>
             )}
@@ -40,16 +46,16 @@ const GoalHeader = ({
         )}
       </div>
 
-      <div className='goal-content-top-left-lower-part'>
-        <h2>Goalの詳細 : {goal.content}</h2>
-          <p className='deadline-text'>
-            期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
-          </p>
-        <div className='goal-content-top-left-lower-part-link'>
+      <div className='pt-5'>
+        <h2 className="text-2xl font-bold mb-4">Goalの詳細 : {goal.content}</h2>
+        <p className='text-lg mb-4'>
+          期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
+        </p>
+        <div className='pt-4'>
           {!goal.completed && (
             <>
               <Link href={`#`} onClick={onOpenEditGoalModal}>
-                <div className='edit-goal-link'>
+                <div className='text-blue-600 cursor-pointer hover:text-blue-800 mb-5'>
                   Goalを編集する
                 </div>
               </Link>
@@ -62,9 +68,9 @@ const GoalHeader = ({
             </>
           )}
 
-          <div className='add-small-goal-button'>
+          <div className='mb-4'>
             <Link href={`#`} onClick={onOpenCreateSmallGoalModal}>
-              <div className="add-small-goal-button-link">
+              <div className="text-green-600 cursor-pointer hover:text-green-800">
                 Small Goalの作成
               </div>
             </Link>
@@ -79,7 +85,7 @@ const GoalHeader = ({
             href="#" 
             onClick={onDeleteGoal} 
             data-testid="delete-goal-link" 
-            className='delete-goal-link'
+            className='text-blue-600 cursor-pointer hover:text-blue-800 flex justify-end'
           >
             Goalを削除する
           </a>

@@ -57,7 +57,7 @@ const SmallGoalCard = ({
             </ul>
             {!smallGoal.completed && smallGoal.tasks?.every(task => task.completed) && (
               <button 
-                className="btn btn-success" 
+                className="w-[20%] px-3 py-2 mt-2 mb-2 rounded-sm border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600" 
                 onClick={() => onCompleteSmallGoal(smallGoal.id, goal, setGoal)}
               >
                 完了

@@ -66,3 +66,6 @@ docs/claude-logs/
 plan/
 
 public/screen-shots/
+
+test-small-goal-form.js
+test-goal-header.js

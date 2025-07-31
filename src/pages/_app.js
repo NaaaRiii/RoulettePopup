@@ -16,8 +16,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 function AuthenticatedApp({ Component, pageProps }) {
   const router = useRouter();
 
-  //amplifyにデプロイする際は、'/edit-roulette-text'を外す
-  const publicPaths = ['/', '/login', '/guest-signin'];
+  const publicPaths = ['/', '/login', '/guest-signin', '/test-small-goal-form', '/test-goal-header'];
   const isPublicPage =
     process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' ||
     publicPaths.includes(router.pathname);

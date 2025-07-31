@@ -88,9 +88,9 @@ const Header = () => {
             </div>
           ) : (
             <div className="flex items-center gap-5">
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="px-2.5 py-2.5 hover:text-blue-600">使い方</Link>
-              <Link href="/guest-signin" className="px-2.5 py-2.5 hover:text-blue-600">お試し</Link>
-              <Link href="/dashboard" className="px-2.5 py-2.5 hover:text-blue-600">ログイン</Link>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="px-2.5 py-2.5 text-blue-600 hover:text-blue-800">使い方</Link>
+              <Link href="/guest-signin" className="px-2.5 py-2.5 text-blue-600 hover:text-blue-800">お試し</Link>
+              <Link href="/dashboard" className="px-2.5 py-2.5 text-blue-600 hover:text-blue-800">ログイン</Link>
             </div>
           )}
         </nav>
@@ -118,9 +118,9 @@ const Header = () => {
             </>
           ) : (
             <>
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
-              <Link href="/guest-signin" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>お試し</Link>
-              <Link href="/dashboard" className="py-3 text-[#373741] hover:text-blue-600" onClick={() => setIsMobileMenuOpen(false)}>ログイン</Link>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-blue-600 hover:text-blue-800 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
+              <Link href="/guest-signin" className="py-3 text-blue-600 hover:text-blue-800 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>お試し</Link>
+              <Link href="/dashboard" className="py-3 text-blue-600 hover:text-blue-800" onClick={() => setIsMobileMenuOpen(false)}>ログイン</Link>
             </>
           )}
         </nav>
