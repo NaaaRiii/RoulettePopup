@@ -184,6 +184,13 @@ function Dashboard() {
 
   useEffect(() => {
     const checkAuth = async () => {
+      // 開発環境では認証をバイパス
+      if (process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true') {
+        setIsLoggedIn(true);
+        setAuthLoading(false);
+        return;
+      }
+
       try {
         const res = await fetchWithAuth('/api/current_user');
         if (res.ok) {

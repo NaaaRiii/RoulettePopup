@@ -3,3 +3,16 @@
 @tailwind utilities;
 
 @import '../src/components/styles.css';
+
+/* Tailwindリセットで失われたフォーム要素のスタイルを復元 */
+input, textarea {
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+input[type="date"] {
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  padding: 10px;
+}
