@@ -4,28 +4,4 @@
 
 @import '../src/components/styles.css';
 
-/* Tailwindリセットで失われたフォーム要素のスタイルを復元 */
-input, textarea, select {
-  border: 1px solid #ced4da;
-  border-radius: 3px;
-  padding: 10px;
-}
 
-input[type="date"] {
-  border: 1px solid #ced4da;
-  border-radius: 3px;
-  padding: 10px;
-}
-
-/* ボタン要素のスタイル復元 */
-button {
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  padding: 8px 12px;
-  background-color: #f8f9fa;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #e9ecef;
-}

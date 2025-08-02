@@ -188,8 +188,8 @@ return (
       </div>
       
       <div className='dashboard px-4 py-6 lg:px-12 xl:px-16'>
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 xl:gap-16 max-w-sm mx-auto sm:max-w-2xl lg:max-w-none'>
-          <div className='space-y-6 lg:space-y-8 xl:space-y-10'>
+        <div className='grid grid-cols-1 lg:grid-cols-10 gap-6 lg:gap-16 xl:gap-20 max-w-sm mx-auto sm:max-w-2xl lg:max-w-none'>
+          <div className='lg:col-span-6 space-y-6 lg:space-y-8 xl:space-y-10'>
             <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
               <h1 className='text-xl md:text-2xl lg:text-3xl font-bold mb-6 lg:mb-8 text-gray-800'>Welcome to your dashboard</h1>
               <div className='space-y-4'>
@@ -297,7 +297,7 @@ return (
 
           </div>
           
-          <div className='space-y-6 lg:space-y-8 xl:space-y-10'>
+          <div className='lg:col-span-4 space-y-6 lg:space-y-8 xl:space-y-10'>
             <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
               <div className='lg:min-h-[350px] xl:min-h-[400px]'>
                 <ExpCalendar />
