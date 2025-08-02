@@ -187,11 +187,11 @@ return (
         {message && <p>{message}</p>}
       </div>
       
-      <div className='dashboard px-4 py-6 lg:px-12 xl:px-16'>
-        <div className='grid grid-cols-1 lg:grid-cols-10 gap-6 lg:gap-16 xl:gap-20 max-w-sm mx-auto sm:max-w-2xl lg:max-w-none'>
-          <div className='lg:col-span-6 space-y-6 lg:space-y-8 xl:space-y-10'>
-            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
-              <h1 className='text-xl md:text-2xl lg:text-3xl font-bold mb-6 lg:mb-8 text-gray-800'>Welcome to your dashboard</h1>
+      <div className='dashboard px-2 justify-start py-6 lg:px-6 xl:px-8'>
+        <div className='grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 xl:gap-20 w-full max-w-sm mx-auto sm:max-w-2xl lg:max-w-none'>
+          <div className='lg:col-span-8 space-y-6 lg:space-y-8 xl:space-y-10'>
+            <h1 className='text-xl md:text-2xl lg:text-3xl font-bold mb-6 lg:mb-8 text-gray-800'>Welcome to your dashboard</h1>
+            <div className='bg-[#FFFCEB] rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
               <div className='space-y-4'>
                 <div className='flex items-center space-x-4'>
                   <div className='flex-shrink-0'>
@@ -266,7 +266,7 @@ return (
                       const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
 
                       return incompleteSmallGoals.map((smallGoal) => (
-                        <div key={smallGoal.id} className='flex items-center space-x-4 p-4 lg:p-6 border rounded-lg hover:bg-gray-50 transition-colors'>
+                        <div key={smallGoal.id} className='flex items-center space-x-4 p-4 lg:p-6 border rounded-lg bg-[#FFFCEB] hover:bg-[#FFF6D9] transition-colors'>
                           <div className='flex-shrink-0'>
                             <Image
                               src='/images/pen-memo4.png'
@@ -317,7 +317,7 @@ return (
                   .map((goal) => (
                     <div
                       key={goal.id}
-                      className="p-4 lg:p-6 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="p-4 lg:p-6 border rounded-lg bg-[#FFFCEB] hover:bg-[#FFF6D9] cursor-pointer transition-colors"
                       onClick={() => router.push(`/goals/${goal.id}`)}
                     >
                       <div className='flex justify-between items-start'>
