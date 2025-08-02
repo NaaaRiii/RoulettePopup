@@ -69,3 +69,4 @@ public/screen-shots/
 test-small-goal-form.js
 test-goal-header.js
 test-dashboard.js
+test-completed_goal.js
