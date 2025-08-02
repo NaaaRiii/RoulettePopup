@@ -187,11 +187,11 @@ return (
         {message && <p>{message}</p>}
       </div>
       
-      <div className='dashboard px-4 py-6'>
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-7xl mx-auto'>
-          <div className='space-y-6'>
-            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6'>
-              <h1 className='text-xl md:text-2xl font-bold mb-6 text-gray-800'>Welcome to your dashboard</h1>
+      <div className='dashboard px-4 py-6 lg:px-12 xl:px-16'>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 xl:gap-16 max-w-sm mx-auto sm:max-w-2xl lg:max-w-none'>
+          <div className='space-y-6 lg:space-y-8 xl:space-y-10'>
+            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
+              <h1 className='text-xl md:text-2xl lg:text-3xl font-bold mb-6 lg:mb-8 text-gray-800'>Welcome to your dashboard</h1>
               <div className='space-y-4'>
                 <div className='flex items-center space-x-4'>
                   <div className='flex-shrink-0'>
@@ -200,7 +200,7 @@ return (
                       alt="User Profile Image"
                       width={60}
                       height={60}
-                      className="rounded-full"
+                      className="rounded-full lg:w-20 lg:h-20"
                     />
                   </div>
                   <div className='flex-1 min-w-0'>
@@ -208,7 +208,7 @@ return (
                       {userData?.currentTitle}
                     </div>
                     <div className='flex items-center space-x-2'>
-                      <span className='text-lg font-semibold text-gray-900'>{userData?.name}</span>
+                      <span className='text-lg lg:text-xl font-semibold text-gray-900'>{userData?.name}</span>
                       <Link href="/edit-name" onClick={openEditName}>
                         <FaPen className='text-gray-500 hover:text-gray-700 cursor-pointer text-sm' />
                       </Link>
@@ -222,41 +222,43 @@ return (
                 </div>
 
                 <div className='border-t pt-4'>
-                  <div className='grid grid-cols-2 gap-4 text-center'>
-                    <div className='bg-gray-50 rounded-lg p-3'>
-                      <div className='text-lg font-bold text-gray-800'>{userData?.totalExp}</div>
-                      <div className='text-sm text-gray-600'>EXP</div>
+                  <div className='grid grid-cols-2 gap-4 lg:gap-6 text-center'>
+                    <div className='bg-gray-50 rounded-lg p-3 lg:p-4'>
+                      <div className='text-lg lg:text-2xl font-bold text-gray-800'>{userData?.totalExp}</div>
+                      <div className='text-sm lg:text-base text-gray-600'>EXP</div>
                     </div>
-                    <div className='bg-gray-50 rounded-lg p-3'>
-                      <div className='text-lg font-bold text-gray-800'>{userData?.rank}</div>
-                      <div className='text-sm text-gray-600'>Rank</div>
+                    <div className='bg-gray-50 rounded-lg p-3 lg:p-4'>
+                      <div className='text-lg lg:text-2xl font-bold text-gray-800'>{userData?.rank}</div>
+                      <div className='text-sm lg:text-base text-gray-600'>Rank</div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6'>
-              <ExpLineChart />
+            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
+              <div className='lg:min-h-[400px] xl:min-h-[500px]'>
+                <ExpLineChart />
+              </div>
             </div>
 
-            <div className='space-y-6'>
-              <div className='flex flex-col sm:flex-row gap-4'>
+            <div className='space-y-6 lg:space-y-8 xl:space-y-10'>
+              <div className='flex flex-col sm:flex-row gap-4 lg:gap-8 xl:gap-10'>
                 <Link href="/new-goal" onClick={handleOpenModal} className='flex-1'>
-                  <div className='bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors'>
+                  <div className='bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 lg:py-4 lg:px-8 rounded-lg text-center transition-colors lg:text-lg'>
                     Goalを設定する
                   </div>
                 </Link>
                 <NewGoalModal isOpen={isModalOpen} onClose={handleCloseModal} />
                 <Link href="/completed-goal" className='flex-1'>
-                  <div className='bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors'>
+                  <div className='bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 lg:py-4 lg:px-8 rounded-lg text-center transition-colors lg:text-lg'>
                     達成したGoal
                   </div>
                 </Link>
               </div>
 
-              <div className='bg-white rounded-lg shadow-sm p-4 md:p-6'>
-                <h2 className='text-lg md:text-xl font-semibold mb-4 text-gray-800'>進行中のSmall Goal</h2>
+              <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
+                <h2 className='text-lg md:text-xl lg:text-2xl font-semibold mb-4 lg:mb-6 text-gray-800'>進行中のSmall Goal</h2>
                 <div className='space-y-3'>
                   {goalsState
                     .filter(goal => !goal.completed && goal.id !== deletedGoalId)
@@ -264,24 +266,24 @@ return (
                       const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
 
                       return incompleteSmallGoals.map((smallGoal) => (
-                        <div key={smallGoal.id} className='flex items-center space-x-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors'>
+                        <div key={smallGoal.id} className='flex items-center space-x-4 p-4 lg:p-6 border rounded-lg hover:bg-gray-50 transition-colors'>
                           <div className='flex-shrink-0'>
                             <Image
                               src='/images/pen-memo4.png'
                               alt='Goal Image'
                               width={40}
                               height={40}
-                              className='rounded'
+                              className='rounded lg:w-12 lg:h-12'
                             />
                           </div>
                           <div className='flex-1 min-w-0'>
                             <p className='text-sm text-gray-600 truncate'>{goal.title}</p>
-                            <p className='text-base font-medium text-gray-900' data-testid='small-goal-title'>{smallGoal.title}</p>
-                            <p className='text-sm text-gray-500'>期限: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
+                            <p className='text-base lg:text-lg font-medium text-gray-900' data-testid='small-goal-title'>{smallGoal.title}</p>
+                            <p className='text-sm lg:text-base text-gray-500'>期限: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
                           </div>
                           <div className='flex-shrink-0'>
                             <Link href={`/goals/${goal.id}`}>
-                              <button className='bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-2 px-4 rounded text-sm transition-colors'>
+                              <button className='bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-2 px-4 lg:py-3 lg:px-6 rounded text-sm lg:text-base transition-colors'>
                                 確認
                               </button>
                             </Link>
@@ -295,13 +297,15 @@ return (
 
           </div>
           
-          <div className='space-y-6'>
-            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6'>
-              <ExpCalendar />
+          <div className='space-y-6 lg:space-y-8 xl:space-y-10'>
+            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
+              <div className='lg:min-h-[350px] xl:min-h-[400px]'>
+                <ExpCalendar />
+              </div>
             </div>
 
-            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6'>
-              <h3 className='text-lg md:text-xl font-semibold mb-4 text-gray-800'>進行中のGoal</h3>
+            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
+              <h3 className='text-lg md:text-xl lg:text-2xl font-semibold mb-4 lg:mb-6 text-gray-800'>進行中のGoal</h3>
               <div className='space-y-3'>
                 {goalsState
                   .filter((goal) => !goal.completed)
@@ -313,12 +317,12 @@ return (
                   .map((goal) => (
                     <div
                       key={goal.id}
-                      className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="p-4 lg:p-6 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                       onClick={() => router.push(`/goals/${goal.id}`)}
                     >
                       <div className='flex justify-between items-start'>
-                        <span data-testid="goal-title" className='font-medium text-gray-900 flex-1 pr-3'>{goal.title}</span>
-                        <span className='text-xs text-gray-500 flex-shrink-0'>
+                        <span data-testid="goal-title" className='font-medium lg:text-lg text-gray-900 flex-1 pr-3'>{goal.title}</span>
+                        <span className='text-xs lg:text-sm text-gray-500 flex-shrink-0'>
                           期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
                         </span>
                       </div>
@@ -327,12 +331,12 @@ return (
               </div>
 
               <div className='mt-6 pt-6 border-t'>
-                <h3 className='text-md font-semibold mb-3 text-gray-800'>最近完了したSmall Goal</h3>
+                <h3 className='text-md lg:text-lg font-semibold mb-3 lg:mb-4 text-gray-800'>最近完了したSmall Goal</h3>
                 <div className='space-y-2'>
                   {latestCompletedGoals.map(goal => (
-                    <div key={goal.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <p className='font-medium text-gray-900'>{goal.title}</p>
-                      <div className='flex items-center space-x-2 text-sm'>
+                    <div key={goal.id} className="p-3 lg:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <p className='font-medium lg:text-lg text-gray-900'>{goal.title}</p>
+                      <div className='flex items-center space-x-2 text-sm lg:text-base'>
                         <span className="font-medium" style={{color: 'green'}}>完了!</span>
                         <span style={{color: 'rgb(72, 99, 141)'}}>{formatDate(goal.completed_time)}</span>
                       </div>

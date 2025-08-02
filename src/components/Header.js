@@ -82,9 +82,9 @@ const Header = () => {
           {isLoggedIn ? (
             <div className="flex items-center gap-4 text-[1.2rem] text-red-800">
               <span>ログイン中</span>
-              <Link href="/dashboard" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">ダッシュボード</Link>
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">使い方</Link>
-              <a href="/logout" onClick={handleLogout} className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">ログアウト</a>
+              <Link href="/dashboard" className="text-[1.2rem] px-2.5 py-2.5 text-blue-600 hover:text-blue-800">ダッシュボード</Link>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="text-[1.2rem] px-2.5 py-2.5 text-blue-600 hover:text-blue-800">使い方</Link>
+              <a href="/logout" onClick={handleLogout} className="text-[1.2rem] px-2.5 py-2.5 text-blue-600 hover:text-blue-800">ログアウト</a>
             </div>
           ) : (
             <div className="flex items-center gap-5">
@@ -112,9 +112,9 @@ const Header = () => {
           {isLoggedIn ? (
             <>
               <span className="py-2 text-sm text-red-800">ログイン中</span>
-              <Link href="/dashboard" className="py-3 text-[#373741] hover:text-red-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>ダッシュボード</Link>
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-red-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
-              <a href="/logout" onClick={(e) => { handleLogout(e); setIsMobileMenuOpen(false); }} className="py-3 text-[#373741] hover:text-red-600">ログアウト</a>
+              <Link href="/dashboard" className="py-3 text-blue-600 hover:text-blue-800 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>ダッシュボード</Link>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-blue-600 hover:text-blue-800 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
+              <a href="/logout" onClick={(e) => { handleLogout(e); setIsMobileMenuOpen(false); }} className="py-3 text-blue-600 hover:text-blue-800">ログアウト</a>
             </>
           ) : (
             <>
