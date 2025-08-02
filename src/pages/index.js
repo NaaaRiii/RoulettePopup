@@ -36,7 +36,7 @@ export default function HomePage() {
           </div>
           <div className="flex-1 flex justify-center max-w-md">
             <Image
-              src="/images/goal-setting.png"
+              src="/images/Goal-setting.png"
               alt="Goal 設定フォーム"
               width={300}
               height={225}
@@ -55,7 +55,7 @@ export default function HomePage() {
           </div>
           <div className="flex-1 flex justify-center max-w-md">
             <Image
-              src="/images/small_goal-setting.png"
+              src="/images/Small_Goal-setting.png"
               alt="Small Goal 設定フォーム"
               width={400}
               height={250}

@@ -61,11 +61,11 @@ cypress.config.prod.ts
 /src/amplify_outputs.json
 
 CLAUDE_WORK_LOG.md
-docs/claude-logs/
 
-plan/
+docs/
 
 public/screen-shots/
 
 test-small-goal-form.js
 test-goal-header.js
+test-dashboard.js
