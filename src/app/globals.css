@@ -2,9 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '../components/styles.css';
+
 /* 必要最小限のリセット */
 body {
   margin: 0;
   padding: 0;
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+/* Tailwindのスタイルを無効化 */
+.dashboard-container {
+  gap: 0 !important;
+}
+
+/* .dashboard {
+  padding-right: 0 !important;
+} */

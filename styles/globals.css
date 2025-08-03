@@ -3,3 +3,27 @@
 @tailwind utilities;
 
 @import '../src/components/styles.css';
+
+/* 必要最小限のリセット */
+body {
+margin: 0;
+padding: 0;
+font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Tailwindのgapを無効化 */
+.dashboard-container {
+gap: 0 !important;
+}
+
+.dashboard {
+    padding-right: 0 !important;
+}
+
+.unmet-goals-card {
+    width: 75%;
+}
+
+.bottom-small-goal-card {
+    width: 75%;
+  }

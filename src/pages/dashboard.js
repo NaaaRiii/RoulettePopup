@@ -220,10 +220,10 @@ return (
       {message && <p>{message}</p>}
     </div>
 
-    <div className='dashboard px-4 lg:px-8'>
-      <div className='dashboard-container flex-col lg:flex-row gap-4 lg:gap-8'>
+    <div className="dashboard">
+      <div className='dashboard-container flex-col lg:flex-row'>
         {/* 左側コンテナ */}
-        <div className='dashboard-left-container w-full lg:w-[60%] order-1'>
+        <div className='dashboard-left-container w-full lg:w-[60%] order-1 px-0'>
           {/* ユーザープロフィール */}
           <div className='user-profile-container'>
             <h1>Welcome to your dashboard</h1>
@@ -358,7 +358,7 @@ return (
                 .map((goal) => (
                   <li
                     key={goal.id}
-                    className="unmet-goals-card cursor-pointer w-full mb-2 lg:mb-3"
+                    className="unmet-goals-card cursor-pointer mb-2 lg:mb-3"
                     onClick={() => router.push(`/goals/${goal.id}`)}
                   >
                     <span data-testid="goal-title">{goal.title}</span>
@@ -373,7 +373,7 @@ return (
             <div className='dashboard-right-container-bottom'>
               <h3>最近完了したSmall Goal</h3>
               {latestCompletedGoals.map(goal => (
-                <div key={goal.id} className="bottom-small-goal-card w-full mb-2 lg:mb-3">
+                <div key={goal.id} className="bottom-small-goal-card mb-2 lg:mb-3">
                   <p>{goal.title}</p>
                   <p>
                     <span className="completed-text">完了!</span>
