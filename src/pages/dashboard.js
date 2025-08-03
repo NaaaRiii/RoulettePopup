@@ -16,6 +16,8 @@ import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 
 function Dashboard() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [goalsState, setGoalsState] = useState([]);
   const [deletedGoalId, setDeletedGoalId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,10 +35,9 @@ function Dashboard() {
   const [latestCompletedGoals, setLatestCompletedGoals] = useState([]);
   const router = useRouter();
   const message = router.query.message ? decodeURIComponent(router.query.message) : '';
-  
+
   const formatDate = (dateString) => format(new Date(dateString), 'yyyy-MM-dd');
 
-  
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -89,7 +90,7 @@ function Dashboard() {
       }
     }
   };
-  
+
 
   useEffect(() => {
     const fetchGoals = async () => {
@@ -102,7 +103,7 @@ function Dashboard() {
         console.error('[fetchGoals] error', err);
       }
     };
-  
+
     fetchGoals();
   }, []);
 
@@ -113,8 +114,10 @@ function Dashboard() {
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched user data:', data);
-  
+
+
         setUserRank(data.rank);
+
         const formattedData = {
           ...data,
           lastRouletteRank: parseInt(data.last_roulette_rank, 10) || 0
@@ -130,13 +133,15 @@ function Dashboard() {
         console.error('Error fetching user data:', error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
+
   useEffect(() => {
     console.log("Current rank:", userData.rank, "Last roulette rank:", userData.lastRouletteRank);
     if (userData.rank >= 10 && Math.floor(userData.rank / 10) > Math.floor(userData.lastRouletteRank / 10)) {
+
+
       updateLastRouletteRank(userData.rank);
     }
       // TODO: Fix the dependency array issue for userData
@@ -162,8 +167,13 @@ function Dashboard() {
       const resData = await response.json();
       console.log('resData:', resData);
 
+
+
+
+
       if (resData.success) {
         console.log("Update response received and successful");
+
         const formattedData = {
           ...userData,
           lastRouletteRank: parseInt(newRank, 10) || 0
@@ -180,133 +190,166 @@ function Dashboard() {
       console.error('Error updating last roulette rank:', error);
     }
   };
-  
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetchWithAuth('/api/current_user');
+        if (res.ok) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+          router.replace('/login');
+        }
+      } catch {
+        setIsLoggedIn(false);
+        router.replace('/login');
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+    checkAuth();
+  }, [router]);
+
+  if (authLoading) return <p>Loading...</p>;
+  if (!isLoggedIn)  return null;
+
 return (
   <Layout>
+
+
+
+
+
+
+
+
+
       <div>
         {message && <p>{message}</p>}
       </div>
-      
-      <div className='dashboard px-2 justify-start py-6 lg:px-6 xl:px-8'>
-        <div className='grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 xl:gap-20 w-full max-w-sm mx-auto sm:max-w-2xl lg:max-w-none'>
-          <div className='lg:col-span-8 space-y-6 lg:space-y-8 xl:space-y-10'>
-            <h1 className='text-xl md:text-2xl lg:text-3xl font-bold mb-6 lg:mb-8 text-gray-800'>Welcome to your dashboard</h1>
-            <div className='bg-[#FFFCEB] rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
-              <div className='space-y-4'>
-                <div className='flex items-center space-x-4'>
-                  <div className='flex-shrink-0'>
-                    <Image
-                      src="/images/learn.png"
-                      alt="User Profile Image"
-                      width={60}
-                      height={60}
-                      className="rounded-full lg:w-20 lg:h-20"
-                    />
-                  </div>
-                  <div className='flex-1 min-w-0'>
-                    <div className='text-sm text-gray-600'>
-                      {userData?.currentTitle}
-                    </div>
-                    <div className='flex items-center space-x-2'>
-                      <span className='text-lg lg:text-xl font-semibold text-gray-900'>{userData?.name}</span>
-                      <Link href="/edit-name" onClick={openEditName}>
-                        <FaPen className='text-gray-500 hover:text-gray-700 cursor-pointer text-sm' />
-                      </Link>
-                    </div>
-                    <EditUserNameModal isOpen={isEditNameOpen} onClose={closeEditName} onUserUpdate={handleUserUpdate}/>
-                    
-                    <div className='text-sm'>
-                      {userRank >= 10 && <Link href="/edit-roulette-text" className='text-blue-600 hover:text-blue-800'>ごほうびルーレット</Link>}
-                    </div>
-                  </div>
-                </div>
 
-                <div className='border-t pt-4'>
-                  <div className='grid grid-cols-2 gap-4 lg:gap-6 text-center'>
-                    <div className='bg-gray-50 rounded-lg p-3 lg:p-4'>
-                      <div className='text-lg lg:text-2xl font-bold text-gray-800'>{userData?.totalExp}</div>
-                      <div className='text-sm lg:text-base text-gray-600'>EXP</div>
-                    </div>
-                    <div className='bg-gray-50 rounded-lg p-3 lg:p-4'>
-                      <div className='text-lg lg:text-2xl font-bold text-gray-800'>{userData?.rank}</div>
-                      <div className='text-sm lg:text-base text-gray-600'>Rank</div>
+      <div className='dashboard px-4 lg:px-8'>
+        <div className='dashboard-container flex-col lg:flex-row gap-4 lg:gap-8'>
+          <div className='dashboard-left-container w-full lg:flex-1 order-1'>
+            <div className='user-profile-container'>
+              <h1>Welcome to your dashboard</h1>
+              {/* TODO: Fix the unescaped entities issue */}
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
+              <div className='user-profile-card w-full max-w-none lg:max-w-2xl'>
+                <div className='user-profile flex-col sm:flex-row lg:flex-col xl:flex-row'>
+                  <div className='user-profile__basic'>
+                    <div className='user-profile__image'>
+                      <Image
+                        src="/images/learn.png"
+                        alt="User Profile Image"
+                        width={60}
+                        height={60}
+                        className="profile-image"
+                      />
+                      </div>
+                    <div className='user-profile__info'>
+                      <div className='user-profile__title'>
+                        {userData?.currentTitle}
+                      </div>
+
+
+
+                      <div className='user-profile__name'>
+                        {userData?.name}
+
+                        <Link href="/edit-name" onClick={openEditName}>
+                          <FaPen />
+                        </Link>
+                      </div>
+                      <EditUserNameModal isOpen={isEditNameOpen} onClose={closeEditName} onUserUpdate={handleUserUpdate}/>
+
+                      <div className='user-profile__roulette'>
+                        {userRank >= 10 && <Link href="/edit-roulette-text">ごほうびルーレット</Link>}
+                      </div>
                     </div>
                   </div>
+
+                  <div className='user-profile__separator'>
+                  </div>
+
+                  <div className='user-profile__rank'>
+                    <h2>Your EXP: {userData?.totalExp}</h2>
+                  </div>
+
+                  <div className='user-profile__separator'>
+                  </div>
+
+                  <div className='user-profile__exp'>
+                    <h2>Your Rank: {userData?.rank}</h2>
+                  </div>
+
                 </div>
               </div>
             </div>
 
-            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
-              <div className='lg:min-h-[400px] xl:min-h-[500px]'>
-                <ExpLineChart />
-              </div>
+            <div className='chart h-64 lg:h-80 xl:h-96 mt-4 lg:mt-6'>
+              <ExpLineChart />
             </div>
 
-            <div className='space-y-6 lg:space-y-8 xl:space-y-10'>
-              <div className='flex flex-col sm:flex-row gap-4 lg:gap-8 xl:gap-10'>
-                <Link href="/new-goal" onClick={handleOpenModal} className='flex-1'>
-                  <div className='bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 lg:py-4 lg:px-8 rounded-lg text-center transition-colors lg:text-lg'>
-                    Goalを設定する
-                  </div>
+            <div className='dashboard-left-bottom-container'>
+              <div className='button-container flex-col sm:flex-row gap-2 lg:gap-4'>
+                <Link href="/new-goal" onClick={handleOpenModal}>
+                  <div className={'btn btn-primary w-full sm:w-auto flex-1'}>Goalを設定する</div>
                 </Link>
                 <NewGoalModal isOpen={isModalOpen} onClose={handleCloseModal} />
-                <Link href="/completed-goal" className='flex-1'>
-                  <div className='bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 lg:py-4 lg:px-8 rounded-lg text-center transition-colors lg:text-lg'>
-                    達成したGoal
-                  </div>
+                <Link href="/completed-goal">
+                  <div className={'btn btn-primary w-full sm:w-auto flex-1'}>達成したGoal</div>
                 </Link>
               </div>
 
-              <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
-                <h2 className='text-lg md:text-xl lg:text-2xl font-semibold mb-4 lg:mb-6 text-gray-800'>進行中のSmall Goal</h2>
-                <div className='space-y-3'>
-                  {goalsState
-                    .filter(goal => !goal.completed && goal.id !== deletedGoalId)
-                    .map((goal) => {
-                      const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
+              <div className='small-goals mt-4 lg:mt-6'>
+                <h2>進行中のSmall Goal</h2>
+                {goalsState
+                  .filter(goal => !goal.completed && goal.id !== deletedGoalId)
+                  .map((goal) => {
+                    const incompleteSmallGoals = goal.small_goals?.filter(smallGoal => !smallGoal.completed) || [];
 
-                      return incompleteSmallGoals.map((smallGoal) => (
-                        <div key={smallGoal.id} className='flex items-center space-x-4 p-4 lg:p-6 border rounded-lg bg-[#FFFCEB] hover:bg-[#FFF6D9] transition-colors'>
-                          <div className='flex-shrink-0'>
-                            <Image
-                              src='/images/pen-memo4.png'
-                              alt='Goal Image'
-                              width={40}
-                              height={40}
-                              className='rounded lg:w-12 lg:h-12'
-                            />
-                          </div>
-                          <div className='flex-1 min-w-0'>
-                            <p className='text-sm text-gray-600 truncate'>{goal.title}</p>
-                            <p className='text-base lg:text-lg font-medium text-gray-900' data-testid='small-goal-title'>{smallGoal.title}</p>
-                            <p className='text-sm lg:text-base text-gray-500'>期限: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
-                          </div>
-                          <div className='flex-shrink-0'>
-                            <Link href={`/goals/${goal.id}`}>
-                              <button className='bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-2 px-4 lg:py-3 lg:px-6 rounded text-sm lg:text-base transition-colors'>
-                                確認
-                              </button>
-                            </Link>
+                    return incompleteSmallGoals.map((smallGoal) => (
+                      <div key={smallGoal.id} className='c-card small-goals w-full max-w-none lg:max-w-2xl mb-3 lg:mb-4'>
+                        <div className='small-goal__image-container'>
+                          <Image
+                            src='/images/pen-memo4.png'
+                            alt='Goal Image'
+                            width={60}
+                            height={60}
+                            className='small-goal__image'
+                          />
+                        </div>
+                        <div className='small-goal__content-container'>
+                          <p className='goal-title'>{goal.title}</p> {/* Goalのタイトルは各small-goalに表示されます */}
+                          <div className='small-goal__content'>
+                          <p className='small-goal__title' data-testid='small-goal-title'>{smallGoal.title}</p>
+                            <p className='small-goal__deadline'>期限: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}</p>
                           </div>
                         </div>
-                      ));
-                    })}
-                </div>
+                        <div className='small-goal__button-container'>
+                          <Link href={`/goals/${goal.id}`}>
+                            <button className='small-goal__confirm-button'>確認</button>
+                          </Link>
+                        </div>
+                      </div>
+                    ));
+                  })}
               </div>
-            </div>
 
           </div>
-          
-          <div className='lg:col-span-4 space-y-6 lg:space-y-8 xl:space-y-10'>
-            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
-              <div className='lg:min-h-[350px] xl:min-h-[400px]'>
-                <ExpCalendar />
-              </div>
+
+          </div>
+
+          <div className='dashboard-right-container w-full lg:w-80 xl:w-96 order-2'>
+            <div className='calendar mb-6 lg:mb-8'>
+              <ExpCalendar />
             </div>
 
-            <div className='bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-10 xl:p-12'>
-              <h3 className='text-lg md:text-xl lg:text-2xl font-semibold mb-4 lg:mb-6 text-gray-800'>進行中のGoal</h3>
-              <div className='space-y-3'>
+            <div className='unmet-goals'>
+              <h3>進行中のGoal</h3>
+              <ul>
                 {goalsState
                   .filter((goal) => !goal.completed)
                   .sort((a, b) => {
@@ -315,34 +358,39 @@ return (
                     return dateA - dateB;
                   })
                   .map((goal) => (
-                    <div
-                      key={goal.id}
-                      className="p-4 lg:p-6 border rounded-lg bg-[#FFFCEB] hover:bg-[#FFF6D9] cursor-pointer transition-colors"
-                      onClick={() => router.push(`/goals/${goal.id}`)}
+                    //<li key={goal.id} className="unmet-goals-card">
+                    //  <Link href={`/goals/${goal.id}`} className="unmet-goals">
+                    //    <span data-testid="goal-title">{goal.title}</span> 
+                    //  </Link>
+                    //  <p className="goal-deadline">
+                    //    Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
+                    //  </p>
+                    //</li>
+                    <li
+                    key={goal.id}
+                    className="unmet-goals-card cursor-pointer w-full mb-2 lg:mb-3"
+                    style={{ cursor: 'pointer' }} 
+                    onClick={() => router.push(`/goals/${goal.id}`)}
                     >
-                      <div className='flex justify-between items-start'>
-                        <span data-testid="goal-title" className='font-medium lg:text-lg text-gray-900 flex-1 pr-3'>{goal.title}</span>
-                        <span className='text-xs lg:text-sm text-gray-500 flex-shrink-0'>
-                          期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
-                        </span>
-                      </div>
-                    </div>
+                    <span data-testid="goal-title">{goal.title}</span>
+                    <p className="goal-deadline">
+                      期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
+                    </p>
+                  </li>
                   ))}
-              </div>
+              </ul>
 
-              <div className='mt-6 pt-6 border-t'>
-                <h3 className='text-md lg:text-lg font-semibold mb-3 lg:mb-4 text-gray-800'>最近完了したSmall Goal</h3>
-                <div className='space-y-2'>
-                  {latestCompletedGoals.map(goal => (
-                    <div key={goal.id} className="p-3 lg:p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <p className='font-medium lg:text-lg text-gray-900'>{goal.title}</p>
-                      <div className='flex items-center space-x-2 text-sm lg:text-base'>
-                        <span className="font-medium" style={{color: 'green'}}>完了!</span>
-                        <span style={{color: 'rgb(72, 99, 141)'}}>{formatDate(goal.completed_time)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className='dashboard-right-container-bottom'>
+                <h3>最近完了したSmall Goal</h3>
+                {latestCompletedGoals.map(goal => (
+                  <div key={goal.id} className="bottom-small-goal-card w-full mb-2 lg:mb-3">
+                    <p>{goal.title}</p>
+                    <p>
+                      <span className="completed-text">完了!</span>
+                      <span className="completed-time">{formatDate(goal.completed_time)}</span>
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -351,5 +399,3 @@ return (
     </Layout>
   );
 }
-
-export default Dashboard;
