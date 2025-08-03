@@ -392,6 +392,7 @@ label {
   flex: 7;
   background-color: #f7f7ed;
   border-right: 1px solid #ddd;
+  margin-left: 2rem;
 }
 
 .user-profile-container{
@@ -403,7 +404,7 @@ label {
 }
 
 .small-goals{
-  padding-left: 10px;
+  padding-left: 20px;
 }
 
 .dashboard-right-container {
@@ -452,7 +453,8 @@ label {
 
 .chart {
   margin-top: 20px;
-  width: 100%;
+  margin-left: 20px;
+  width: calc(100% - 20px);
   height: 400px;
 }
 
