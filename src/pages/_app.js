@@ -16,7 +16,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 function AuthenticatedApp({ Component, pageProps }) {
   const router = useRouter();
 
-  const publicPaths = ['/', '/login', '/guest-signin', '/test-small-goal-form', '/test-goal-header'];
+  const publicPaths = ['/', '/login', '/guest-signin'];
   const isPublicPage =
     process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' ||
     publicPaths.includes(router.pathname);

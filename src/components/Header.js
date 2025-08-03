@@ -70,7 +70,7 @@ const Header = () => {
             <div className="flex items-center gap-5">
               <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">使い方</Link>
               <Link href="/guest-signin" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">お試し</Link>
-              <Link href="/dashboard" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">ログイン</Link>
+              <Link href="/login" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">ログイン</Link>
             </div>
           )}
         </nav>
@@ -91,73 +91,15 @@ const Header = () => {
         <div className="max-h-[calc(100vh-90px)] overflow-y-auto">
           {isLoggedIn ? (
             <nav className="flex flex-col p-4">
-              {/* カレンダー（最上位） */}
-              <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">カレンダー</h3>
-                <ExpCalendar />
-              </div>
-              
-              {/* ダッシュボード・使い方・ログアウト */}
-              <div className="mb-6 bg-gray-50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">メニュー</h3>
-                <div className="space-y-3">
-                  <span className="block py-2 text-sm text-red-800">ログイン中</span>
-                  <Link href="/dashboard" className="block py-3 px-4 bg-white rounded border text-center hover:bg-gray-100 text-blue-600 hover:text-blue-800" onClick={() => setIsMobileMenuOpen(false)}>ダッシュボード</Link>
-                  <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="block py-3 px-4 bg-white rounded border text-center hover:bg-gray-100 text-blue-600 hover:text-blue-800" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
-                  <a href="/logout" onClick={(e) => { handleLogout(e); setIsMobileMenuOpen(false); }} className="block py-3 px-4 bg-white rounded border text-center hover:bg-gray-100 text-blue-600 hover:text-blue-800">ログアウト</a>
-                </div>
-              </div>
-              
-              {/* 進行中のGoal */}
-              <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">進行中のGoal</h3>
-                <div className="space-y-3">
-                  {goalsState
-                    .filter((goal) => !goal.completed)
-                    .sort((a, b) => {
-                      const dateA = a.deadline ? new Date(a.deadline) : Infinity;
-                      const dateB = b.deadline ? new Date(b.deadline) : Infinity;
-                      return dateA - dateB;
-                    })
-                    .map((goal) => (
-                      <div
-                        key={goal.id}
-                        className="p-3 bg-[#FFFCEB] rounded border cursor-pointer hover:bg-[#FFF6D9]"
-                        onClick={() => {
-                          router.push(`/goals/${goal.id}`);
-                          setIsMobileMenuOpen(false);
-                        }}
-                      >
-                        <span className="font-medium text-gray-900">{goal.title}</span>
-                        <p className="text-sm text-gray-500">
-                          期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
-                        </p>
-                      </div>
-                    ))}
-                </div>
-              </div>
-              
-              {/* 最近完了したSmall Goal */}
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">最近完了したSmall Goal</h3>
-                <div className="space-y-2">
-                  {latestCompletedGoals.map(goal => (
-                    <div key={goal.id} className="p-3 bg-gray-50 rounded border">
-                      <p className="font-medium text-gray-900">{goal.title}</p>
-                      <div className="text-sm">
-                        <span className="text-green-600 font-medium">完了!</span>
-                        <span className="text-blue-600 ml-2">{formatDate(goal.completed_time)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
+              <Link href="/guest-signin" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>お試し</Link>
+              <Link href="/login" className="py-3 text-[#373741] hover:text-blue-600" onClick={() => setIsMobileMenuOpen(false)}>ログイン</Link>
             </nav>
-          ) : (
+          ):(
             <nav className="flex flex-col p-4">
               <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
               <Link href="/guest-signin" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>お試し</Link>
-              <Link href="/dashboard" className="py-3 text-[#373741] hover:text-blue-600" onClick={() => setIsMobileMenuOpen(false)}>ログイン</Link>
+              <Link href="/login" className="py-3 text-[#373741] hover:text-blue-600" onClick={() => setIsMobileMenuOpen(false)}>ログイン</Link>
             </nav>
           )}
         </div>

@@ -13,15 +13,11 @@ export default function HomePage() {
             Plus ONEで成長を可視化しよう！
           </h1>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-            <Link href="/guest-signin">
-              <button className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg text-white bg-black bg-opacity-50 border-none rounded hover:bg-opacity-70 transition-colors cursor-pointer whitespace-nowrap">
-                お試し
-              </button>
+            <Link href="/guest-signin" className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg text-white bg-black bg-opacity-50 border-none rounded hover:bg-opacity-70 transition-colors cursor-pointer whitespace-nowrap inline-block text-center">
+              お試し
             </Link>
-            <Link href="/dashboard">
-              <button className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg text-white bg-black bg-opacity-50 border-none rounded hover:bg-opacity-70 transition-colors cursor-pointer whitespace-nowrap">
-                ログイン
-              </button>
+            <Link href="/dashboard" className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg text-white bg-black bg-opacity-50 border-none rounded hover:bg-opacity-70 transition-colors cursor-pointer whitespace-nowrap inline-block text-center">
+              ログイン
             </Link>
           </div>
         </section>
