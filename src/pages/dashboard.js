@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 
-import { FaPen } from 'react-icons/fa';
+import { FaPen, FaBars, FaTimes } from 'react-icons/fa';
 import EditUserNameModal from '../components/EditUserNameModal';
 
 import Link from 'next/link';
@@ -33,6 +33,7 @@ function Dashboard() {
     rouletteTexts: []
   });
   const [latestCompletedGoals, setLatestCompletedGoals] = useState([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const message = router.query.message ? decodeURIComponent(router.query.message) : '';
 
@@ -216,22 +217,98 @@ function Dashboard() {
 
 return (
   <Layout>
+    {/* モバイル用ハンバーガーメニュー */}
+    <div className="lg:hidden">
+      <button 
+        className="fixed top-[100px] right-4 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        {isMobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+      </button>
+      
+      {/* モバイルメニュー - カレンダーを最上位に配置 */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 top-[90px] bg-white z-40 overflow-y-auto">
+          <div className="p-4">
+            {/* カレンダー（最上位） */}
+            <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">カレンダー</h3>
+              <ExpCalendar />
+            </div>
+            
+            {/* 使い方、お試し、ログインリンク */}
+            <div className="mb-6 bg-gray-50 rounded-lg p-4">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">メニュー</h3>
+              <div className="space-y-3">
+                <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="block py-3 px-4 bg-white rounded border text-center hover:bg-gray-100">
+                  使い方
+                </Link>
+                <Link href="/guest-signin" className="block py-3 px-4 bg-white rounded border text-center hover:bg-gray-100">
+                  お試し
+                </Link>
+                <Link href="/dashboard" className="block py-3 px-4 bg-white rounded border text-center hover:bg-gray-100">
+                  ログイン
+                </Link>
+              </div>
+            </div>
+            
+            {/* 進行中のGoal */}
+            <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">進行中のGoal</h3>
+              <div className="space-y-3">
+                {goalsState
+                  .filter((goal) => !goal.completed)
+                  .sort((a, b) => {
+                    const dateA = a.deadline ? new Date(a.deadline) : Infinity;
+                    const dateB = b.deadline ? new Date(b.deadline) : Infinity;
+                    return dateA - dateB;
+                  })
+                  .map((goal) => (
+                    <div
+                      key={goal.id}
+                      className="p-3 bg-[#FFFCEB] rounded border cursor-pointer hover:bg-[#FFF6D9]"
+                      onClick={() => {
+                        router.push(`/goals/${goal.id}`);
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <span className="font-medium text-gray-900">{goal.title}</span>
+                      <p className="text-sm text-gray-500">
+                        期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            
+            {/* 最近完了したSmall Goal */}
+            <div className="bg-white rounded-lg shadow-sm p-4">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">最近完了したSmall Goal</h3>
+              <div className="space-y-2">
+                {latestCompletedGoals.map(goal => (
+                  <div key={goal.id} className="p-3 bg-gray-50 rounded border">
+                    <p className="font-medium text-gray-900">{goal.title}</p>
+                    <div className="text-sm">
+                      <span className="text-green-600 font-medium">完了!</span>
+                      <span className="text-blue-600 ml-2">{formatDate(goal.completed_time)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
 
+    <div>
+      {message && <p>{message}</p>}
+    </div>
 
-
-
-
-
-
-
-
-      <div>
-        {message && <p>{message}</p>}
-      </div>
-
-      <div className='dashboard px-4 lg:px-8'>
-        <div className='dashboard-container flex-col lg:flex-row gap-4 lg:gap-8'>
-          <div className='dashboard-left-container w-full lg:flex-1 order-1'>
+    {/* レスポンシブレイアウト */}
+    <div className='dashboard px-4 lg:px-8'>
+      <div className='dashboard-container flex-col gap-4 lg:gap-8'>
+        <div className='dashboard-left-container w-full'>
             <div className='user-profile-container'>
               <h1>Welcome to your dashboard</h1>
               {/* TODO: Fix the unescaped entities issue */}
@@ -342,58 +419,6 @@ return (
 
           </div>
 
-          <div className='dashboard-right-container w-full lg:w-80 xl:w-96 order-2'>
-            <div className='calendar mb-6 lg:mb-8'>
-              <ExpCalendar />
-            </div>
-
-            <div className='unmet-goals'>
-              <h3>進行中のGoal</h3>
-              <ul>
-                {goalsState
-                  .filter((goal) => !goal.completed)
-                  .sort((a, b) => {
-                    const dateA = a.deadline ? new Date(a.deadline) : Infinity;
-                    const dateB = b.deadline ? new Date(b.deadline) : Infinity;
-                    return dateA - dateB;
-                  })
-                  .map((goal) => (
-                    //<li key={goal.id} className="unmet-goals-card">
-                    //  <Link href={`/goals/${goal.id}`} className="unmet-goals">
-                    //    <span data-testid="goal-title">{goal.title}</span> 
-                    //  </Link>
-                    //  <p className="goal-deadline">
-                    //    Deadline: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
-                    //  </p>
-                    //</li>
-                    <li
-                    key={goal.id}
-                    className="unmet-goals-card cursor-pointer w-full mb-2 lg:mb-3"
-                    style={{ cursor: 'pointer' }} 
-                    onClick={() => router.push(`/goals/${goal.id}`)}
-                    >
-                    <span data-testid="goal-title">{goal.title}</span>
-                    <p className="goal-deadline">
-                      期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
-                    </p>
-                  </li>
-                  ))}
-              </ul>
-
-              <div className='dashboard-right-container-bottom'>
-                <h3>最近完了したSmall Goal</h3>
-                {latestCompletedGoals.map(goal => (
-                  <div key={goal.id} className="bottom-small-goal-card w-full mb-2 lg:mb-3">
-                    <p>{goal.title}</p>
-                    <p>
-                      <span className="completed-text">完了!</span>
-                      <span className="completed-time">{formatDate(goal.completed_time)}</span>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </Layout>
