@@ -88,7 +88,7 @@ export const UserDataProvider = ({ children }) => {
       });
       setLatestCompletedGoals([]);
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, fetchGoals, fetchUserData]);
 
   const updateUserData = (updatedData) => {
     setUserData(prevData => ({ ...prevData, ...updatedData }));
