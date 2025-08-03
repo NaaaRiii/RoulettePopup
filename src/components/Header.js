@@ -2,21 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuthenticator } from '@aws-amplify/ui-react';
-import { getCurrentUser, signOut as amplifySignOut } from 'aws-amplify/auth';
-import { format } from 'date-fns';
-import { useUserData } from '../contexts/UserDataContext';
-import ExpCalendar from './Calendar';
+import { signOut as amplifySignOut } from 'aws-amplify/auth';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const Header = () => {
   const router = useRouter();
-
-  // Amplify 認証情報の取得
-  const { route, signOut } = useAuthenticator((context) => [context.route, context.signOut]);
-  const { isLoggedIn, goalsState, latestCompletedGoals } = useUserData();
-
+  const { signOut } = useAuthenticator((context) => [context.signOut]);
+  
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const formatDate = (dateString) => format(new Date(dateString), 'yyyy-MM-dd');
+  // 認証状態をチェック
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetchWithAuth('/api/current_user');
+        setIsLoggedIn(res.ok);
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
 
   // Amplifyでのログアウト
@@ -88,21 +95,22 @@ const Header = () => {
       
       {/* モバイルメニュー */}
       <div className={`md:hidden fixed top-[90px] left-0 w-full bg-[rgb(240,239,226)] shadow-lg transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-        <div className="max-h-[calc(100vh-90px)] overflow-y-auto">
+        <nav className="flex flex-col p-4">
           {isLoggedIn ? (
-            <nav className="flex flex-col p-4">
+            <>
+              <span className="py-2 text-sm text-red-800">ログイン中</span>
+              <Link href="/dashboard" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>ダッシュボード</Link>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
+              <a href="/logout" onClick={(e) => { handleLogout(e); setIsMobileMenuOpen(false); }} className="py-3 text-[#373741] hover:text-blue-600">ログアウト</a>
+            </>
+          ) : (
+            <>
               <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
               <Link href="/guest-signin" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>お試し</Link>
               <Link href="/login" className="py-3 text-[#373741] hover:text-blue-600" onClick={() => setIsMobileMenuOpen(false)}>ログイン</Link>
-            </nav>
-          ):(
-            <nav className="flex flex-col p-4">
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
-              <Link href="/guest-signin" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>お試し</Link>
-              <Link href="/login" className="py-3 text-[#373741] hover:text-blue-600" onClick={() => setIsMobileMenuOpen(false)}>ログイン</Link>
-            </nav>
+            </>
           )}
-        </div>
+        </nav>
       </div>
     </header>
   );
