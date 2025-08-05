@@ -226,9 +226,9 @@ return (
         <div className='dashboard-left-container w-full lg:w-[60%] order-1 px-0'>
           {/* ユーザープロフィール */}
           <div className='user-profile-container'>
-            <h1>Welcome to your dashboard</h1>
-            <div className='user-profile-card w-full max-w-none lg:max-w-2xl'>
-              <div className='user-profile flex-col sm:flex-row lg:flex-col xl:flex-row'>
+            <h2>Welcome to your dashboard</h2>
+            <div className='user-profile-cards-container'>
+              <div className='user-profile-card user-profile-card--basic'>
                 <div className='user-profile__basic'>
                   <div className='user-profile__image'>
                     <Image
@@ -261,17 +261,17 @@ return (
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div className='user-profile__separator' />
-
-                <div className='user-profile__rank'>
-                  <h2>Your EXP: {userData?.totalExp}</h2>
-                </div>
-
-                <div className='user-profile__separator' />
-
+              <div className='user-profile-card user-profile-card--exp'>
                 <div className='user-profile__exp'>
-                  <h2>Your Rank: {userData?.rank}</h2>
+                  <h3>Your EXP: {userData?.totalExp}</h3>
+                </div>
+              </div>
+
+              <div className='user-profile-card user-profile-card--rank'>
+                <div className='user-profile__rank'>
+                  <h3>Your Rank: {userData?.rank}</h3>
                 </div>
               </div>
             </div>
