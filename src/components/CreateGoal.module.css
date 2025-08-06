@@ -50,16 +50,30 @@
 .textareaField,
 .taskInputField {
   width: 400px;
-  padding: 5px;
+  padding: 10px;
   font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   word-wrap: break-word;
   word-break: break-all;
   white-space: pre-wrap;
   overflow-wrap: break-word;
   font-family: "UD デジタル 教科書体 N-R", "UD Digi Kyokasho NP-R", sans-serif;
+  transition: border-color 0.2s;
+}
+
+.textareaField:focus,
+.taskInputField:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .deadlineField {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   font-family: "UD デジタル 教科書体 N-R", "UD Digi Kyokasho NP-R", sans-serif;
 }
 

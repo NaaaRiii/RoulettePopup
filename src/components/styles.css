@@ -417,7 +417,12 @@ label {
 }
 
 .dashboard-left-bottom-container {
-  padding-left: 20px; 
+  padding-left: 20px;
+  margin-top: 20px;
+}
+
+.small-goals {
+  padding-left: 20px;
 }
 
 .dashboard-right-container {
@@ -475,7 +480,7 @@ label {
 .chart {
   margin-top: 20px;
   margin-left: 20px;
-  width: calc(100% - 20px);
+  width: calc(100% - 40px);
   height: 400px;
 }
 

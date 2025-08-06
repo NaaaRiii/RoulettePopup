@@ -82,7 +82,7 @@ const ExpLineChart = () => {
   }));
 
   return (
-    <ResponsiveContainer width={600} height={400}>
+    <ResponsiveContainer width='100%' height={400}>
       <LineChart data={updatedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="#ccc" strokeDasharray="" vertical={false} horizontal={false} />
         <XAxis dataKey="day" tick={<CustomTick />} />
