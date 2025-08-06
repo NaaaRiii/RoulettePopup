@@ -67,11 +67,10 @@ const Header = () => {
         {/* デスクトップメニュー */}
         <nav className="hidden md:flex items-center gap-4">
           {isLoggedIn ? (
-            <div className="flex items-center gap-4 text-[1.2rem] text-red-800">
-              <span>ログイン中</span>
-              <Link href="/dashboard" className="text-[1.1rem] px-2.5 py-2.5 hover:text-blue-800">ダッシュボード</Link>
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="text-[1.1rem] px-2.5 py-2.5 hover:text-blue-800">使い方</Link>
-              <a href="/logout" onClick={handleLogout} className="text-[1.1rem] px-2.5 py-2.5 hover:text-blue-800">ログアウト</a>
+            <div className="flex items-center gap-4 text-[1rem]">
+              <Link href="/dashboard" className="px-2.5 py-2.5 hover:text-blue-800">ダッシュボード</Link>
+              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="px-2.5 py-2.5 hover:text-blue-800">使い方</Link>
+              <a href="/logout" onClick={handleLogout} className="px-2.5 py-2.5 hover:text-blue-800">ログアウト</a>
             </div>
           ) : (
             <div className="flex items-center gap-5">
