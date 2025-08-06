@@ -285,7 +285,7 @@ return (
           {/* 左側下部コンテナ */}
           <div className='dashboard-left-bottom-container lg:max-w-2xl'>
             {/* ボタンコンテナ */}
-            <div className='button-container space-y-2 sm:space-y-0 sm:space-x-4'>
+            <div className='button-container space-y-0 sm:space-x-4'>
               <Link href="/new-goal" onClick={handleOpenModal} className="block sm:inline-block">
                 <div className='btn btn-primary w-full sm:w-auto'>Goalを設定する</div>
               </Link>

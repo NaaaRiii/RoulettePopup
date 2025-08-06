@@ -112,7 +112,8 @@ a:hover {
   .button-container {
     margin: 20px 0;
     gap: 20px;
-    flex-direction: column;
+    flex-direction: row;
+    width: 50%;
   }
 }
 
@@ -417,7 +418,7 @@ label {
 }
 
 .dashboard-left-bottom-container {
-  padding-left: 20px;
+  padding: 0 20px;
   margin-top: 20px;
 }
 
@@ -479,15 +480,15 @@ label {
 
 .chart {
   margin-top: 20px;
-  margin-left: 20px;
-  width: calc(100% - 40px);
+  /* margin-left: 20px; */
+  width: calc(100% - 60px);
   height: 400px;
 }
 
 @media (max-width: 1023px) {
   .chart {
     margin-left: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 160px;
     width: calc(100% - 40px);
     height: 300px;
   }
@@ -676,8 +677,8 @@ label {
 }
 
 .small-goal__title {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
+  /* font-size: 1.2rem; */
+  margin-bottom: 20px;
 }
 
 .small-goal__deadline {
@@ -933,7 +934,7 @@ label {
 }
 
 .goal-title {
-  font-size: 1.1rem;
+  font-size: 17px;
   margin-bottom: 10px;
   color: #373741;
 }
