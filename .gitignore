@@ -71,3 +71,7 @@ test-goal-header.js
 test-dashboard.js
 test-completed_goal.js
 test-goal-modal.js
+
+# localhost test files
+test-loggedin-header.js
+src/components/HeaderTest.js

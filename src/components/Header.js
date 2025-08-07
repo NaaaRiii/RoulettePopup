@@ -64,27 +64,21 @@ const Header = () => {
           <Link href="/dashboard" id="logo">Plus ONE</Link>
         </div>
         
-        {/* デスクトップメニュー */}
-        <nav className="hidden md:flex items-center gap-4">
-          {isLoggedIn ? (
-            <div className="flex items-center gap-4 text-[1rem]">
-              <Link href="/dashboard" className="px-2.5 py-2.5 hover:text-blue-800">ダッシュボード</Link>
-              <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="px-2.5 py-2.5 hover:text-blue-800">使い方</Link>
-              <a href="/logout" onClick={handleLogout} className="px-2.5 py-2.5 hover:text-blue-800">ログアウト</a>
-            </div>
-          ) : (
+        {/* デスクトップメニュー（ログイン前のみ表示） */}
+        {!isLoggedIn && (
+          <nav className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-5">
               <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="text-[1.2rem] px-2.5 py-2.5 hover:text-blue-600">使い方</Link>
               <Link href="/guest-signin" className="text-[1.1rem] px-2.5 py-2.5 hover:text-blue-600">お試し</Link>
               <Link href="/login?tab=signUp" className="text-[1.1rem] px-2.5 py-2.5 hover:text-blue-600">サインイン</Link>
               <Link href="/login" className="text-[1.1rem] px-2.5 py-2.5 hover:text-blue-600">ログイン</Link>
             </div>
-          )}
-        </nav>
+          </nav>
+        )}
         
-        {/* モバイルハンバーガーメニュー */}
+        {/* ハンバーガーメニュー（ログイン前はモバイルのみ、ログイン後は全画面で表示） */}
         <button 
-          className="md:hidden flex flex-col justify-center items-center w-8 h-8"
+          className={`${isLoggedIn ? 'flex' : 'md:hidden flex'} flex-col justify-center items-center w-8 h-8`}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           <span className={`block w-6 h-0.5 bg-[#373741] transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
@@ -93,15 +87,15 @@ const Header = () => {
         </button>
       </div>
       
-      {/* モバイルメニュー */}
-      <div className={`md:hidden fixed top-[90px] left-0 w-full bg-[rgb(240,239,226)] shadow-lg transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+      {/* ハンバーガーメニュー（ログイン前はモバイルのみ、ログイン後は全画面で表示） */}
+      <div className={`${isLoggedIn ? 'fixed' : 'md:hidden fixed'} top-[90px] left-0 w-full bg-[rgb(240,239,226)] shadow-lg transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
         <nav className="flex flex-col p-4">
           {isLoggedIn ? (
             <>
-              <span className="py-2 text-sm text-red-800">ログイン中</span>
               <Link href="/dashboard" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>ダッシュボード</Link>
               <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
-              <a href="/logout" onClick={(e) => { handleLogout(e); setIsMobileMenuOpen(false); }} className="py-3 text-[#373741] hover:text-blue-600">ログアウト</a>
+              <a href="/logout" onClick={(e) => { handleLogout(e); setIsMobileMenuOpen(false); }} className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200">ログアウト</a>
+              <button className="py-3 text-[#373741] hover:text-red-600 text-left">退会</button>
             </>
           ) : (
             <>
