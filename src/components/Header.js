@@ -26,6 +26,18 @@ const Header = () => {
   }, []);
 
 
+  // 退会処理
+  const handleWithdrawal = async () => {
+    const confirmed = confirm('この動作は取り消しができません。このサービスから退会しますか？');
+    
+    if (confirmed) {
+      // TODO: 退会処理の実装
+      console.log('退会処理を実行します');
+      // 一時的にハンバーガーメニューを閉じる
+      setIsMobileMenuOpen(false);
+    }
+  };
+
   // Amplifyでのログアウト
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -95,7 +107,7 @@ const Header = () => {
               <Link href="/dashboard" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>ダッシュボード</Link>
               <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
               <a href="/logout" onClick={(e) => { handleLogout(e); setIsMobileMenuOpen(false); }} className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200">ログアウト</a>
-              <button className="py-3 text-[#373741] hover:text-red-600 text-left">退会</button>
+              <button onClick={handleWithdrawal} className="py-3 text-[#373741] hover:text-red-600 text-left">退会</button>
             </>
           ) : (
             <>
