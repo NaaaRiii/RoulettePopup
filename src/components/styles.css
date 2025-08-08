@@ -784,7 +784,6 @@ label {
 }
 
 .goal-content-bottom {
-  margin: 30px 80px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -794,8 +793,7 @@ label {
 .goal-content-bottom-bottom {
   display: flex;
   flex-wrap: wrap;
-  
-  /*justify-content: flex-start;*/
+  gap: 20px;
 }
 
 .c-card.goalid-small-goal {
@@ -806,9 +804,21 @@ label {
   display: flex;
   flex-direction: column;
   padding: 15px;
-  margin-right: 20px;
-  flex: 0 1 calc(25% - 20px);
+  /* flex: 0 1 calc(100% - 10px); */
   box-sizing: border-box;
+  position: relative;
+}
+
+@media (min-width: 700px) {
+  .c-card.goalid-small-goal {
+    flex: 0 1 calc(50% - 20px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .c-card.goalid-small-goal {
+    flex: 0 1 calc(30% - 20px);
+  }
 }
 
 .goalid-small-goal__top {
@@ -822,15 +832,28 @@ label {
 }
 
 .goalid-small-goal__title {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin-bottom: 5px;
+}
+
+@media (min-width: 640px) {
+  .goalid-small-goal__title {
+    font-size: 1.2rem;
+  }
 }
 
 .goalid-small-goal__deadline,
 .goalid-small-goal__difficulty {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #555;
   margin-bottom: 5px;
+}
+
+@media (min-width: 640px) {
+  .goalid-small-goal__deadline,
+  .goalid-small-goal__difficulty {
+    font-size: 0.9rem;
+  }
 }
 
 .completed-text {
@@ -858,7 +881,15 @@ label {
   bottom: 10px;
   right: 10px;
   display: flex;
-  gap: 10px;
+  flex-direction: row;
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .goalid-small-goal__actions {
+    flex-direction: row;
+    gap: 10px;
+  }
 }
 
 .goalid-small-goal__edit-link,

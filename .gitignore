@@ -66,11 +66,6 @@ docs/
 
 public/screen-shots/
 
-test-small-goal-form.js
-test-goal-header.js
-test-dashboard.js
-test-completed_goal.js
-test-goal-modal.js
-test-loggedin-header.js
-HeaderTest.js
-src/pages/test/test-index.js
+
+src/pages/test/
+src/components/test/
