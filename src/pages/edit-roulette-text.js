@@ -13,9 +13,23 @@ const EditRouletteText = () => {
   const [showForm, setShowForm] = useState(false);
   const [editedText, setEditedText] = useState('');
   const [flashMessage, setFlashMessage] = useState('');
+  const [recentSpins, setRecentSpins] = useState([]);
   const { tickets, fetchTickets } = useContext(TicketsContext);
   const { rouletteTexts, setRouletteTexts } = useFetchRouletteTexts();
   console.log('[EditRoulette] tickets=', tickets);
+
+  // 初期読み込み: 最近のスピン結果
+  useEffect(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? window.localStorage.getItem('recentSpins') : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setRecentSpins(parsed);
+      }
+    } catch (e) {
+      console.error('Failed to load recentSpins from localStorage', e);
+    }
+  }, []);
 
   useEffect(() => {
     if (rouletteNumber !== '') {
@@ -58,6 +72,31 @@ const EditRouletteText = () => {
   
 
   const selectedRouletteTextNumber = parseInt(rouletteNumber);
+
+  // ルーレット結果の受け取り・履歴保存
+  const handleSpinComplete = (matchedNumber) => {
+    try {
+      const matched = rouletteTexts.find((t) => t.number === Number(matchedNumber));
+      const entry = {
+        number: matchedNumber,
+        text: matched ? matched.text : '',
+        at: new Date().toISOString(),
+      };
+      setRecentSpins((prev) => {
+        const next = [entry, ...prev].slice(0, 5);
+        try {
+          if (typeof window !== 'undefined') {
+            window.localStorage.setItem('recentSpins', JSON.stringify(next));
+          }
+        } catch (e) {
+          console.error('Failed to save recentSpins to localStorage', e);
+        }
+        return next;
+      });
+    } catch (e) {
+      console.error('handleSpinComplete error', e);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -124,30 +163,44 @@ const EditRouletteText = () => {
   return (
     <Layout>
       {flashMessage && <div className="flash-message">{flashMessage}</div>}
-      <div className="edit-roulette-container">
-        <div className="edit-roulette-left-container">
-          <h2 className="page-title">ごほうびルーレット</h2>
-          <h3 className="ticket-info" data-testid="tickets">
+      <div className="
+        flex flex-col lg:flex-row
+        min-h-screen px-2 py-4 sm:p-6 lg:p-5
+        gap-6 lg:gap-8
+      ">
+        <div className="
+          flex-1 lg:flex-[6]
+          flex flex-col space-y-6
+        ">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">ごほうびルーレット</h2>
+          <h3 className="text-sm sm:text-base lg:text-lg font-medium text-gray-700" data-testid="tickets">
             チケットを『{tickets}』枚持っています。
           </h3>
 
           <div>
             {!showForm && (
-              <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
+              <button type="button" className="btn btn-primary rounded-md" onClick={() => setShowForm(true)}>
                 ルーレットを編集する
               </button>
             )}
 
             {showForm && (
-              <div id="edit-roulette-text-form" className="form-container visible" data-testid="edit-roulette-text-form">
+              <div id="edit-roulette-text-form" className="
+                bg-white p-3 sm:p-4 rounded-lg shadow-md
+                border border-gray-200 space-y-3
+                max-w-md mx-auto lg:mx-0
+              " data-testid="edit-roulette-text-form">
                 <form onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label htmlFor="rouletteNumber">編集したい数字を選んでください。</label>
+                  <div className="space-y-2">
+                    <label htmlFor="rouletteNumber" className="block text-base font-medium text-gray-700">
+                      編集したい数字を選んでください。
+                    </label>
                     <select
                       id="rouletteNumber"
                       value={rouletteNumber}
                       onChange={(e) => setRouletteNumber(e.target.value)}
                       required
+                      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="" disabled>数字を選択</option>
                       {[...Array(12).keys()].map(n => (
@@ -155,26 +208,35 @@ const EditRouletteText = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="rouletteText">内容を編集してください。</label>
+                  <div className="space-y-2">
+                    <label htmlFor="rouletteText" className="block text-base font-medium text-gray-700">
+                      内容を編集してください。
+                    </label>
                     <input
                       type="text"
                       id="rouletteText"
-                      className="roulette-text"
+                      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={editedText}
                       onChange={(e) => setEditedText(e.target.value)}
                       required
                     />
                   </div>
 
-                  <div className="button-group">
+                  <div className="
+                    flex flex-col sm:flex-row gap-3">
                     <button
                       type="submit"
-                      className="btn btn-primary"
+                      className="btn btn-primary w-full sm:w-auto rounded-md"
                     >
                       内容を保存する
                     </button>
-                    <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>キャンセル</button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary w-full sm:w-auto border border-gray-300 rounded-md"
+                      onClick={() => setShowForm(false)}
+                    >
+                      キャンセル
+                    </button>
                   </div>
                 </form>
               </div>
@@ -203,17 +265,40 @@ const EditRouletteText = () => {
 
         </div>
 
-        <div className="edit-roulette-right-container">
+        <div className="
+          flex-1 lg:flex-[4]
+          flex flex-col items-center text-center
+          gap-6 lg:gap-5
+          mt-6 lg:mt-0
+        ">
           <div className="roulette">
-            <RoulettePopup />
+            <RoulettePopup onSpinComplete={handleSpinComplete} />
           </div>
 
-          <div className="roulette-description c-card">
+          <div className="roulette-description c-card mx-2 sm:mx-0">
             <ul data-testid="roulette-description-list">
               <li>Rankが10上がるごとに、チケットが付与されます。</li>
               <li>ルーレットを回すには、チケットを1枚使用する必要があります。</li>
               <li>各チケットの枚数は、左上に表示されています。</li>
             </ul>
+          </div>
+
+          <div className="roulette-history c-card mx-2 sm:mx-0" data-testid="roulette-recent-results">
+            <div className="px-5 py-4">
+              <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3">最近のスピン結果</h4>
+              {recentSpins.length === 0 ? (
+                <p className="text-sm text-gray-600">まだ結果はありません。右のボタンから回してみましょう。</p>
+              ) : (
+                <ul className="space-y-2">
+                  {recentSpins.map((s, idx) => (
+                    <li key={`${s.at}-${idx}`} className="flex items-center justify-between text-left">
+                      <span className="text-sm text-gray-800">No.{s.number}：{s.text || '—'}</span>
+                      <span className="text-xs text-gray-500">{new Date(s.at).toLocaleString()}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
       </div>

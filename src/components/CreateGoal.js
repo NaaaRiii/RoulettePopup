@@ -40,10 +40,13 @@ export default function NewGoalModal({ isOpen, onClose }) {
 
   return (
     <div className={`${styles.modalOverlay} p-4`} role="dialog" aria-labelledby="modal-title">
-      <div className={`${styles.modalContent} w-full sm:w-[90%] sm:max-w-[600px] lg:max-w-[500px] max-h-[90vh] overflow-hidden`}>
+      <div className={`${styles.modalContent}
+        w-full sm:w-[90%] sm:max-w-[600px] lg:max-w-[500px]
+        max-h-[90vh] overflow-hidden p-2.5
+      `}>
         {/* ヘッダー部分 */}
         <div className="pb-3 border-b border-gray-200">
-          <h2 id="modal-title" className="text-lg sm:text-xl font-bold">Goalを設定する</h2>
+          <h2 id="modal-title" className="text-lg sm:text-xl font-bold">Goalを設定しよう！</h2>
         </div>
 
         {/* スクロール可能なコンテンツ部分 */}

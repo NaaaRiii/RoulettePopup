@@ -94,7 +94,12 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center p-4" data-testid="create-small-goal">
-      <div className="relative bg-white w-full max-w-[500px] max-h-[90vh] rounded border border-gray-400 flex flex-col">
+      <div className="
+        relative bg-white p-4
+        w-full max-w-[500px] max-h-[90vh]
+        rounded border border-gray-400
+        flex flex-col
+      ">
         {/* ヘッダー部分（固定） */}
         <div className="p-5 pb-3 border-b border-gray-200">
           <h2 className="text-2xl font-bold mb-4">Small Goalを設定しよう!</h2>
@@ -188,22 +193,17 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
           </form>
         </div>
 
-        {/* フッター部分（固定） */}
-        <div className="p-5 pt-3 border-t border-gray-200 bg-gray-50">
+        <div className="flex-shrink-0 py-4 space-y-4 space-y-reverse border-t border-gray-200">
           <button 
             type="submit" 
             onClick={handleSubmit}
-            className="w-full px-3 py-2 border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600 rounded font-medium"
+            className="btn btn-primary w-full sm:w-auto"
           >
             設定する
           </button>
-          <button 
-            onClick={handleClose} 
-            className="w-full mt-2 px-3 py-2 border border-gray-300 rounded bg-white hover:bg-gray-50 cursor-pointer"
-          >
-            キャンセル
-          </button>
         </div>
+        
+        <button onClick={handleClose} className={styles.closeButton}>Close</button>
       </div>
     </div>
   );

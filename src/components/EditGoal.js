@@ -67,7 +67,10 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
 
   return (
     <div className={`${styles.modalOverlay} p-4`} role="dialog" aria-labelledby="modal-title">
-      <div className={`${styles.modalContent} w-full sm:w-[90%] sm:max-w-[600px] lg:max-w-[500px] max-h-[90vh] overflow-hidden`}>
+      <div className={`${styles.modalContent}
+        w-full sm:w-[90%] sm:max-w-[600px] lg:max-w-[500px]
+        max-h-[90vh] overflow-hidden p-2.5
+      `}>
         {/* ヘッダー部分 */}
         <div className="pb-3 border-b border-gray-200">
           <h2 id="modal-title" className="text-lg sm:text-xl font-bold">Goalを編集しよう！</h2>
@@ -118,7 +121,7 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-full sm:w-auto">Goalを更新する</button>
+            <button type="submit" className="btn btn-primary w-full sm:w-auto">更新する</button>
           </form>
         </div>
         
