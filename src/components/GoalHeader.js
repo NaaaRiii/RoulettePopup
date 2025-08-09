@@ -19,7 +19,7 @@ const GoalHeader = ({
   onDeleteGoal
 }) => {
   return (
-    <div className='flex flex-col bg-[#FFFCEB] w-full rounded-sm shadow-sm p-4 sm:p-8 lg:p-12'>
+    <div className='flex flex-col bg-[#FFFCEB] w-full rounded-sm shadow-sm p-4 sm:p-8 lg:p-12 lg:w-[750px]'>
       <div className="mb-4">
         <h2 className="text-xl sm:text-2xl font-bold inline">Goal : </h2>
         <span className="text-xl sm:text-2xl font-normal">{goal.title}</span>

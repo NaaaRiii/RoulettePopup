@@ -92,7 +92,7 @@ a:hover {
 
 .main {
   margin-top: 90px;
-  background: #FFFFEE;
+  background: #f7f7ed;
   flex: 1;
 }
 
@@ -555,7 +555,7 @@ label {
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   margin-bottom: 20px;
   position: relative;
-  width: 650px;
+  /* width: 650px; */
 }
 
 .user-profile {
@@ -790,9 +790,16 @@ label {
 
 .goal-content-bottom-top,
 .goal-content-bottom-bottom {
-  display: flex;
-  flex-wrap: wrap;
+  display: block;
   gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .goal-content-bottom-top,
+  .goal-content-bottom-bottom {
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 
 .c-card.goalid-small-goal {
@@ -816,7 +823,7 @@ label {
 
 @media (min-width: 1024px) {
   .c-card.goalid-small-goal {
-    flex: 0 1 calc(30% - 20px);
+    flex: 0 1 calc(24% - 50px);
   }
 }
 

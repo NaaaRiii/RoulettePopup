@@ -5,6 +5,8 @@ import { fetchWithAuth } from '../utils/fetchWithAuth';
 import Layout from '../components/Layout';
 import Image from 'next/image';
 import RoulettePopup from '../components/RoulettePopup';
+import Link from 'next/link';
+import { format } from 'date-fns';
 import '../components/styles.css';
 
 
@@ -14,6 +16,7 @@ const EditRouletteText = () => {
   const [editedText, setEditedText] = useState('');
   const [flashMessage, setFlashMessage] = useState('');
   const [recentSpins, setRecentSpins] = useState([]);
+  const [smallGoals, setSmallGoals] = useState([]);
   const { tickets, fetchTickets } = useContext(TicketsContext);
   const { rouletteTexts, setRouletteTexts } = useFetchRouletteTexts();
   console.log('[EditRoulette] tickets=', tickets);
@@ -29,6 +32,35 @@ const EditRouletteText = () => {
     } catch (e) {
       console.error('Failed to load recentSpins from localStorage', e);
     }
+  }, []);
+
+  // 進行中のSmall Goalを取得
+  useEffect(() => {
+    const fetchSmallGoals = async () => {
+      try {
+        const response = await fetchWithAuth('/api/goals');
+        if (response.ok) {
+          const goalsData = await response.json();
+          // 未完了のGoalから未完了のSmall Goalを抽出
+          const incompleteSmallGoals = goalsData
+            .filter(goal => !goal.completed)
+            .flatMap(goal => 
+              (goal.small_goals || [])
+                .filter(smallGoal => !smallGoal.completed)
+                .map(smallGoal => ({
+                  ...smallGoal,
+                  goalTitle: goal.title,
+                  goalId: goal.id
+                }))
+            );
+          setSmallGoals(incompleteSmallGoals);
+        }
+      } catch (error) {
+        console.error('Failed to fetch small goals:', error);
+      }
+    };
+
+    fetchSmallGoals();
   }, []);
 
   useEffect(() => {
@@ -72,6 +104,8 @@ const EditRouletteText = () => {
   
 
   const selectedRouletteTextNumber = parseInt(rouletteNumber);
+
+  const formatDate = (dateString) => format(new Date(dateString), 'yyyy-MM-dd');
 
   // ルーレット結果の受け取り・履歴保存
   const handleSpinComplete = (matchedNumber) => {
@@ -171,6 +205,7 @@ const EditRouletteText = () => {
         <div className="
           flex-1 lg:flex-[6]
           flex flex-col space-y-6
+          pl-2 sm:pl-4 lg:pl-[100px]
         ">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">ごほうびルーレット</h2>
           <h3 className="text-sm sm:text-base lg:text-lg font-medium text-gray-700" data-testid="tickets">
@@ -270,12 +305,13 @@ const EditRouletteText = () => {
           flex flex-col items-center text-center
           gap-6 lg:gap-5
           mt-6 lg:mt-0
+          pr-0 sm:pr-4 lg:pr-[100px]
         ">
           <div className="roulette">
             <RoulettePopup onSpinComplete={handleSpinComplete} />
           </div>
 
-          <div className="roulette-description c-card mx-2 sm:mx-0">
+          <div className="roulette-description c-card mx-2 sm:mx-0 lg:w-[650px]">
             <ul data-testid="roulette-description-list">
               <li>Rankが10上がるごとに、チケットが付与されます。</li>
               <li>ルーレットを回すには、チケットを1枚使用する必要があります。</li>
@@ -283,7 +319,7 @@ const EditRouletteText = () => {
             </ul>
           </div>
 
-          <div className="roulette-history c-card mx-2 sm:mx-0" data-testid="roulette-recent-results">
+          <div className="roulette-history c-card mx-2 sm:mx-0 lg:w-[650px]" data-testid="roulette-recent-results">
             <div className="px-5 py-4">
               <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3">最近のスピン結果</h4>
               {recentSpins.length === 0 ? (
@@ -300,6 +336,32 @@ const EditRouletteText = () => {
               )}
             </div>
           </div>
+
+          {smallGoals.length > 0 && (
+            <div className="small-goals-section c-card mx-2 sm:mx-0 lg:w-[650px]" data-testid="small-goals-section">
+              <div className="px-5 py-4">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3">期限が近いSmall Goal</h4>
+                <div className="space-y-3">
+                  {smallGoals.slice(0, 5).map((smallGoal) => (
+                    <div key={smallGoal.id} className="flex items-start justify-between p-3 bg-gray-50 rounded border">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800 mb-1">{smallGoal.goalTitle}</p>
+                        <p className="text-xs text-gray-600 mb-2">{smallGoal.title}</p>
+                        <p className="text-xs text-red-600">
+                          期限: {smallGoal.deadline ? formatDate(smallGoal.deadline) : 'No deadline'}
+                        </p>
+                      </div>
+                      <Link href={`/goals/${smallGoal.goalId}`}>
+                        <button className="ml-3 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600">
+                          確認
+                        </button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
