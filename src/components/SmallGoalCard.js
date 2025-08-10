@@ -57,7 +57,7 @@ const SmallGoalCard = ({
             </ul>
             {!smallGoal.completed && smallGoal.tasks?.every(task => task.completed) && (
               <button 
-                className="w-[20%] px-3 py-2 mt-2 mb-2 rounded-sm border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600" 
+                className="px-3 py-2 mt-2 rounded-sm border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600" 
                 onClick={() => onCompleteSmallGoal(smallGoal.id, goal, setGoal)}
               >
                 完了
@@ -65,18 +65,18 @@ const SmallGoalCard = ({
             )}
           </div>
 
-          <div className='goalid-small-goal__actions'>
-            <Link href='#' onClick={(e) => { 
-              e.preventDefault(); 
-              onOpenEditSmallGoalModal(smallGoal); 
+          <div className='flex flex-row gap-2.5 absolute bottom-2 right-2'>
+            <Link href='#' onClick={(e) => {
+              e.preventDefault();
+              onOpenEditSmallGoalModal(smallGoal);
             }}>
-              <div className='goalid-small-goal__edit-link'>編集</div>
+              <div className='text-blue-600 cursor-pointer hover:text-blue-800'>編集</div>
             </Link>
-            <Link href='#' onClick={(e) => { 
-              e.preventDefault(); 
-              onDeleteSmallGoal(smallGoal.id); 
+            <Link href='#' onClick={(e) => {
+              e.preventDefault();
+              onDeleteSmallGoal(smallGoal.id);
             }}>
-              <div className='goalid-small-goal__delete-link' data-testid={`delete-small-goal-${smallGoal.id}`}>
+              <div className='text-blue-600 cursor-pointer hover:text-blue-800' data-testid={`delete-small-goal-${smallGoal.id}`}>
                 削除
               </div>
             </Link>
