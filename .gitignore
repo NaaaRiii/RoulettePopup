@@ -75,3 +75,9 @@ test-goal-modal.js
 # localhost test files
 test-loggedin-header.js
 src/components/HeaderTest.js
+
+src/pages/test/
+src/components/test/
+
+CLAUDE.md
+.claude/

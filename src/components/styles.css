@@ -483,7 +483,7 @@ label {
 
 @media (max-width: 1023px) {
   .chart {
-    margin-left: 20px;
+    /* margin-left: 20px; */
     margin-bottom: 160px;
     width: calc(100% - 40px);
     height: 300px;
@@ -788,6 +788,7 @@ label {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding-left: 2rem;
 }
 
 .goal-content-bottom-top,
@@ -927,6 +928,7 @@ label {
   flex-direction: column;
   justify-content: center;
   flex: 1;
+  padding-top: 1rem;
 }
 
 .goal-title {
