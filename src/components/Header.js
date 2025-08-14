@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuthenticator } from '@aws-amplify/ui-react';
-import { signOut as amplifySignOut } from 'aws-amplify/auth';
+import { signOut as amplifySignOut, updateUserAttributes } from 'aws-amplify/auth';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const Header = () => {
@@ -26,14 +26,43 @@ const Header = () => {
   }, []);
 
 
-  // 退会処理
+  // 退会処理（論理削除）
   const handleWithdrawal = async () => {
     const confirmed = confirm('この動作は取り消しができません。このサービスから退会しますか？');
     
     if (confirmed) {
-      // TODO: 退会処理の実装
-      console.log('退会処理を実行します');
-      // 一時的にハンバーガーメニューを閉じる
+      try {
+        // 1. Rails APIでユーザーデータ論理削除
+        const response = await fetchWithAuth('/api/users/withdrawal', {
+          method: 'PATCH',
+        });
+        
+        if (response.ok) {
+          // 2. Cognitoユーザー属性を更新（退会状態に設定）
+          await updateUserAttributes({
+            userAttributes: {
+              'custom:status': 'deactivated',
+            },
+          });
+          
+          // 3. Amplifyでサインアウト
+          await amplifySignOut({ global: true });
+          
+          // 4. ローカルストレージをクリーンアップ
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+          }
+          
+          // 5. ルートページにリダイレクト
+          router.push('/');
+        } else {
+          console.error('Rails API withdrawal failed:', response.status);
+        }
+      } catch (error) {
+        console.error('退会処理でエラーが発生しました:', error);
+      }
+      
+      // ハンバーガーメニューを閉じる
       setIsMobileMenuOpen(false);
     }
   };
