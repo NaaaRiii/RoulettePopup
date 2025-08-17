@@ -34,7 +34,7 @@ const Header = () => {
       try {
         // 1. Rails APIでユーザーデータ論理削除
         const response = await fetchWithAuth('/api/users/withdrawal', {
-          method: 'PATCH',
+          method: 'DELETE',
         });
         
         if (response.ok) {

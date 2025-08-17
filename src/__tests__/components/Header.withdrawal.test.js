@@ -164,7 +164,7 @@ describe('Header - 退会機能テスト（論理削除）', () => {
       
       await waitFor(() => {
         expect(mockFetchWithAuth).toHaveBeenCalledWith('/api/users/withdrawal', {
-          method: 'PATCH',
+          method: 'DELETE',
         });
       });
     });
@@ -289,7 +289,7 @@ describe('Header - 退会機能テスト（論理削除）', () => {
       
       await waitFor(() => {
         expect(mockFetchWithAuth).toHaveBeenCalledWith('/api/users/withdrawal', {
-          method: 'PATCH',
+          method: 'DELETE',
         });
       });
       
