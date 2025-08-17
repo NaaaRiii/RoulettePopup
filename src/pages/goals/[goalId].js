@@ -64,12 +64,15 @@ function GoalPage() {
 
   return (
     <Layout>
-      <div className='goal-page-container'>
-        <div className='goal-content'>
-          {message && <p>{message}</p>}
-          {smallGoalsError && <p className="error-message">{smallGoalsError}</p>}
-          <div className='goal-content-top'>
-            <div className='goal-content-top-left-container'>
+      <div className="w-full bg-[#f7f7ed] min-h-screen">
+        <div className="flex flex-col min-h-screen bg-[#f7f7ed] px-4 sm:px-6 lg:px-8">
+          {message && <p className="text-center py-2 text-green-600">{message}</p>}
+          {smallGoalsError && <p className="text-center py-2 text-red-600">{smallGoalsError}</p>}
+          
+          {/* Top Section - Goal Header and Calendar */}
+          <div className="flex flex-col lg:flex-row gap-6 pb-6 border-b-2 border-gray-300 mb-6">
+            {/* Goal Header Section */}
+            <div className="flex-1 lg:flex-[7] px-2 sm:px-4 lg:pl-8">
               <GoalHeader
                 goal={goal}
                 goalId={goalId}
@@ -86,25 +89,29 @@ function GoalPage() {
               />
             </div>
 
-            <div className='goal-content-top-right-container'>
-              <div className='calendar'>
+            {/* Calendar Section */}
+            <div className="flex-1 lg:flex-[3] px-2 sm:px-4">
+              <div className="w-full">
                 <ExpCalendar />
               </div>
             </div>
           </div>
 
-          <SmallGoalList
-            goal={goal}
-            selectedSmallGoal={selectedSmallGoal}
-            isEditSmallGoalModalOpen={isEditSmallGoalModalOpen}
-            onCloseEditSmallGoalModal={closeEditSmallGoalModal}
-            onTaskToggle={handleTaskToggle}
-            onCompleteSmallGoal={completeSmallGoal}
-            onOpenEditSmallGoalModal={openEditSmallGoalModal}
-            onDeleteSmallGoal={deleteSmallGoal}
-            onSmallGoalUpdated={handleSmallGoalUpdated}
-            setGoal={setGoal}
-          />
+          {/* Small Goals List Section */}
+          <div className="flex-1">
+            <SmallGoalList
+              goal={goal}
+              selectedSmallGoal={selectedSmallGoal}
+              isEditSmallGoalModalOpen={isEditSmallGoalModalOpen}
+              onCloseEditSmallGoalModal={closeEditSmallGoalModal}
+              onTaskToggle={handleTaskToggle}
+              onCompleteSmallGoal={completeSmallGoal}
+              onOpenEditSmallGoalModal={openEditSmallGoalModal}
+              onDeleteSmallGoal={deleteSmallGoal}
+              onSmallGoalUpdated={handleSmallGoalUpdated}
+              setGoal={setGoal}
+            />
+          </div>
         </div>
       </div>
     </Layout>

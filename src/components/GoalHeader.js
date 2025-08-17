@@ -19,25 +19,28 @@ const GoalHeader = ({
   onDeleteGoal
 }) => {
   return (
-    <div className='flex flex-col bg-[#FFFCEB] w-[70%] rounded-sm shadow-sm p-12 px-15'>
-      <h2 className="text-2xl font-bold mb-4">Goal : {goal.title}</h2>
+    <div className='flex flex-col bg-[#FFFCEB] w-full rounded-sm shadow-sm p-4 sm:p-8 lg:p-12 lg:w-[750px]'>
+      <div className="mb-4">
+        <h2 className="text-xl sm:text-2xl font-bold inline">Goal : </h2>
+        <span className="text-xl sm:text-2xl font-normal">{goal.title}</span>
+      </div>
       <div className='flex flex-col gap-2'>
         {goal.completed ? (
-          <p>このGoalは達成しました!</p>
+          <p className="text-sm sm:text-base">このGoalは達成しました!</p>
         ) : (
           <>
-            <p>このGoalを完了しますか?</p>
+            <p className="text-sm sm:text-base">このGoalを完了しますか?</p>
             {!goal.small_goals || goal.small_goals.length === 0 || goal.small_goals.some(sg => !sg.completed) ? (
               <button 
                 disabled 
-                className='w-[30%] px-3 py-2 mt-2 mb-2 rounded-sm border-none cursor-not-allowed bg-gray-200 text-gray-500 opacity-60'
+                className='w-full sm:w-auto sm:max-w-[200px] px-3 py-2 mt-2 mb-2 rounded-sm border-none cursor-not-allowed bg-gray-200 text-gray-500 opacity-60 text-sm sm:text-base'
               >
                 Goalを完了する
               </button>
             ) : (
               <button 
                 onClick={onCompleteGoal} 
-                className='w-[30%] px-3 py-2 mt-2 mb-2 rounded-sm border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600'
+                className='w-full sm:w-auto sm:max-w-[200px] px-3 py-2 mt-2 mb-2 rounded-sm border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600 text-sm sm:text-base'
               >
                 Goalを完了する
               </button>
@@ -47,15 +50,16 @@ const GoalHeader = ({
       </div>
 
       <div className='pt-5'>
-        <h2 className="text-2xl font-bold mb-4">Goalの詳細 : {goal.content}</h2>
-        <p className='text-lg mb-4'>
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4">Goalの詳細 : </h2>
+        <span className="text-xl sm:text-2xl font-normal">{goal.content}</span>
+        <p className='text-sm sm:text-base lg:text-lg mb-4 mt-3'>
           期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
         </p>
-        <div className='pt-4'>
+        <div className='pt-4 space-y-3'>
           {!goal.completed && (
             <>
               <Link href={`#`} onClick={onOpenEditGoalModal}>
-                <div className='text-blue-600 cursor-pointer hover:text-blue-800 mb-5'>
+                <div className='text-blue-600 cursor-pointer hover:text-blue-800 text-sm sm:text-base'>
                   Goalを編集する
                 </div>
               </Link>
@@ -68,9 +72,9 @@ const GoalHeader = ({
             </>
           )}
 
-          <div className='mb-4'>
+          <div>
             <Link href={`#`} onClick={onOpenCreateSmallGoalModal}>
-              <div className="text-green-600 cursor-pointer hover:text-green-800">
+              <div className="text-green-600 cursor-pointer hover:text-green-800 text-sm sm:text-base">
                 Small Goalの作成
               </div>
             </Link>
@@ -81,14 +85,16 @@ const GoalHeader = ({
               onSmallGoalAdded={onSmallGoalAdded}
             />
           </div>
-          <a 
-            href="#" 
-            onClick={onDeleteGoal} 
-            data-testid="delete-goal-link" 
-            className='text-blue-600 cursor-pointer hover:text-blue-800 flex justify-end'
-          >
-            Goalを削除する
-          </a>
+          <div className='flex justify-end'>
+            <a 
+              href="#" 
+              onClick={onDeleteGoal} 
+              data-testid="delete-goal-link" 
+              className='text-blue-600 cursor-pointer hover:text-blue-800 text-sm sm:text-base'
+            >
+              Goalを削除する
+            </a>
+          </div>
         </div>
       </div>
     </div>

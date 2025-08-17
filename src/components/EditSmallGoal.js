@@ -96,47 +96,52 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center p-4">
-      <div className="relative bg-white w-full max-w-[500px] max-h-[90vh] rounded border border-gray-400 flex flex-col">
+      <div className="
+        relative bg-white p-4
+        w-full sm:w-[90%] sm:max-w-[600px] lg:max-w-[500px]
+        max-h-[90vh] rounded border border-gray-400
+        flex flex-col
+      ">
         {/* ヘッダー部分（固定） */}
-        <div className="p-5 pb-3 border-b border-gray-200">
-          <h2 className="text-2xl font-bold mb-4">Small Goalを編集</h2>
+        <div className="p-4 sm:p-5 pb-3 border-b border-gray-200">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">Small Goalを編集しよう！</h2>
         </div>
 
         {/* スクロール可能なコンテンツ部分 */}
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="title" className="block mb-2 font-medium">Small Goalのタイトル</label>
+              <label htmlFor="title" className="block mb-2 font-medium text-base">Small Goalのタイトル</label>
               <textarea
                 id="title"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded-sm resize-none"
+                className="w-full p-2 border border-gray-300 rounded-sm resize-none text-sm sm:text-base"
                 rows={2}
               />
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-medium">タスク一覧</h3>
+              <h3 className="font-medium text-sm sm:text-base">タスク一覧</h3>
               {tasks.filter(task => !task._destroy).map((task, index) => (
                 <div key={task.id || `temp-${index}`} className="p-3 bg-gray-50 rounded border">
-                  <label htmlFor={`task-${task.id || `temp-${index}`}`} className="block mb-2 font-medium">タスク {index + 1}</label>
+                  <label htmlFor={`task-${task.id || `temp-${index}`}`} className="block mb-2 font-medium text-base">タスク {index + 1}</label>
                   <textarea
                     id={`task-${task.id || `temp-${index}`}`}
                     type="text"
                     value={task.content}
                     onChange={(e) => handleTaskChange(task.id, e.target.value)}
                     required
-                    className="w-full p-2 border border-gray-300 rounded-sm resize-none mb-2"
+                    className="w-full p-2 border border-gray-300 rounded-sm resize-none mb-2 text-sm sm:text-base"
                     rows={2}
                   />
                   {tasks.filter(task => !task._destroy).length > 1 && (
                     <button 
                       type="button" 
                       onClick={() => removeTask(task.id)}
-                      className="px-3 py-1 text-sm border border-red-300 rounded-sm bg-red-50 hover:bg-red-100 text-red-700 cursor-pointer"
+                      className="w-full sm:w-auto px-3 py-1 text-sm border border-red-300 rounded-sm bg-red-50 hover:bg-red-100 text-red-700 cursor-pointer"
                     >
                       タスクを削除
                     </button>
@@ -154,13 +159,13 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
             </div>
             
             <div>
-              <label htmlFor="difficulty" className="block mb-2 font-medium">難易度</label>
+              <label htmlFor="difficulty" className="block mb-2 font-medium text-sm sm:text-base">難易度</label>
               <select
                 id="difficulty"
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded-sm"
+                className="w-full p-2 border border-gray-300 rounded-sm text-sm sm:text-base"
               >
                 <option value="ものすごく簡単">ものすごく簡単</option>
                 <option value="簡単">簡単</option>
@@ -171,35 +176,30 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
             </div>
             
             <div>
-              <label htmlFor="deadline" className="block mb-2 font-medium">期限</label>
+              <label htmlFor="deadline" className="block mb-2 font-medium text-sm sm:text-base">期限</label>
               <input
                 id="deadline"
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded-sm"
+                className="w-full p-2 border border-gray-300 rounded-sm text-sm sm:text-base"
               />
             </div>
           </form>
         </div>
 
-        {/* フッター部分（固定） */}
-        <div className="p-5 pt-3 border-t border-gray-200 bg-gray-50">
+        <div className="flex-shrink-0 py-4 space-y-4 space-y-reverse border-t border-gray-200">
           <button 
             type="submit" 
             onClick={handleSubmit}
-            className="w-full px-3 py-2 border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600 rounded font-medium"
+            className="btn btn-primary w-full sm:w-auto"
           >
-            Small Goalを更新する
-          </button>
-          <button 
-            onClick={onClose} 
-            className="w-full mt-2 px-3 py-2 border border-gray-300 rounded bg-white hover:bg-gray-50 cursor-pointer"
-          >
-            キャンセル
+            更新する
           </button>
         </div>
+        
+          <button onClick={onClose} className={styles.closeButton}>Close</button>
       </div>
     </div>
   );
