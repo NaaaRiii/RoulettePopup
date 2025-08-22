@@ -39,7 +39,7 @@ export default function NewGoalModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className={`${styles.modalOverlay} p-4`} role="dialog" aria-labelledby="modal-title">
+    <div className={`${styles.modalOverlay}`} role="dialog" aria-labelledby="modal-title">
       <div className={`${styles.modalContent}
         w-full sm:w-[90%] sm:max-w-[600px] lg:max-w-[500px]
         max-h-[90vh] overflow-hidden p-2.5

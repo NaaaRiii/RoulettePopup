@@ -65,7 +65,7 @@ function GoalPage() {
   return (
     <Layout>
       <div className="w-full bg-[#f7f7ed] min-h-screen">
-        <div className="flex flex-col min-h-screen bg-[#f7f7ed] px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col min-h-screen bg-[#f7f7ed] p-4 sm:p-6 lg:p-8">
           {message && <p className="text-center py-2 text-green-600">{message}</p>}
           {smallGoalsError && <p className="text-center py-2 text-red-600">{smallGoalsError}</p>}
           
