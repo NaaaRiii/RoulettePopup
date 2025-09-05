@@ -13,9 +13,9 @@ export default function HomePage() {
             Plus ONEで成長を可視化しよう！
           </h1>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-            <Link href="/guest-signin" className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg bg-black bg-opacity-50 border-none rounded cursor-pointer whitespace-nowrap inline-block text-center">
+            {/* <Link href="/guest-signin" className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg bg-black bg-opacity-50 border-none rounded cursor-pointer whitespace-nowrap inline-block text-center">
               <span className="text-white">お試し</span>
-            </Link>
+            </Link> */}
             <Link href="/dashboard" className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg bg-black bg-opacity-50 border-none rounded cursor-pointer whitespace-nowrap inline-block text-center">
               <span className="text-white">ログイン</span>
             </Link>
