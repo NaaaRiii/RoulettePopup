@@ -43,21 +43,37 @@ const SmallGoalCard = ({
             <ul>
               {smallGoal.tasks?.map(task => (
                 <li key={task.id}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={task.completed}
-                      onChange={() => onTaskToggle(task.id, task.completed)}
-                      className="input-checkbox"
-                    />
-                    {task.content}
+                  <label className="flex items-center cursor-pointer">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={task.completed}
+                        onChange={() => onTaskToggle(task.id, task.completed)}
+                        className="sr-only"
+                      />
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                        task.completed 
+                          ? 'bg-[#e7833c] border-[#e7833c]' 
+                          : 'bg-white border-gray-300'
+                      }`}>
+                        {task.completed && (
+                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className="ml-2">{task.content}</span>
                   </label>
                 </li>
               ))}
             </ul>
             {!smallGoal.completed && smallGoal.tasks?.every(task => task.completed) && (
               <button 
-                className="px-3 py-2 mt-2 rounded-sm border-none cursor-pointer bg-blue-500 text-white hover:bg-blue-600" 
+                className="px-3 py-2 mt-2 rounded-sm border-none cursor-pointer text-white transition-colors duration-200" 
+                style={{ backgroundColor: '#e7833c' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#8B7355'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#e7833c'}
                 onClick={() => onCompleteSmallGoal(smallGoal.id, goal, setGoal)}
               >
                 完了
@@ -70,13 +86,18 @@ const SmallGoalCard = ({
               e.preventDefault();
               onOpenEditSmallGoalModal(smallGoal);
             }}>
-              <div className='text-blue-600 cursor-pointer hover:text-blue-800'>編集</div>
+              <div className='cursor-pointer'
+                style={{ color: '#e7833c' }}>
+                編集
+              </div>
             </Link>
             <Link href='#' onClick={(e) => {
               e.preventDefault();
               onDeleteSmallGoal(smallGoal.id);
             }}>
-              <div className='text-blue-600 cursor-pointer hover:text-blue-800' data-testid={`delete-small-goal-${smallGoal.id}`}>
+              <div className='cursor-pointer'
+                style={{ color: '#8c7869' }}
+                data-testid={`delete-small-goal-${smallGoal.id}`}>
                 削除
               </div>
             </Link>
