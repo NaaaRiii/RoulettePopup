@@ -253,6 +253,8 @@ return (
                       isOpen={isEditNameOpen} 
                       onClose={closeEditName} 
                       onUserUpdate={handleUserUpdate}
+                      currentName={userData?.name}
+                      userData={userData}
                     />
                     <div className='user-profile__roulette'>
                       {userRank >= 10 && (
@@ -289,7 +291,7 @@ return (
               <Link href="/new-goal" onClick={handleOpenModal} className="block sm:inline-block">
                 <div className='btn btn-primary w-full sm:w-auto'>Goalを設定する</div>
               </Link>
-              <NewGoalModal isOpen={isModalOpen} onClose={handleCloseModal} />
+              <NewGoalModal isOpen={isModalOpen} onClose={handleCloseModal} userData={userData} />
               <Link href="/completed-goal" className="block sm:inline-block">
                 <div className='btn btn-primary w-full sm:w-auto'>達成したGoal</div>
               </Link>

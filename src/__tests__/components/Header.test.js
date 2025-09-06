@@ -2,12 +2,14 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Header from '../../components/Header';
-
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 
 const mockPush = jest.fn();
+const mockReplace = jest.fn();
 jest.mock('next/router', () => ({
   useRouter: () => ({
     push: mockPush,
+    replace: mockReplace,
   }),
 }));
 
@@ -17,138 +19,158 @@ jest.mock('@aws-amplify/ui-react', () => ({
   useAuthenticator: () => mockUseAuthenticator(),
 }));
 
+jest.mock('../../utils/fetchWithAuth');
+jest.mock('aws-amplify/auth', () => ({
+  signOut: jest.fn(),
+  updateUserAttributes: jest.fn(),
+}));
+
 describe('Header コンポーネント', () => {
   beforeEach(() => {
     mockUseAuthenticator.mockReturnValue({
-      route: 'unauthenticated',
-      user: null,
       signOut: mockSignOut,
     });
+    fetchWithAuth.mockReset();
     jest.clearAllMocks();
   });
 
-  it('flex_header クラスを持つ要素が存在すること', () => {
+  it('header要素が存在すること', async () => {
+    fetchWithAuth.mockResolvedValue({ ok: false });
     render(<Header />);
-    const headerElement = screen.getByText('Plus ONE').closest('.flex_header');
+    const headerElement = screen.getByRole('banner');
     expect(headerElement).toBeInTheDocument();
   });
 
-  it('ロゴ(Plus ONE)が正しく表示されていること', () => {
+  it('ロゴ(Plus ONE)が正しく表示されていること', async () => {
+    fetchWithAuth.mockResolvedValue({ ok: false });
     render(<Header />);
     expect(screen.getByText('Plus ONE')).toBeInTheDocument();
   });
 
-  it('ロゴのリンク先が /dashboard であること', () => {
+  it('ロゴのリンク先が /dashboard であること', async () => {
+    fetchWithAuth.mockResolvedValue({ ok: false });
     render(<Header />);
     const logoLink = screen.getByText('Plus ONE').closest('a');
     expect(logoLink).toHaveAttribute('href', '/dashboard');
   });
 
   describe('認証状態の管理', () => {
-    it('useAuthenticator フックが正しく使用されていること', () => {
+    it('useAuthenticator フックが正しく使用されていること', async () => {
+      fetchWithAuth.mockResolvedValue({ ok: false });
       render(<Header />);
       expect(mockUseAuthenticator).toHaveBeenCalled();
     });
 
-    it('route、user、signOut が正しく取得されていること', () => {
-      const mockUser = { username: 'testuser' };
-      mockUseAuthenticator.mockReturnValue({
-        route: 'authenticated',
-        user: mockUser,
-        signOut: mockSignOut,
-      });
-
+    it('認証確認APIが呼び出されること', async () => {
+      fetchWithAuth.mockResolvedValue({ ok: false });
       render(<Header />);
-      
-      expect(screen.getByText('ログイン中')).toBeInTheDocument();
-      expect(screen.getByText('ログアウト')).toBeInTheDocument();
-    });
-
-    it('isLoggedIn の判定が正しく機能すること', () => {
-      mockUseAuthenticator.mockReturnValue({
-        route: 'unauthenticated',
-        user: null,
-        signOut: mockSignOut,
+      await waitFor(() => {
+        expect(fetchWithAuth).toHaveBeenCalledWith('/api/current_user');
       });
-      const { rerender } = render(<Header />);
-      expect(screen.getByText('使い方')).toBeInTheDocument();
-      expect(screen.getByText('お試し')).toBeInTheDocument();
-      expect(screen.getByText('ログイン')).toBeInTheDocument();
-      expect(screen.queryByText('ログイン中')).not.toBeInTheDocument();
-
-      mockUseAuthenticator.mockReturnValue({
-        route: 'authenticated',
-        user: { username: 'testuser' },
-        signOut: mockSignOut,
-      });
-      rerender(<Header />);
-      expect(screen.getByText('ログイン中')).toBeInTheDocument();
-      expect(screen.getByText('ダッシュボード')).toBeInTheDocument();
-      expect(screen.getByText('使い方')).toBeInTheDocument();
-      expect(screen.getByText('ログアウト')).toBeInTheDocument();
-      expect(screen.queryByText('お試し')).not.toBeInTheDocument();
-      expect(screen.queryByText('ログイン')).not.toBeInTheDocument();
     });
   });
 
   describe('未ログイン状態', () => {
     beforeEach(() => {
-      render(<Header />);
+      fetchWithAuth.mockResolvedValue({ ok: false });
     });
 
-    it('使い方、お試し、ログイン リンクが表示されること', () => {
-      const howToLink = screen.getByText('使い方');
-      const trialLink = screen.getByText('お試し');
-      const loginLink = screen.getByText('ログイン');
+    it('使い方、サインイン、ログイン リンクが表示されること', async () => {
+      render(<Header />);
+      
+      await waitFor(() => {
+        const desktopNav = screen.getByRole('navigation');
+        
+        // デスクトップメニュー内の要素を確認
+        const howToLink = screen.getByRole('link', { name: '使い方' });
+        const signUpLink = screen.getByRole('link', { name: 'サインイン' });
+        const loginLink = screen.getByRole('link', { name: 'ログイン' });
 
-      expect(howToLink).toBeInTheDocument();
-      expect(howToLink).toHaveAttribute('href', 'https://qiita.com/NaaaRiii/items/b79753445554530fafd7');
+        expect(howToLink).toBeInTheDocument();
+        expect(howToLink).toHaveAttribute('href', 'https://qiita.com/NaaaRiii/items/b79753445554530fafd7');
 
-      expect(trialLink).toBeInTheDocument();
-      expect(trialLink).toHaveAttribute('href', '/guest-signin');
+        expect(signUpLink).toBeInTheDocument();
+        expect(signUpLink).toHaveAttribute('href', '/login?tab=signUp');
 
-      expect(loginLink).toBeInTheDocument();
-      expect(loginLink).toHaveAttribute('href', '/dashboard');
+        expect(loginLink).toBeInTheDocument();
+        expect(loginLink).toHaveAttribute('href', '/login');
+      });
     });
   });
 
   describe('ログイン状態', () => {
     beforeEach(() => {
-      mockUseAuthenticator.mockReturnValue({
-        route: 'authenticated',
-        user: { username: 'testuser' },
-        signOut: mockSignOut,
+      fetchWithAuth.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          id: 1,
+          name: 'テストユーザー',
+          email: 'test@example.com',
+          is_guest: false
+        })
       });
+    });
+
+    it('ハンバーガーメニューがログイン状態で表示されること', async () => {
       render(<Header />);
-    });
-
-    it('ログイン状態の要素が表示されること', () => {
-      expect(screen.getByText('ログイン中')).toBeInTheDocument();
-
-      const dashboardLink = screen.getByText('ダッシュボード');
-      expect(dashboardLink).toBeInTheDocument();
-      expect(dashboardLink).toHaveAttribute('href', '/dashboard');
-
-      const howToUseLink = screen.getByText('使い方');
-      expect(howToUseLink).toBeInTheDocument();
-      expect(howToUseLink).toHaveAttribute('href', 'https://qiita.com/NaaaRiii/items/b79753445554530fafd7');
-
-      expect(screen.getByText('ログアウト')).toBeInTheDocument();
-    });
-
-    it('ログアウトリンクをクリックした時に適切な処理が実行されること', async () => {
-      const logoutLink = screen.getByText('ログアウト');
-
-      fireEvent.click(logoutLink, {
-        preventDefault: () => {},
-      });
-
-      expect(mockSignOut).toHaveBeenCalled();
-
+      
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/');
+        // ハンバーガーメニューボタンが表示されること
+        const hamburgerButtons = screen.getAllByRole('button');
+        expect(hamburgerButtons.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('ハンバーガーメニューをクリックするとメニューが開くこと', async () => {
+      render(<Header />);
+      
+      await waitFor(() => {
+        const hamburgerButtons = screen.getAllByRole('button');
+        const hamburgerButton = hamburgerButtons[0]; // 最初のボタン（ハンバーガー）
+        fireEvent.click(hamburgerButton);
+        
+        // メニューアイテムが表示されること
+        expect(screen.getByRole('link', { name: 'ダッシュボード' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '退会' })).toBeInTheDocument();
+      });
+    });
+
+    it('通常ユーザーの場合、退会ボタンが表示されること', async () => {
+      render(<Header />);
+      
+      await waitFor(() => {
+        const hamburgerButtons = screen.getAllByRole('button');
+        const hamburgerButton = hamburgerButtons[0];
+        fireEvent.click(hamburgerButton);
+        
+        expect(screen.getByRole('button', { name: '退会' })).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('ゲスト制限機能', () => {
+    it('ゲストユーザーの場合、退会ボタンが表示されないこと', async () => {
+      fetchWithAuth.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          id: 1,
+          name: 'ゲストユーザー',
+          email: 'guest@example.com',
+          is_guest: true
+        })
+      });
+      
+      render(<Header />);
+      
+      await waitFor(() => {
+        const hamburgerButtons = screen.getAllByRole('button');
+        const hamburgerButton = hamburgerButtons[0];
+        fireEvent.click(hamburgerButton);
+        
+        // 他のメニューアイテムは表示されるが、退会ボタンは表示されない
+        expect(screen.getByRole('link', { name: 'ダッシュボード' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: '退会' })).not.toBeInTheDocument();
       });
     });
   });
 });
- 
