@@ -11,15 +11,24 @@ const Header = () => {
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   // 認証状態をチェック
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const res = await fetchWithAuth('/api/current_user');
-        setIsLoggedIn(res.ok);
+        if (res.ok) {
+          const data = await res.json();
+          setUserData(data);
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+          setUserData(null);
+        }
       } catch {
         setIsLoggedIn(false);
+        setUserData(null);
       }
     };
     checkAuth();
@@ -136,7 +145,10 @@ const Header = () => {
               <Link href="/dashboard" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>ダッシュボード</Link>
               <Link href="https://qiita.com/NaaaRiii/items/b79753445554530fafd7" target="_blank" rel="noopener noreferrer" className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200" onClick={() => setIsMobileMenuOpen(false)}>使い方</Link>
               <a href="/logout" onClick={(e) => { handleLogout(e); setIsMobileMenuOpen(false); }} className="py-3 text-[#373741] hover:text-blue-600 border-b border-gray-200">ログアウト</a>
-              <button onClick={handleWithdrawal} className="py-3 text-[#373741] hover:text-red-600 text-left">退会</button>
+              {/* ゲストユーザーの場合は退会ボタンを非表示 */}
+              {!userData?.is_guest && (
+                <button onClick={handleWithdrawal} className="py-3 text-[#373741] hover:text-red-600 text-left">退会</button>
+              )}
             </>
           ) : (
             <>

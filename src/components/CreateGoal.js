@@ -5,14 +5,24 @@ import styles from '../components/CreateGoal.module.css';
 
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
-export default function NewGoalModal({ isOpen, onClose }) {
+export default function NewGoalModal({ isOpen, onClose, userData = null }) {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [deadline, setDeadline] = useState('');
+  const [showGuestWarning, setShowGuestWarning] = useState(false);
+
+  const isGuestUser = userData?.is_guest || false;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    // ゲストユーザーの場合は送信を阻止
+    if (isGuestUser) {
+      setShowGuestWarning(true);
+      return;
+    }
+
     const body = JSON.stringify({ title, content, deadline });
 
     try {
@@ -36,6 +46,12 @@ export default function NewGoalModal({ isOpen, onClose }) {
     }
   };
 
+  const handleGuestFocus = () => {
+    if (isGuestUser) {
+      setShowGuestWarning(true);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -51,6 +67,13 @@ export default function NewGoalModal({ isOpen, onClose }) {
 
         {/* スクロール可能なコンテンツ部分 */}
         <div className="flex-1 overflow-y-auto py-4">
+          {/* ゲスト制限警告メッセージ */}
+          {isGuestUser && (
+            <div className="mb-4 p-3 bg-gray-100 border border-gray-300 rounded text-sm text-gray-600">
+              不適切な投稿を避けるため、入力できません
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4 space-y-reverse">
             <div>
               <label htmlFor="title" className="block mb-2 text-base">Goalのタイトル</label>
@@ -60,9 +83,14 @@ export default function NewGoalModal({ isOpen, onClose }) {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                onFocus={handleGuestFocus}
+                disabled={isGuestUser}
                 required
-                className={`${styles.textareaField} w-full text-sm sm:text-base`}
+                className={`${styles.textareaField} w-full text-sm sm:text-base ${
+                  isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''
+                }`}
                 rows={2}
+                placeholder={isGuestUser ? "ゲストユーザーは入力できません" : ""}
               />
             </div>
 
@@ -74,9 +102,14 @@ export default function NewGoalModal({ isOpen, onClose }) {
                 type="text"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
+                onFocus={handleGuestFocus}
+                disabled={isGuestUser}
                 required
-                className={`${styles.textareaField} w-full text-sm sm:text-base`}
+                className={`${styles.textareaField} w-full text-sm sm:text-base ${
+                  isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''
+                }`}
                 rows={2}
+                placeholder={isGuestUser ? "ゲストユーザーは入力できません" : ""}
               />
             </div>
 
@@ -88,12 +121,24 @@ export default function NewGoalModal({ isOpen, onClose }) {
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
+                onFocus={handleGuestFocus}
+                disabled={isGuestUser}
                 required
-                className={`${styles.deadlineField} w-full text-sm sm:text-base`}
+                className={`${styles.deadlineField} w-full text-sm sm:text-base ${
+                  isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''
+                }`}
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-full sm:w-auto">設定する</button>
+            <button 
+              type="submit" 
+              disabled={isGuestUser}
+              className={`btn btn-primary w-full sm:w-auto ${
+                isGuestUser ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              設定する
+            </button>
           </form>
         </div>
         
