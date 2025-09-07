@@ -45,6 +45,7 @@ const SmallGoalList = ({
         smallGoal={selectedSmallGoal}
         goalId={goal.id}
         onSmallGoalUpdated={onSmallGoalUpdated}
+        userData={userData}
       />
 
       {/* 完了済みのSmall Goals */}

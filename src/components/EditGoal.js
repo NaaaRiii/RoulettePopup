@@ -4,11 +4,12 @@ import styles from '../components/CreateGoal.module.css';
 
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
-export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
+export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated, userData = null }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [deadline, setDeadline] = useState('');
   const [message, setMessage] = useState('');
+  const isGuestUser = userData?.is_guest || false;
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -36,6 +37,13 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    // ゲストユーザーの場合は送信を阻止
+    if (isGuestUser) {
+      setMessage('不適切な投稿を避けるため、編集できません');
+      return;
+    }
+    
     const updatedGoal = {
       title,
       content,
@@ -74,7 +82,12 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
         {/* ヘッダー部分 */}
         <div className="pb-3 border-b border-gray-200">
           <h2 id="modal-title" className="text-lg sm:text-xl font-bold">Goalを編集しよう！</h2>
-          {message && <p role="alert" className="text-green-600 mt-2 text-sm">{message}</p>}
+          {message && <p role="alert" className="text-red-600 mt-2 text-sm">{message}</p>}
+          {isGuestUser && (
+            <div className="mt-3 p-3 bg-gray-100 border border-gray-300 rounded text-sm text-gray-600">
+              不適切な投稿を避けるため、編集できません
+            </div>
+          )}
         </div>
 
         {/* スクロール可能なコンテンツ部分 */}
@@ -89,7 +102,8 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className={`${styles.textareaField} w-full text-sm sm:text-base`}
+                disabled={isGuestUser}
+                className={`${styles.textareaField} w-full text-sm sm:text-base ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
                 rows={2}
               />
             </div>
@@ -103,7 +117,8 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 required
-                className={`${styles.textareaField} w-full text-sm sm:text-base`}
+                disabled={isGuestUser}
+                className={`${styles.textareaField} w-full text-sm sm:text-base ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
                 rows={2}
               />
             </div>
@@ -117,11 +132,18 @@ export default function EditGoal({ isOpen, onClose, goalId, onGoalUpdated }) {
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 required
-                className={`${styles.deadlineField} w-full text-sm sm:text-base`}
+                disabled={isGuestUser}
+                className={`${styles.deadlineField} w-full text-sm sm:text-base ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-full sm:w-auto">更新する</button>
+            <button 
+              type="submit" 
+              disabled={isGuestUser}
+              className={`btn btn-primary w-full sm:w-auto ${isGuestUser ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              更新する
+            </button>
           </form>
         </div>
         
