@@ -11,7 +11,7 @@ import { useModalState } from '../../hooks/useModalState';
 import { useGoalData } from '../../hooks/useGoalData';
 import { useGoalActions } from '../../hooks/useGoalActions';
 import { useSmallGoalActions } from '../../hooks/useSmallGoalActions';
-import { getCurrentUser } from '../../utils/auth';
+import { getCurrentUser } from 'aws-amplify/auth';
 import '../../components/styles.css';
 
 function GoalPage() {
