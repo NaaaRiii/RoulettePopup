@@ -3,8 +3,10 @@ frontend:
   phases:
     preBuild:
       commands:
-        - nvm use 20
+        - echo "Using Node.js version:"
         - node -v
+        - echo "Using npm version:"  
+        - npm -v
         - npm ci --prefer-offline --cache .npm --no-audit --progress=false
     build:
       commands:
