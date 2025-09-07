@@ -5,13 +5,14 @@ import styles from '../components/CreateGoal.module.css';
 
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
-export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAdded }) {
+export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAdded, userData = null }) {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [tasks, setTasks] = useState([{ id: Date.now(), content: '' }]);
   const [difficulty, setDifficulty] = useState('');
   const [deadline, setDeadline] = useState('');
   const [message, setMessage] = useState('');
+  const isGuestUser = userData?.is_guest || false;
 
   useEffect(() => {
     if (isOpen) {
@@ -57,6 +58,12 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // ゲストユーザーは作成不可
+    if (isGuestUser) {
+      setMessage('不適切な投稿を避けるため、入力できません');
+      return;
+    }
     const body = JSON.stringify({
       small_goal: {
         title,
@@ -108,6 +115,11 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
               {message}
             </div>
           )}
+          {isGuestUser && (
+            <div className="mb-3 p-3 bg-gray-100 border border-gray-300 rounded text-sm text-gray-600">
+              不適切な投稿を避けるため、入力できません
+            </div>
+          )}
         </div>
 
         {/* スクロール可能なコンテンツ部分 */}
@@ -121,7 +133,8 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded-sm resize-none"
+                disabled={isGuestUser}
+                className={`w-full p-2 border border-gray-300 rounded-sm resize-none ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
                 rows={2}
               />
             </div>
@@ -137,14 +150,16 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
                     value={task.content}
                     onChange={(e) => handleTaskChange(index, e.target.value)}
                     required
-                    className="w-full p-2 border border-gray-300 rounded-sm resize-none mb-2"
+                    disabled={isGuestUser}
+                    className={`w-full p-2 border border-gray-300 rounded-sm resize-none mb-2 ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
                     rows={2}
                   />
                   {tasks.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => removeTask(index)}
-                      className="px-3 py-1 text-sm border border-red-300 rounded-sm bg-red-50 hover:bg-red-100 text-red-700 cursor-pointer"
+                      onClick={() => !isGuestUser && removeTask(index)}
+                      disabled={isGuestUser}
+                      className={`px-3 py-1 text-sm border border-red-300 rounded-sm ${isGuestUser ? 'opacity-50 cursor-not-allowed bg-red-50' : 'bg-red-50 hover:bg-red-100 cursor-pointer'} text-red-700`}
                     >
                       タスクの削除
                     </button>
@@ -154,8 +169,9 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
               
               <button 
                 type="button" 
-                onClick={addTask} 
-                className="w-full px-3 py-2 border border-green-300 rounded-sm bg-green-50 hover:bg-green-100 text-green-700 cursor-pointer"
+                onClick={() => !isGuestUser && addTask()} 
+                disabled={isGuestUser}
+                className={`w-full px-3 py-2 border border-green-300 rounded-sm ${isGuestUser ? 'opacity-50 cursor-not-allowed bg-green-50' : 'bg-green-50 hover:bg-green-100 cursor-pointer'} text-green-700`}
               >
                 + タスクの追加
               </button>
@@ -168,7 +184,8 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded-sm"
+                disabled={isGuestUser}
+                className={`w-full p-2 border border-gray-300 rounded-sm ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
               >
                 <option value="">難易度を選択</option>
                 <option value="ものすごく簡単">ものすごく簡単</option>
@@ -187,7 +204,8 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded-sm"
+                disabled={isGuestUser}
+                className={`w-full p-2 border border-gray-300 rounded-sm ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
               />
             </div>
           </form>
@@ -197,7 +215,8 @@ export default function CreateSmallGoal({ isOpen, onClose, goalId, onSmallGoalAd
           <button 
             type="submit" 
             onClick={handleSubmit}
-            className="btn btn-primary w-full sm:w-auto"
+            disabled={isGuestUser}
+            className={`btn btn-primary w-full sm:w-auto ${isGuestUser ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             設定する
           </button>
