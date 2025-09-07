@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import EditGoalModal from './EditGoal';
 import CreateSmallGoal from './CreateSmallGoal';
@@ -16,8 +16,21 @@ const GoalHeader = ({
   onCloseCreateSmallGoalModal,
   onGoalUpdated,
   onSmallGoalAdded,
-  onDeleteGoal
+  onDeleteGoal,
+  userData
 }) => {
+
+  const [isHighlighted, setIsHighlighted] = useState(true);
+
+  // 10秒後にハイライトを解除
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsHighlighted(false);
+    }, 10000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
   return (
     <div className='flex flex-col bg-[#FFFCEB] w-full rounded-sm shadow-sm p-4 sm:p-8 lg:p-12 lg:w-[750px]'>
       <div className="mb-4">
@@ -55,14 +68,26 @@ const GoalHeader = ({
         <p className='text-sm sm:text-base lg:text-lg mb-4 mt-3'>
           期限: {goal.deadline ? formatDate(goal.deadline) : 'No deadline'}
         </p>
-        <div className='pt-4 space-y-3'>
+        <div className='pt-4 '>
           {!goal.completed && (
             <>
-              <Link href={`#`} onClick={onOpenEditGoalModal}>
-                <div className='text-blue-600 cursor-pointer hover:text-blue-800 text-sm sm:text-base'>
+              {userData?.is_guest ? (
+                <div 
+                  className='text-blue-600 opacity-50 cursor-not-allowed text-sm sm:text-base relative group'
+                  title="ゲストログイン時は無効"
+                >
                   Goalを編集する
+                  <div className="absolute bottom-full left-0 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                    ゲストログイン時は無効
+                  </div>
                 </div>
-              </Link>
+              ) : (
+                <Link href={`#`} onClick={onOpenEditGoalModal}>
+                  <div className='text-blue-600 cursor-pointer hover:text-blue-800 text-sm sm:text-base'>
+                    Goalを編集する
+                  </div>
+                </Link>
+              )}
               <EditGoalModal 
                 isOpen={isEditGoalModalOpen} 
                 onClose={onCloseEditGoalModal} 
@@ -72,28 +97,58 @@ const GoalHeader = ({
             </>
           )}
 
-          <div>
-            <Link href={`#`} onClick={onOpenCreateSmallGoalModal}>
-              <div className="text-green-600 cursor-pointer hover:text-green-800 text-sm sm:text-base">
-                Small Goalの作成
-              </div>
-            </Link>
-            <CreateSmallGoal
-              isOpen={isCreateSmallGoalModalOpen}
-              onClose={onCloseCreateSmallGoalModal}
-              goalId={goalId}
-              onSmallGoalAdded={onSmallGoalAdded}
-            />
-          </div>
-          <div className='flex justify-end'>
-            <a 
-              href="#" 
-              onClick={onDeleteGoal} 
-              data-testid="delete-goal-link" 
-              className='text-blue-600 cursor-pointer hover:text-blue-800 text-sm sm:text-base'
-            >
-              Goalを削除する
-            </a>
+          <div className='flex justify-between items-center mt-12'>
+            <div className='goalid-create-small-goal-container w-48'>
+              {userData?.is_guest ? (
+                <div 
+                  className="btn btn-primary sm:w-auto opacity-50 cursor-not-allowed relative group"
+                  title="ゲストログイン時は無効"
+                >
+                  Small Goalを作成
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                    ゲストログイン時は無効
+                  </div>
+                </div>
+              ) : (
+                <Link href={`#`} onClick={onOpenCreateSmallGoalModal}>
+                  <div className={`btn btn-primary sm:w-auto transition-all duration-500 ${
+                    isHighlighted 
+                      ? 'animate-pulse bg-orange-500 hover:bg-orange-600 scale-110 shadow-lg border-2 border-yellow-400' 
+                      : ''
+                  }`}>
+                    {isHighlighted ? '✨ Small Goalを作成 ✨' : 'Small Goalを作成'}
+                  </div>
+                </Link>
+              )}
+              <CreateSmallGoal
+                isOpen={isCreateSmallGoalModalOpen}
+                onClose={onCloseCreateSmallGoalModal}
+                goalId={goalId}
+                onSmallGoalAdded={onSmallGoalAdded}
+              />
+            </div>
+            <div className='mt-8'>
+              {userData?.is_guest ? (
+                <div 
+                  className='text-blue-600 opacity-50 cursor-not-allowed text-sm sm:text-base relative group'
+                  title="ゲストログイン時は無効"
+                >
+                  Goalを削除する
+                  <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                    ゲストログイン時は無効
+                  </div>
+                </div>
+              ) : (
+                <a 
+                  href="#" 
+                  onClick={onDeleteGoal} 
+                  data-testid="delete-goal-link" 
+                  className='text-blue-600 cursor-pointer hover:text-blue-800 text-sm sm:text-base'
+                >
+                  Goalを削除する
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>
