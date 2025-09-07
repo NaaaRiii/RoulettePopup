@@ -70,15 +70,31 @@ const SmallGoalCard = ({
               ))}
             </ul>
             {!smallGoal.completed && smallGoal.tasks?.every(task => task.completed) && (
-              <button 
-                className="px-3 py-2 mt-2 rounded-sm border-none cursor-pointer text-white transition-colors duration-200" 
-                style={{ backgroundColor: '#e7833c' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#8B7355'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#e7833c'}
-                onClick={() => onCompleteSmallGoal(smallGoal.id, goal, setGoal)}
-              >
-                完了
-              </button>
+              userData?.is_guest ? (
+                <div className="relative group inline-block">
+                  <button 
+                    disabled
+                    className="px-3 py-2 mt-2 rounded-sm border-none cursor-not-allowed text-white opacity-60"
+                    style={{ backgroundColor: '#e7833c' }}
+                    title="ゲストログイン時は無効"
+                  >
+                    完了
+                  </button>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                    ゲストログイン時は無効
+                  </div>
+                </div>
+              ) : (
+                <button 
+                  className="px-3 py-2 mt-2 rounded-sm border-none cursor-pointer text-white transition-colors duration-200" 
+                  style={{ backgroundColor: '#e7833c' }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#8B7355'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#e7833c'}
+                  onClick={() => onCompleteSmallGoal(smallGoal.id, goal, setGoal)}
+                >
+                  完了
+                </button>
+              )
             )}
           </div>
 
