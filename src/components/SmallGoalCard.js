@@ -10,7 +10,8 @@ const SmallGoalCard = ({
   onOpenEditSmallGoalModal,
   onDeleteSmallGoal,
   goal,
-  setGoal
+  setGoal,
+  userData
 }) => {
   const cardClass = isCompleted 
     ? "c-card goalid-small-goal" 
@@ -82,25 +83,52 @@ const SmallGoalCard = ({
           </div>
 
           <div className='flex flex-row gap-2.5 absolute bottom-2 right-2'>
-            <Link href='#' onClick={(e) => {
-              e.preventDefault();
-              onOpenEditSmallGoalModal(smallGoal);
-            }}>
-              <div className='cursor-pointer'
-                style={{ color: '#e7833c' }}>
+            {userData?.is_guest ? (
+              <div 
+                className='opacity-50 cursor-not-allowed relative group'
+                style={{ color: '#e7833c' }}
+                title="ゲストログイン時は無効"
+              >
                 編集
+                <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                  ゲストログイン時は無効
+                </div>
               </div>
-            </Link>
-            <Link href='#' onClick={(e) => {
-              e.preventDefault();
-              onDeleteSmallGoal(smallGoal.id);
-            }}>
-              <div className='cursor-pointer'
+            ) : (
+              <Link href='#' onClick={(e) => {
+                e.preventDefault();
+                onOpenEditSmallGoalModal(smallGoal);
+              }}>
+                <div className='cursor-pointer'
+                  style={{ color: '#e7833c' }}>
+                  編集
+                </div>
+              </Link>
+            )}
+            {userData?.is_guest ? (
+              <div 
+                className='opacity-50 cursor-not-allowed relative group'
                 style={{ color: '#8c7869' }}
-                data-testid={`delete-small-goal-${smallGoal.id}`}>
+                title="ゲストログイン時は無効"
+                data-testid={`delete-small-goal-${smallGoal.id}`}
+              >
                 削除
+                <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                  ゲストログイン時は無効
+                </div>
               </div>
-            </Link>
+            ) : (
+              <Link href='#' onClick={(e) => {
+                e.preventDefault();
+                onDeleteSmallGoal(smallGoal.id);
+              }}>
+                <div className='cursor-pointer'
+                  style={{ color: '#8c7869' }}
+                  data-testid={`delete-small-goal-${smallGoal.id}`}>
+                  削除
+                </div>
+              </Link>
+            )}
           </div>
         </div>
       ) : (

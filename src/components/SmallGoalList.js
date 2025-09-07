@@ -12,7 +12,8 @@ const SmallGoalList = ({
   onOpenEditSmallGoalModal,
   onDeleteSmallGoal,
   onSmallGoalUpdated,
-  setGoal
+  setGoal,
+  userData
 }) => {
   const incompleteSmallGoals = goal.small_goals.filter(smallGoal => !smallGoal.completed);
   const completedSmallGoals = goal.small_goals.filter(smallGoal => smallGoal.completed);
@@ -32,6 +33,7 @@ const SmallGoalList = ({
             onDeleteSmallGoal={onDeleteSmallGoal}
             goal={goal}
             setGoal={setGoal}
+            userData={userData}
           />
         ))}
       </div>
@@ -58,6 +60,7 @@ const SmallGoalList = ({
             onDeleteSmallGoal={onDeleteSmallGoal}
             goal={goal}
             setGoal={setGoal}
+            userData={userData}
           />
         ))}
       </div>

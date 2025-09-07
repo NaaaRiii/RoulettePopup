@@ -21,6 +21,7 @@ function Dashboard() {
   const [goalsState, setGoalsState] = useState([]);
   const [deletedGoalId, setDeletedGoalId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHighlighted, setIsHighlighted] = useState(true);
   const [userRank, setUserRank] = useState(0);
   const [userData, setUserData] = useState({
     name: '',
@@ -91,6 +92,14 @@ function Dashboard() {
     }
   };
 
+  // 10秒後にハイライトを解除
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsHighlighted(false);
+    }, 10000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const fetchGoals = async () => {
@@ -166,10 +175,6 @@ function Dashboard() {
     if (response.ok) {
       const resData = await response.json();
       console.log('resData:', resData);
-
-
-
-
 
       if (resData.success) {
         console.log("Update response received and successful");
@@ -289,7 +294,13 @@ return (
             {/* ボタンコンテナ */}
             <div className='button-container'>
               <Link href="/new-goal" onClick={handleOpenModal} className="block sm:inline-block">
-                <div className='btn btn-primary w-full sm:w-auto'>Goalを設定する</div>
+              <div className={`btn btn-primary w-full sm:w-auto transition-all duration-500 ${
+                isHighlighted 
+                  ? 'animate-pulse bg-orange-500 hover:bg-orange-600 scale-110 shadow-lg border-2 border-yellow-400' 
+                  : ''
+                }`}>
+                {isHighlighted ? '✨ Goalを設定する ✨' : 'Goalを設定する'}
+              </div>
               </Link>
               <NewGoalModal isOpen={isModalOpen} onClose={handleCloseModal} userData={userData} />
               <Link href="/completed-goal" className="block sm:inline-block">

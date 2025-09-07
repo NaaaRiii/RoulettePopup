@@ -11,12 +11,14 @@ import { useModalState } from '../../hooks/useModalState';
 import { useGoalData } from '../../hooks/useGoalData';
 import { useGoalActions } from '../../hooks/useGoalActions';
 import { useSmallGoalActions } from '../../hooks/useSmallGoalActions';
+import { getCurrentUser } from '../../utils/auth';
 import '../../components/styles.css';
 
 function GoalPage() {
   const { goalsState, setGoalsState, refreshGoals } = useGoals();
   const router = useRouter();
   const { goalId } = router.query;
+  const [userData, setUserData] = useState(null);
 
   const { fetchTickets } = useContext(TicketsContext);
   
@@ -47,6 +49,18 @@ function GoalPage() {
 
   const { deleteGoal, completeGoal } = useGoalActions({ goalId, refreshGoals });
   const { deleteSmallGoal, completeSmallGoal } = useSmallGoalActions({ goalId, setGoal });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = await getCurrentUser();
+        setUserData(user);
+      } catch (error) {
+        console.error('Failed to get current user:', error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     console.log("Goal state updated:", goal);
@@ -86,6 +100,7 @@ function GoalPage() {
                 onGoalUpdated={handleGoalUpdated}
                 onSmallGoalAdded={handleSmallGoalAdded}
                 onDeleteGoal={deleteGoal}
+                userData={userData}
               />
             </div>
 
@@ -110,6 +125,7 @@ function GoalPage() {
               onDeleteSmallGoal={deleteSmallGoal}
               onSmallGoalUpdated={handleSmallGoalUpdated}
               setGoal={setGoal}
+              userData={userData}
             />
           </div>
         </div>
