@@ -125,6 +125,7 @@ const GoalHeader = ({
                 onClose={onCloseCreateSmallGoalModal}
                 goalId={goalId}
                 onSmallGoalAdded={onSmallGoalAdded}
+                userData={userData}
               />
             </div>
             <div className='mt-8'>
