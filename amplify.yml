@@ -3,9 +3,13 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "Using Node.js version:"
+        - echo "Using Node.js version (before):"
         - node -v
-        - echo "Using npm version:"  
+        - echo "Activating Node via nvm (from .nvmrc)"
+        - . ~/.nvm/nvm.sh && nvm install && nvm use
+        - echo "Using Node.js version (after):"
+        - node -v
+        - echo "Using npm version:"
         - npm -v
         - npm ci --prefer-offline --cache .npm --no-audit --progress=false
     build:
