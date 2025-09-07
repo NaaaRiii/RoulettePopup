@@ -93,6 +93,7 @@ const GoalHeader = ({
                 onClose={onCloseEditGoalModal} 
                 goalId={goalId}
                 onGoalUpdated={onGoalUpdated}
+                userData={userData}
               />
             </>
           )}

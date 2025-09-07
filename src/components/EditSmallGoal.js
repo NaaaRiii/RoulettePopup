@@ -4,11 +4,13 @@ import styles from '../components/CreateGoal.module.css';
 
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
-export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId, onSmallGoalUpdated }) {
+export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId, onSmallGoalUpdated, userData = null }) {
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState('');
   const [deadline, setDeadline] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [message, setMessage] = useState('');
+  const isGuestUser = userData?.is_guest || false;
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -49,6 +51,12 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    // ゲストユーザーの場合は送信を阻止
+    if (isGuestUser) {
+      setMessage('不適切な投稿を避けるため、編集できません');
+      return;
+    }
 
     if (!goalId || !smallGoal?.id) {
       console.error("goalId or smallGoal.id is undefined.");
@@ -105,6 +113,16 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
         {/* ヘッダー部分（固定） */}
         <div className="p-4 sm:p-5 pb-3 border-b border-gray-200">
           <h2 className="text-xl sm:text-2xl font-bold mb-4">Small Goalを編集しよう！</h2>
+          {message && (
+            <div role="alert" className="text-red-600 mb-3 text-center">
+              {message}
+            </div>
+          )}
+          {isGuestUser && (
+            <div className="mb-3 p-3 bg-gray-100 border border-gray-300 rounded text-sm text-gray-600">
+              不適切な投稿を避けるため、編集できません
+            </div>
+          )}
         </div>
 
         {/* スクロール可能なコンテンツ部分 */}
@@ -118,7 +136,8 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded-sm resize-none text-sm sm:text-base"
+                disabled={isGuestUser}
+                className={`w-full p-2 border border-gray-300 rounded-sm resize-none text-sm sm:text-base ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
                 rows={2}
               />
             </div>
@@ -134,14 +153,16 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
                     value={task.content}
                     onChange={(e) => handleTaskChange(task.id, e.target.value)}
                     required
-                    className="w-full p-2 border border-gray-300 rounded-sm resize-none mb-2 text-sm sm:text-base"
+                    disabled={isGuestUser}
+                    className={`w-full p-2 border border-gray-300 rounded-sm resize-none mb-2 text-sm sm:text-base ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
                     rows={2}
                   />
                   {tasks.filter(task => !task._destroy).length > 1 && (
                     <button 
                       type="button" 
-                      onClick={() => removeTask(task.id)}
-                      className="w-full sm:w-auto px-3 py-1 text-sm border border-red-300 rounded-sm bg-red-50 hover:bg-red-100 text-red-700 cursor-pointer"
+                      onClick={() => !isGuestUser && removeTask(task.id)}
+                      disabled={isGuestUser}
+                      className={`w-full sm:w-auto px-3 py-1 text-sm border border-red-300 rounded-sm text-red-700 ${isGuestUser ? 'opacity-50 cursor-not-allowed bg-red-50' : 'bg-red-50 hover:bg-red-100 cursor-pointer'}`}
                     >
                       タスクを削除
                     </button>
@@ -151,8 +172,9 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
               
               <button 
                 type="button" 
-                onClick={addTask}
-                className="w-full px-3 py-2 border border-green-300 rounded-sm bg-green-50 hover:bg-green-100 text-green-700 cursor-pointer"
+                onClick={() => !isGuestUser && addTask()}
+                disabled={isGuestUser}
+                className={`w-full px-3 py-2 border border-green-300 rounded-sm text-green-700 ${isGuestUser ? 'opacity-50 cursor-not-allowed bg-green-50' : 'bg-green-50 hover:bg-green-100 cursor-pointer'}`}
               >
                 + タスクを追加
               </button>
@@ -165,7 +187,8 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded-sm text-sm sm:text-base"
+                disabled={isGuestUser}
+                className={`w-full p-2 border border-gray-300 rounded-sm text-sm sm:text-base ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
               >
                 <option value="ものすごく簡単">ものすごく簡単</option>
                 <option value="簡単">簡単</option>
@@ -183,7 +206,8 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded-sm text-sm sm:text-base"
+                disabled={isGuestUser}
+                className={`w-full p-2 border border-gray-300 rounded-sm text-sm sm:text-base ${isGuestUser ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''}`}
               />
             </div>
           </form>
@@ -193,7 +217,8 @@ export default function EditSmallGoalModal({ isOpen, onClose, smallGoal, goalId,
           <button 
             type="submit" 
             onClick={handleSubmit}
-            className="btn btn-primary w-full sm:w-auto"
+            disabled={isGuestUser}
+            className={`btn btn-primary w-full sm:w-auto ${isGuestUser ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             更新する
           </button>
