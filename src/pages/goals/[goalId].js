@@ -11,7 +11,7 @@ import { useModalState } from '../../hooks/useModalState';
 import { useGoalData } from '../../hooks/useGoalData';
 import { useGoalActions } from '../../hooks/useGoalActions';
 import { useSmallGoalActions } from '../../hooks/useSmallGoalActions';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import '../../components/styles.css';
 
 function GoalPage() {
@@ -53,10 +53,15 @@ function GoalPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const user = await getCurrentUser();
-        setUserData(user);
+        const res = await fetchWithAuth('/api/current_user');
+      if (!res.ok) {
+        console.error('Failed to fetch user data');
+      } else {
+        const data = await res.json();
+        setUserData(data);
+      }
       } catch (error) {
-        console.error('Failed to get current user:', error);
+        console.error('Error fetching user data:', error);
       }
     };
     fetchUserData();
